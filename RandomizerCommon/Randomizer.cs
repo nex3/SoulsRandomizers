@@ -181,8 +181,7 @@ namespace RandomizerCommon
             }
             else if (game.EldenRing)
             {
-                EldenLocationDataScraper scraper = new EldenLocationDataScraper();
-                LocationData data = scraper.FindItems(game);
+                throw new Exception("EldenLocationDataScraper didn't make it onto GitHub :(");
             }
         }
     }

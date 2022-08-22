@@ -639,7 +639,7 @@ namespace RandomizerCommon
             }
             else
             {
-                Maps = Editor.Load("Base", path => EldenLocationDataScraper.ReadMSB(path), "*.msb.dcx");
+                throw new Exception("EldenLocationDataScraper didn't make it onto GitHub :(");
             }
         }
 
