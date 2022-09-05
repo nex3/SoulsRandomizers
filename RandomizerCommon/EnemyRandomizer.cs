@@ -1935,7 +1935,7 @@ namespace RandomizerCommon
                             // Don't allow wooooooo enemies or true monk to walk around, as this interrupts their invisibility
                             if (e is MSBS.Part.Enemy es)
                             {
-                                es.UnkT20 = -1;
+                                es.PatrolIndex = -1;
                             }
                             else if (e is MSB3.Part.Enemy e3)
                             {
