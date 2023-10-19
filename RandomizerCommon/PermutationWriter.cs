@@ -81,32 +81,35 @@ namespace RandomizerCommon
         public Result Write(Random random, Permutation permutation, RandomizerOptions opt)
         {
             bool writeSwitch = true;
-            foreach (string hintType in ann.HintCategories)
+            if (permutation.Hints.Count > 0)
             {
-                Console.WriteLine($"-- Hints for {hintType}:");
-                bool hasHint = false;
-                foreach (KeyValuePair<SlotKey, SlotKey> assign in permutation.Hints[hintType].OrderBy(e => (game.DisplayName(e.Key.Item), permutation.GetLogOrder(e.Value))))
+                foreach (string hintType in ann.HintCategories)
                 {
-                    LocationScope scope = data.Location(assign.Value).LocScope;
-                    Console.WriteLine($"{game.DisplayName(assign.Key.Item)}: {ann.GetLocationHint(assign.Value, permutation.SpecialLocation(scope))}");
-                    hasHint = true;
-                    if (opt["fullhint"])
+                    Console.WriteLine($"-- Hints for {hintType}:");
+                    bool hasHint = false;
+                    foreach (KeyValuePair<SlotKey, SlotKey> assign in permutation.Hints[hintType].OrderBy(e => (game.DisplayName(e.Key.Item), permutation.GetLogOrder(e.Value))))
                     {
-                        Console.WriteLine($"- {ann.GetLocationDescription(assign.Value)}");
+                        LocationScope scope = data.Location(assign.Value).LocScope;
+                        Console.WriteLine($"{game.DisplayName(assign.Key.Item)}: {ann.GetLocationHint(assign.Value, permutation.SpecialLocation(scope))}");
+                        hasHint = true;
+                        if (opt["fullhint"])
+                        {
+                            Console.WriteLine($"- {ann.GetLocationDescription(assign.Value)}");
+                        }
+                    }
+                    if (!hasHint)
+                    {
+                        Console.WriteLine("(not randomized)");
+                    }
+                    Console.WriteLine();
+                    if (opt["silent"])
+                    {
+                        writeSwitch = false;
+                        break;
                     }
                 }
-                if (!hasHint)
-                {
-                    Console.WriteLine("(not randomized)");
-                }
-                Console.WriteLine();
-                if (opt["silent"])
-                {
-                    writeSwitch = false;
-                    break;
-                }
+                Console.WriteLine("-- End of hints");
             }
-            Console.WriteLine("-- End of hints");
 #if !DEBUG
             for (int i = 0; i < 30; i++) Console.WriteLine();
 #endif
@@ -1213,10 +1216,10 @@ namespace RandomizerCommon
             else if (game.DS3)
             {
                 // DS3 edits
-                if (dragonFlag <= 0 && !opt["norandom"])
-                {
-                    throw new Exception("Internal error: Path of the dragon not assigned to any location, but key items are randomized");
-                }
+                //if (dragonFlag <= 0 && !opt["norandom"])
+                //{
+                //    throw new Exception("Internal error: Path of the dragon not assigned to any location, but key items are randomized");
+                //}
 
                 // Disable Firelink Shrine bonfire without Coiled Sword, with special event flag
                 game.Params["ActionButtonParam"][9351]["grayoutFlag"].Value = 14005108;

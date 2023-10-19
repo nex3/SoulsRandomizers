@@ -729,6 +729,33 @@ namespace RandomizerCommon
             }
         }
 
+
+        /// <summary>
+        /// Creates a permutation that exclusively permutes items as specified.
+        /// </summary>
+        /// <param name="items">A dictionary whose keys are slots where items can appear and whose
+        /// values are the items that should appear in thsoe slots.</param>
+        public void Forced(Dictionary<SlotKey, SlotKey> items)
+        {
+            foreach (KeyValuePair<RandomSilo, SiloPermutation> entry in Silos)
+            {
+                RandomSilo siloType = entry.Key;
+                SiloPermutation silo = entry.Value;
+                if (siloType == RandomSilo.SELF)
+                {
+                    continue;
+                }
+
+                foreach (SlotKey targetKey in silo.Targets.SelectMany(loc => data.Location(loc)))
+                {
+                    if (items.TryGetValue(targetKey, out SlotKey sourceKey))
+                    {
+                        AddMulti(silo.Mapping, targetKey, sourceKey);
+                    }
+                }
+            }
+        }
+
         // Used for hints
         public SortedSet<string> SpecialLocation(LocationScope scope)
         {

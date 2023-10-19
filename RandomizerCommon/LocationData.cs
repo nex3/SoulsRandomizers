@@ -123,6 +123,19 @@ namespace RandomizerCommon
         {
             public readonly ItemType Type;
             public readonly int ID;
+
+            public ItemKey(String serialized)
+            {
+                var parts = serialized.Split(':');
+                if (parts.Length != 2)
+                {
+                    throw new ArgumentException($"ItemKey must be two colon-separated numbers, was \"{serialized}\".");
+                }
+
+                this.Type = (ItemType)int.Parse(parts[0]);
+                this.ID = int.Parse(parts[1]);
+            }
+
             public ItemKey(ItemType Type, int ID)
             {
                 this.Type = Type;
