@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RandomizerCommon.LocationData;
+using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
@@ -83,7 +84,6 @@ namespace RandomizerCommon
 
             status.Text = "Downloading item data...";
             var locations = session.Locations.ScoutLocationsAsync(session.Locations.AllLocations.ToArray()).Result;
-            var archiNames = GetArchipelagoNames(session).Result;
 
             status.Text = "Loading game data...";
 
@@ -99,56 +99,80 @@ namespace RandomizerCommon
             {
                 throw new Exception("Missing data directory");
             }
-            GameData game = new GameData(distDir, FromGame.DS3);
+            var game = new GameData(distDir, FromGame.DS3);
             game.Load();
-            LocationDataScraper scraper = new LocationDataScraper(logUnused: false);
-            LocationData data = scraper.FindItems(game);
-            AnnotationData ann = new AnnotationData(game, data);
+            var scraper = new LocationDataScraper(logUnused: false);
+            var data = scraper.FindItems(game);
+            var ann = new AnnotationData(game, data);
             ann.Load(opt);
-
-            var items = new Dictionary<SlotKey, SlotKey>();
-            foreach (var info in locations.Locations)
-            {
-                var item = archiNames.Items[info.Item];
-                if (item.Game != "Dark Souls III")
-                {
-                    // TODO: generate synthetic items to represent items from other games
-                    continue;
-                }
-
-                var location = archiNames.Locations[info.Location];
-                var targetSlotKey = ann.GetArchipelagoLocation(location.Name);
-                if (!ann.ArchipelagoItems.TryGetValue(item.Name, out ItemKey sourceKey))
-                {
-                    // Don't use game.ItemForName() because there are a number of items that have
-                    // multiple possible IDs but it really doesn't matter which we choose.
-                    sourceKey = game.RevItemNames[item.Name].First(data.Data.ContainsKey);
-                }
-
-                var sourceLocations = data.Data[sourceKey].Locations;
-                var sourceScope = sourceLocations[
-                    sourceLocations.Keys.First(scope => scope.Type == ItemScope.ScopeType.EVENT || scope.Type == ItemScope.ScopeType.ENTITY)
-                ].Scope;
-                items[targetSlotKey] = new SlotKey(sourceKey, sourceScope);
-            }
-
-            // The permutation writer will complain if we don't explicitly assign Path of the
-            // Dragon to a location.
-            //
-            // TODO: This code didn't work so I had to comment out the check in PermutationWriter
-            // instead. Figure out why this isn't working and fix it—we want to be able to
-            // randomize this from Archipelago eventually.
-            // var dragonSlotKey = new SlotKey(game.ItemForName("Path of the Dragon"), new ItemScope(ItemScope.ScopeType.SPECIAL, -1));
-            // items[dragonSlotKey] = dragonSlotKey;
-
-            status.Text = "Randomizing locations...";
-            var permutation = new Permutation(game, data, ann, new Messages(null));
-            permutation.Forced(items);
-
             var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
             var writer = new PermutationWriter(game, data, ann, events, null);
-            // TODO: Seed the random number generator based on the Archipelago seed
-            writer.Write(new Random(), permutation, opt);
+            var permutation = new Permutation(game, data, ann, new Messages(null));
+
+            var random = new Random(session.RoomState.Seed.GetHashCode());
+
+            // A map from locations in the game where items can appear to the list of items that
+            // should appear in those locations.
+            var items = new Dictionary<SlotKey, List<SlotKey>>();
+
+            // A map from items in the game that should be removed to locations where those items
+            // would normally appear, or null if those items should remain in-game (likely because
+            // they're assigned elsewhere).
+            var itemsToRemove = new Dictionary<SlotKey, SlotKey>();
+
+            foreach (var info in locations.Locations)
+            {
+                var locationName = session.Locations.GetLocationNameFromId(info.Location);
+                var targetSlotKey = ann.GetArchipelagoLocation(locationName);
+
+                // Tentatively mark all items in this location as not being in the game, unless
+                // we've already seen them or we see them later.
+                var locationScope = ann.SlotsByArchipelagoName[locationName].LocationScope;
+                foreach (var itemInLocation in data.Locations[locationScope])
+                {
+                    itemsToRemove.TryAdd(itemInLocation, targetSlotKey);
+                }
+
+                var itemName = session.Items.GetItemName(info.Item);
+                if (info.Player != session.ConnectionInfo.Slot)
+                {
+                    var player = session.Players.Players[session.ConnectionInfo.Team]
+                        .First(player => player.Slot == info.Player);
+                    // Create a fake key item for each item from another world.
+                    AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
+                        $"{player.Alias}'s {itemName}",
+                        $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
+                        archipelagoLocationId: info.Location));
+                }
+                else
+                {
+                    // TODO: Give Archipelago a way to inject multiple copies of the same item to a
+                    // given location. Maybe support an itemName like "Firebomb x3" and parse it
+                    // here or in GetArchipelagoItem.
+                    var slotKey = ann.GetArchipelagoItem(itemName);
+                    // TODO: Once Archipelago supports items in shops, we shouldn't remove those
+                    // because they'll be directly added to the player's inventory without a chance
+                    // for replacement.
+                    itemsToRemove[slotKey] = targetSlotKey;
+                    AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
+                        $"[Placeholder] {itemName}",
+                        "If you can see this your Archipelago mod isn't working.",
+                        archipelagoLocationId: info.Location,
+                        replaceWithInArchipelago: slotKey.Item));
+                }
+            }
+
+            status.Text = "Randomizing locations...";
+
+            permutation.Forced(items,
+                remove: itemsToRemove
+                    .Where(entry => entry.Value != null)
+                    .GroupBy(entry => entry.Value)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.Select(entry => entry.Key).ToList()));
+
+            writer.Write(random, permutation, opt);
 
             MiscSetup.DS3CommonPass(game, events, opt);
 
@@ -164,97 +188,6 @@ namespace RandomizerCommon
             Enabled = true;
             status.ForeColor = Color.DarkRed;
             status.Text = message;
-        }
-
-        private Task<ArchipelagoNames> GetArchipelagoNames(ArchipelagoSession session)
-        {
-            var games = session.Players.AllPlayers.Select((player) => player.Game).Distinct().ToArray();
-            var source = new TaskCompletionSource<ArchipelagoNames>();
-            session.Socket.SendPacket(new GetDataPackagePacket() { Games = games });
-
-            void onData(ArchipelagoPacketBase packet)
-            {
-                session.Socket.PacketReceived -= onData;
-                session.Socket.ErrorReceived -= onError;
-                var data = ((DataPackagePacket)packet).DataPackage;
-                var items = new Dictionary<long, ArchipelagoEntity>();
-                var locations = new Dictionary<long, ArchipelagoEntity>();
-                foreach (var (game, gameData) in data.Games)
-                {
-                    foreach (var (name, id) in gameData.ItemLookup)
-                    {
-                        items[id] = new ArchipelagoEntity(id, name, game);
-                    }
-                    foreach (var (name, id) in gameData.LocationLookup)
-                    {
-                        locations[id] = new ArchipelagoEntity(id, name, game);
-                    }
-                }
-                source.SetResult(new ArchipelagoNames(items, locations));
-            }
-
-            void onError(Exception e, string message)
-            {
-                session.Socket.PacketReceived -= onData;
-                session.Socket.ErrorReceived -= onError;
-                source.SetException(e);
-            }
-
-            session.Socket.PacketReceived += onData;
-            session.Socket.ErrorReceived += onError;
-
-            return source.Task;
-        }
-
-        /// <summary>
-        /// A mapping from this Archipelago session's numeric ID for each item and location to full
-        /// information about each of those entities.
-        /// </summary>
-        private readonly struct ArchipelagoNames
-        {
-            public Dictionary<long, ArchipelagoEntity> Items { get; init; }
-            public Dictionary<long, ArchipelagoEntity> Locations { get; init; }
-
-            public ArchipelagoNames(
-                Dictionary<long, ArchipelagoEntity> items,
-                Dictionary<long, ArchipelagoEntity> locations)
-            {
-                this.Items = items;
-                this.Locations = locations;
-            }
-        }
-
-        /// <summary>
-        /// Information about a location or item as understood by the Archipelago server.
-        /// </summary>
-        private readonly struct ArchipelagoEntity
-        {
-            /// <summary>
-            ///  The numeric ID for this entity. Different for each Archipelago session.
-            /// </summary>
-            public long ID { get; init; }
-
-            /// <summary>
-            /// This entity's name according to the Archipelago world.
-            /// </summary>
-            public string Name { get; init; }
-
-            /// <summary>
-            /// The name of the game in which this entity appears.
-            /// </summary>
-            public string Game { get; init; }
-
-            public ArchipelagoEntity(long id, string name, string game)
-            {
-                ID = id;
-                Name = name;
-                Game = game;
-            }
-
-            public override string ToString()
-            {
-                return $"{Name} ({ID})";
-            }
         }
     }
 }

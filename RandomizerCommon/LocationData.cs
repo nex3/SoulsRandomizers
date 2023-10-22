@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static RandomizerCommon.Util;
 
 namespace RandomizerCommon
 {
@@ -141,6 +142,25 @@ namespace RandomizerCommon
                 this.Type = Type;
                 this.ID = ID;
             }
+
+            /// <summary>
+            ///  Returns the combined type and ID that's occasionally used internally by games to
+            ///  track items.
+            /// </summary>
+            public int FullID
+            {
+                get
+                {
+                    switch (Type)
+                    {
+                        case ItemType.WEAPON: return ID;
+                        case ItemType.ARMOR: return 0x10000000 + ID;
+                        case ItemType.RING: return 0x20000000 + ID;
+                        default: return 0x40000000 + ID;
+                    }
+                }
+            }
+
             public override string ToString()
             {
                 return $"{Type}:{ID}";

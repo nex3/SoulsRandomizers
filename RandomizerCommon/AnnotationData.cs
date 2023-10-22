@@ -1035,7 +1035,8 @@ namespace RandomizerCommon
         /// Returns the SlotKey that corresponds to the Archipelago server's name for a given
         /// location.
         /// </summary>
-        public SlotKey GetArchipelagoLocation(string archipelagoName) {
+        public SlotKey GetArchipelagoLocation(string archipelagoName)
+        {
             var candidates = data.Location(SlotsByArchipelagoName[archipelagoName].LocationScope);
             if (candidates.Count > 1)
             {
@@ -1043,6 +1044,27 @@ namespace RandomizerCommon
             }
 
             return candidates[0];
+        }
+
+        /// <summary>
+        /// Returns the SlotKey that corresponds to the Archipelago server's name for a given item
+        /// in this game.
+        /// </summary>
+        public SlotKey GetArchipelagoItem(string archipelagoName)
+        {
+
+            if (!ArchipelagoItems.TryGetValue(archipelagoName, out ItemKey sourceKey))
+            {
+                // Don't use game.ItemForName() because there are a number of items that have
+                // multiple possible IDs but it really doesn't matter which we choose.
+                sourceKey = game.RevItemNames[archipelagoName].First(data.Data.ContainsKey);
+            }
+
+            var sourceLocations = data.Data[sourceKey].Locations;
+            var sourceScope = sourceLocations.Keys.First(scope =>
+                scope.Type == ItemScope.ScopeType.EVENT ||
+                scope.Type == ItemScope.ScopeType.ENTITY);
+            return new SlotKey(sourceKey, sourceScope);
         }
 
         public class Annotations
