@@ -38,13 +38,13 @@ namespace RandomizerCommon
 
             if (url.Text.Length == 0)
             {
-                showFailure("Missing Archipelago URL");
+                ShowFailure("Missing Archipelago URL");
                 return;
             }
 
             if (name.Text.Length == 0)
             {
-                showFailure("Missing player name");
+                ShowFailure("Missing player name");
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace RandomizerCommon
                 {
                     errorMessage += $"\n    {error}";
                 }
-                showFailure(errorMessage);
+                ShowFailure(errorMessage);
                 return;
             }
 
@@ -88,10 +88,11 @@ namespace RandomizerCommon
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
+            var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
+            var opt = ConvertRandomizerOptions(options);
 
             status.Text = "Loading game data...";
 
-            var opt = new RandomizerOptions(FromGame.DS3);
             var distDir = "dist";
             if (!Directory.Exists(distDir))
             {
@@ -178,6 +179,12 @@ namespace RandomizerCommon
 
             writer.Write(random, permutation, opt);
 
+            if (options["random_starting_loadout"])
+            {
+                var characters = new CharacterWriter(game, data);
+                characters.Write(random, opt);
+            }
+
             MiscSetup.DS3CommonPass(game, events, opt);
 
             status.Text = "Writing game files...";
@@ -187,7 +194,19 @@ namespace RandomizerCommon
             this.Close();
         }
 
-        private void showFailure(String message)
+        /// <summary>
+        /// Converts Archipelago options into options for this randomizer.
+        /// </summary>
+        private static RandomizerOptions ConvertRandomizerOptions(Dictionary<string, bool> archiOptions)
+        {
+            var opt = new RandomizerOptions(FromGame.DS3);
+            opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
+            opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
+                                     // when we add enemizer support.
+            return opt;
+        }
+
+        private void ShowFailure(String message)
         {
             Enabled = true;
             status.ForeColor = Color.DarkRed;
