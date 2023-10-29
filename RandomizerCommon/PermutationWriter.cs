@@ -1942,9 +1942,9 @@ namespace RandomizerCommon
         /// <param name="replaceWithQuantity">If replaceWith is set, this is the number of items it
         /// should be replaced with.</param>
         /// <returns>The SlotKey to use for the new item.</returns>
-        public SlotKey AddSyntheticItem(String name, String shortDescription,
-            String longDescription = null, long? archipelagoLocationId  = null,
-            ItemKey? replaceWithInArchipelago = null, uint replaceWithQuantity = 1)
+        public SlotKey AddSyntheticItem(string name, string shortDescription,
+            string longDescription = null, long? archipelagoLocationId  = null,
+            ItemKey replaceWithInArchipelago = null, uint replaceWithQuantity = 1)
         {
             var goods = game.Params["EquipParamGoods"];
             var newRow = new PARAM.Row(goods[2005]); // Copy the basic structure from the Small Doll.

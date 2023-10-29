@@ -13,6 +13,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static RandomizerCommon.LocationData;
@@ -90,6 +91,8 @@ namespace RandomizerCommon
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
             var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
             var opt = ConvertRandomizerOptions(options);
+            var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
+                .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
 
             status.Text = "Loading game data...";
 
@@ -113,6 +116,7 @@ namespace RandomizerCommon
             var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
             var writer = new PermutationWriter(game, data, ann, events, null);
             var permutation = new Permutation(game, data, ann, new Messages(null));
+            var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
             var random = new Random(session.RoomState.Seed.GetHashCode());
 
@@ -127,13 +131,31 @@ namespace RandomizerCommon
 
             foreach (var info in locations.Locations)
             {
-                var locationName = session.Locations.GetLocationNameFromId(info.Location);
-                var targetSlotKey = ann.GetArchipelagoLocation(locationName);
+                var targetScope = apLocationsToScopes[info.Location];
+                var candidates = data.Location(targetScope);
+                SlotKey targetSlotKey;
+                if (candidates.Count == 1)
+                {
+                    targetSlotKey = candidates.First();
+                }
+                else
+                {
+                    var apLocation = session.Locations.GetLocationNameFromId(info.Location);
+                    var defaultItemName = ItemNameForLocation(apLocation);
+                    var match = candidates.FirstOrDefault(candidate => game.ItemNames[candidate.Item] == defaultItemName);
+                    if (match != null)
+                    {
+                        targetSlotKey = match;
+                    }
+                    else
+                    {
+                        throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
+                    }
+                }
 
                 // Tentatively mark all items in this location as not being in the game, unless
                 // we've already seen them or we see them later.
-                var locationScope = ann.SlotsByArchipelagoName[locationName].LocationScope;
-                foreach (var itemInLocation in data.Locations[locationScope])
+                foreach (var itemInLocation in data.Locations[targetScope])
                 {
                     itemsToRemove.TryAdd(itemInLocation, targetSlotKey);
                 }
@@ -149,21 +171,26 @@ namespace RandomizerCommon
                         $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
                         archipelagoLocationId: info.Location));
                 }
-                else
+                else if (targetScope.ShopIds.Count == 0)
                 {
-                    // TODO: Give Archipelago a way to inject multiple copies of the same item to a
-                    // given location. Maybe support an itemName like "Firebomb x3" and parse it
-                    // here or on the server? Maybe have the server know how to create ranges of
-                    // different items?
-
-                    // TODO: Once Archipelago supports items in shops, we shouldn't remove those
-                    // because they'll be directly added to the player's inventory without a chance
-                    // for replacement.
+                    // Replace items that can't appear in shops with placeholders, so we can notify
+                    // the Archipelago server when they're checked. We can't do this with items in
+                    // shops because we don't have a good way to replace them on pickup.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"[Placeholder] {itemName}",
                         "If you can see this your Archipelago mod isn't working.",
                         archipelagoLocationId: info.Location,
-                        replaceWithInArchipelago: new ItemKey(apIdsToItemIds[info.Item])));
+                        replaceWithInArchipelago: new ItemKey(apIdsToItemIds[info.Item]),
+                        replaceWithQuantity: itemCounts.GetValueOrDefault(info.Item, 1U)));
+                }
+                else
+                {
+                    var itemKey = new ItemKey(apIdsToItemIds[info.Item]);
+                    data.AddLocationlessItem(itemKey);
+                    AddMulti(
+                        items,
+                        targetSlotKey,
+                        new SlotKey(itemKey, new ItemScope(ItemScope.ScopeType.SPECIAL, -1)));
                 }
             }
 
@@ -176,6 +203,15 @@ namespace RandomizerCommon
                     .ToDictionary(
                         group => group.Key,
                         group => group.Select(entry => entry.Key).ToList()));
+
+            // TODO: Respect randomization exclusions here as well.
+            permutation.NoLogic(random, new List<Permutation.RandomSilo> {
+                Permutation.RandomSilo.INFINITE,
+                Permutation.RandomSilo.INFINITE_SHOP,
+                Permutation.RandomSilo.INFINITE_GEAR,
+                Permutation.RandomSilo.INFINITE_CERTAIN,
+                Permutation.RandomSilo.MIXED
+            });
 
             writer.Write(random, permutation, opt);
 
@@ -201,9 +237,107 @@ namespace RandomizerCommon
         {
             var opt = new RandomizerOptions(FromGame.DS3);
             opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
+            opt["ngplusrings"] = archiOptions["enable_ngp"];
+            opt["nongplusrings"] = !archiOptions["enable_ngp"];
             opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
                                      // when we add enemizer support.
             return opt;
+        }
+
+        /// <summary>
+        /// Returns a map from Archipelago location IDs to the corresponding location scopes.
+        /// </summary>
+        private static Dictionary<long, LocationScope> ArchipelagoLocations(
+            ArchipelagoSession session, AnnotationData ann, LocationInfoPacket locations)
+        {
+            var slotData = session.DataStorage.GetSlotData();
+            var apIdsToKeys = ((JObject)slotData["locationIdsToKeys"])
+                .ToObject<Dictionary<string, string>>()
+                .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
+
+            // A map from item names to all the slots that correspond to those names.
+            var itemNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
+
+            // A map from potential Archipelago location names to all the slots that correspond to
+            // those names.
+            var locationNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
+            foreach (var slot in ann.SlotsByAnnotationsKey.Values)
+            {
+                var area = ann.Areas[slot.Area].Archipelago;
+                if (area == null) continue;
+
+                foreach (var text in slot.DebugText)
+                {
+                    var itemKey = text.Split(" - ")[0];
+                    itemNameToSlots.TryAdd(itemKey, new());
+                    itemNameToSlots[itemKey].Add(slot);
+
+                    var locationKey = $"{area}: {itemKey}";
+                    locationNameToSlots.TryAdd(locationKey, new());
+                    locationNameToSlots[locationKey].Add(slot);
+                }
+            }
+
+            // Unlike locationNameToSlot, this divides multiple copies of the same item in the same
+            // location up by their index and adds that index to the name.
+            var locationNameToSlot = new Dictionary<string, AnnotationData.SlotAnnotation>();
+            foreach (var (apName, slots) in locationNameToSlots)
+            {
+                if (slots.Count == 1)
+                {
+                    locationNameToSlot[apName] = slots.First();
+                }
+                else
+                {
+                    for (var i = 0; i < slots.Count; i++)
+                    {
+                        locationNameToSlot[$"{apName} #{i + 1}"] = slots[i];
+                    }
+                }
+            }
+
+            var result = new Dictionary<long, LocationScope>();
+            foreach (var location in locations.Locations)
+            {
+                if (apIdsToKeys.TryGetValue(location.Location, out var key))
+                {
+                    result[location.Location] = ann.SlotsByAnnotationsKey[key].LocationScope;
+                    continue;
+                }
+
+                var apName = session.Locations.GetLocationNameFromId(location.Location);
+                if (locationNameToSlot.TryGetValue(apName, out var slot))
+                {
+                    result[location.Location] = slot.LocationScope;
+                    continue;
+                }
+
+                var itemName = apName.Split(": ")[1];
+                if (itemNameToSlots.TryGetValue(itemName, out var slots) && slots.Count == 1)
+                {
+                    result[location.Location] = slots.First().LocationScope;
+                    continue;
+                }
+
+                throw new Exception($"Couldn't find a slot that corresponds to Archipelago location \"{apName}\".");
+            }
+            return result;
+        }
+
+        private static Regex ApLocationRe = new(@"^[^:]+: (.*?)( #\d+| \(.*\))?$");
+
+        /// <summary>
+        /// Gets the name of the default item from an Archipelago location name.
+        /// </summary>
+        private static String ItemNameForLocation(string location)
+        {
+            var match = ApLocationRe.Match(location);
+            if (!match.Success)
+            {
+                throw new Exception($"Unexpect Archipelago location format \"{location}\"");
+            }
+
+            return match.Groups[1].Value;
         }
 
         private void ShowFailure(String message)

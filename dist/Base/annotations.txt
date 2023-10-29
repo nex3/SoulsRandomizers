@@ -284,10 +284,11 @@ Areas:
 - Name: highwall_darkwraith
   Text: High Wall Lift Cell
   Req: highwall AND liftchamberkey
+  Archipelago: HWL
 - Name: highwall_greirat
   Text: Greirat's Cell
   Req: highwall AND cellkey
-  Archipelago: HWL
+  Archipelago: Greirat
 - Name: settlement
   Text: Undead Settlement
   Req: highwall AND smalllothricbanner AND vordt
@@ -386,6 +387,7 @@ Areas:
   # May want to split out post-gundyr into a different area, but this messes with early/late infos for now
   Req: untended AND (regdancer OR middancer OR settlement) AND championgundyr
   WeightBase: lothric
+  Archipelago: UG
 - Name: lothric_gotthard
   Text: Lothric Castle after Yhorm and Aldrich
   Req: lothric AND yhorm AND aldrich AND pontiff

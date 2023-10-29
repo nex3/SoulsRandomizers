@@ -26,6 +26,14 @@ namespace RandomizerCommon
         // This is a lot of data okay
         // All annotated item slots
         public readonly Dictionary<LocationScope, SlotAnnotation> Slots = new Dictionary<LocationScope, SlotAnnotation>();
+
+        /// <summary>
+        /// A map from keys exactly as they appear in annotations.txt to the slots associated with
+        /// them.
+        /// </summary>
+        /// <remarks>This is guaranteed to be in the same order as in annotations.txt.</remarks>
+        public readonly Dictionary<string, SlotAnnotation> SlotsByAnnotationsKey = new();
+
         // All areas
         public readonly Dictionary<string, AreaAnnotation> Areas = new Dictionary<string, AreaAnnotation>();
         // All events (boss fights and major game progress triggers)
@@ -60,19 +68,6 @@ namespace RandomizerCommon
         public readonly HashSet<ItemKey> RaceModeItems = new HashSet<ItemKey>();
         // Items which shouldn't be randomized
         public readonly HashSet<ItemKey> NorandomItems = new HashSet<ItemKey>();
-
-        /// <summary>
-        /// A mapping from Archipelago's name for an item to the game's ID for it. If an item
-        /// doesn't appear in this mapping, it means that Archipelago uses the standard game name
-        /// for it and so it can be looked up from Data.
-        /// </summary>
-        public readonly Dictionary<string, ItemKey> ArchipelagoItems = new Dictionary<string, ItemKey>();
-
-        /// <summary>
-        /// A mapping from Archipelago names for slots to the slots they refer to. Note that a slot
-        /// being listed here doesn't guarantee it exists on the Archipelago server.
-        /// </summary>
-        public readonly Dictionary<string, SlotAnnotation> SlotsByArchipelagoName = new Dictionary<string, SlotAnnotation>();
 
         // Used for statistics and whatnot?
         public readonly SortedDictionary<string, List<LocationScope>> AllTags = new SortedDictionary<string, List<LocationScope>>();
@@ -469,6 +464,7 @@ namespace RandomizerCommon
             {
                 string key = slot.Key.Substring(slot.Key.IndexOf(',') + 1);
                 strSlots[key] = slot;
+                SlotsByAnnotationsKey[slot.Key] = slot;
             }
             foreach (KeyValuePair<LocationScope, List<SlotKey>> entry in data.Locations)
             {
@@ -494,12 +490,6 @@ namespace RandomizerCommon
             {
                 // Should this be an error? Try seeing if merging in really big overhaul mods is actually playable.
                 Console.WriteLine($"Warning: Keys [{string.Join(", ", strSlots.Keys)}] are in config but not in game. Make sure your base mods have all of the required item lots. Will try to proceed without them, but this will result in errors if any key or important items are missing.");
-            }
-
-            // Fill in ArchipelagoItems.
-            foreach (var item in ann.ArchipelagoItems)
-            {
-                ArchipelagoItems[item.Archipelago] = new ItemKey(item.ID);
             }
 
             // Simple post processing and validation
@@ -565,20 +555,6 @@ namespace RandomizerCommon
                 if (slot.Area != "unknown")
                 {
                     AddMulti(AllAreas, slot.GetArea(), scope);
-                }
-
-                var archiArea = areaAnn?.Archipelago;
-                if (slot.Archipelago == null && archiArea != null)
-                {
-                    slot.Archipelago = slot.DebugText.Select(item => {
-                        var name = item.Split(" - ")[0];
-                        return $"{archiArea}: {name}";
-                    }).ToList();
-                }
-
-                foreach (var name in slot.Archipelago ?? new List<string> {})
-                {
-                    SlotsByArchipelagoName[name] = slot;
                 }
             }
         }
@@ -1031,42 +1007,6 @@ namespace RandomizerCommon
             return config;
         }
 
-        /// <summary>
-        /// Returns the SlotKey that corresponds to the Archipelago server's name for a given
-        /// location.
-        /// </summary>
-        public SlotKey GetArchipelagoLocation(string archipelagoName)
-        {
-            var candidates = data.Location(SlotsByArchipelagoName[archipelagoName].LocationScope);
-            if (candidates.Count > 1)
-            {
-                throw new Exception($"Multiple possible locations for {archipelagoName}: {string.Join(", ", candidates)}");
-            }
-
-            return candidates[0];
-        }
-
-        /// <summary>
-        /// Returns the SlotKey that corresponds to the Archipelago server's name for a given item
-        /// in this game.
-        /// </summary>
-        public SlotKey GetArchipelagoItem(string archipelagoName)
-        {
-
-            if (!ArchipelagoItems.TryGetValue(archipelagoName, out ItemKey sourceKey))
-            {
-                // Don't use game.ItemForName() because there are a number of items that have
-                // multiple possible IDs but it really doesn't matter which we choose.
-                sourceKey = game.RevItemNames[archipelagoName].First(data.Data.ContainsKey);
-            }
-
-            var sourceLocations = data.Data[sourceKey].Locations;
-            var sourceScope = sourceLocations.Keys.First(scope =>
-                scope.Type == ItemScope.ScopeType.EVENT ||
-                scope.Type == ItemScope.ScopeType.ENTITY);
-            return new SlotKey(sourceKey, sourceScope);
-        }
-
         public class Annotations
         {
             public List<ConfigAnnotation> Config { get; set; }
@@ -1078,11 +1018,6 @@ namespace RandomizerCommon
             public List<AreaAnnotation> Areas { get; set; }
             public List<SlotAnnotation> Slots { get; set; }
 
-            /// <summary>
-            /// Items for which Archipelago's name differs from the name in the game files or is
-            /// ambiguous with respect to the item ID.
-            /// </summary>
-            public List<ArchipelagoItemAnnotation> ArchipelagoItems { get; set; }
             public Annotations()
             {
                 Areas = new List<AreaAnnotation>();
@@ -1290,13 +1225,6 @@ namespace RandomizerCommon
             public string AreaUntil { get; set; }
             // TODO: Replace uses with TagList directly.
             
-            /// <summary>
-            /// The name or names of this location according to the Archipelago server. These names
-            /// are usually determined implicitly from the area's Archipelago abbreviation and the
-            /// item names in this slot, but they can be explicitly written in annotations.txt if
-            /// that heuristic isn't accurate.
-            /// </summary>
-            public List<string> Archipelago { get; set; }
             public HashSet<string> GetTags() => TagList;
             public void SetTags(bool shopOnly, RandomizerOptions opt, string areaTags = null)
             {
@@ -1489,19 +1417,6 @@ namespace RandomizerCommon
                     }
                 }
             }
-        }
-
-        public class ArchipelagoItemAnnotation
-        {
-            /// <summary>
-            /// Archipelago's name for this item.
-            /// </summary>
-            public string Archipelago { get; set; }
-
-            /// <summary>
-            /// The game's internal ID for this item.
-            /// </summary>
-            public string ID { get; set; }
         }
 
         private static Parser<char, T> Token<T>(Parser<char, T> parser)

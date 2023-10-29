@@ -712,19 +712,27 @@ namespace RandomizerCommon
             }
         }
 
-        public void NoLogic(Random random)
+        /// <summary>
+        /// Randomizes the game with a simple flat permutation algorithm that has no built-in
+        /// logic. Almost always generates an uncompletable game.
+        /// </summary>
+        /// <param name="silos">If this is passed, only randomizes items within these silos.</param>
+        public void NoLogic(Random random, IEnumerable<RandomSilo> silos = null)
         {
+            silos ??= Silos.Keys;
             // Simple flat permutation algorithm. Almost all gets stuck at High Wall.
-            foreach (KeyValuePair<RandomSilo, SiloPermutation> entry in Silos)
+            foreach (var siloType in silos)
             {
-                RandomSilo siloType = entry.Key;
-                SiloPermutation silo = entry.Value;
+                SiloPermutation silo = Silos[siloType];
                 if (explain) Console.WriteLine($"{siloType}: Mapping {silo.Sources.Count()} sources -> {silo.Targets.Count()} targets");
                 if (siloType == RandomSilo.SELF)
                 {
                     continue;
                 }
-                List<SlotKey> targets = silo.Targets.SelectMany(loc => data.Location(loc)).ToList();
+                List<SlotKey> targets = silo.Targets
+                    .SelectMany(loc => data.Location(loc))
+                    .Where(slot => !silo.ExcludeTargets.Contains(slot))
+                    .ToList();
                 Shuffle(random, targets);
                 AssignItemsToLocations(random, silo, silo.Sources, targets, new Dictionary<ItemKey, PendingItem>(), new Dictionary<LocationScope, string>());
             }

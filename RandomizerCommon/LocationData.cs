@@ -148,13 +148,14 @@ namespace RandomizerCommon
             /// </summary>
             public ItemKey(int FullID)
             {
+                // This logic may currently only work for DS3 but it's also currently only running
+                // for DS3 Archipelago support so who's counting
                 this.ID = FullID & 0xfffffff;
                 this.Type = (FullID & 0xf0000000) switch
                 {
                     0 => ItemType.WEAPON,
                     0x10000000 => ItemType.ARMOR,
                     0x20000000 => ItemType.RING,
-                    _ when ID >= 1000 && ID < 1250 => ItemType.GEM,
                     _ => ItemType.GOOD
                 };
             }
