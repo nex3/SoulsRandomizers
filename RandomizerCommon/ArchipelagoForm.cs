@@ -160,6 +160,7 @@ namespace RandomizerCommon
                     itemsToRemove.TryAdd(itemInLocation, targetSlotKey);
                 }
 
+                var targetSlot = ann.Slots[targetScope];
                 var itemName = session.Items.GetItemName(info.Item);
                 if (info.Player != session.ConnectionInfo.Slot)
                 {
@@ -171,11 +172,13 @@ namespace RandomizerCommon
                         $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
                         archipelagoLocationId: info.Location));
                 }
-                else if (targetScope.ShopIds.Count == 0)
+                else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
                 {
-                    // Replace items that can't appear in shops with placeholders, so we can notify
-                    // the Archipelago server when they're checked. We can't do this with items in
-                    // shops because we don't have a good way to replace them on pickup.
+                    // The Archipelago mod can't replace items that appear in shops or are dropped
+                    // by the crow, so we have to put literal items there. Everywhere else, we
+                    // replace with placeholders, so we can notify the Archipelago server when
+                    // they're checked. We can't do this with items in shops because we don't have
+                    // a good way to replace them on pickup.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"[Placeholder] {itemName}",
                         "If you can see this your Archipelago mod isn't working.",
@@ -305,7 +308,9 @@ namespace RandomizerCommon
                     continue;
                 }
 
-                var apName = session.Locations.GetLocationNameFromId(location.Location);
+                var apName = session.Locations.GetLocationNameFromId(location.Location)
+                    // https://github.com/ArchipelagoMW/Archipelago.MultiClient.Net/issues/83
+                    .Replace("Siegbr��u", "Siegbräu");
                 if (locationNameToSlot.TryGetValue(apName, out var slot))
                 {
                     result[location.Location] = slot.LocationScope;
