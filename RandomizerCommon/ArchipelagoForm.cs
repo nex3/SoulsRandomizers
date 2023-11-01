@@ -248,7 +248,12 @@ namespace RandomizerCommon
                     IDeserializer deserializer = new DeserializerBuilder().Build();
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);
                 }
-                new EnemyRandomizer(game, events, eventConfig).Run(opt);
+
+                var preset = new Preset {
+                    RemoveSource = "Yhorm the Giant",
+                    Enemies = new Dictionary<string, string>() { { (String)slotData["yhorm"], "Yhorm the Giant" } }
+                };
+                new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
             MiscSetup.DS3CommonPass(game, events, opt);
@@ -276,10 +281,6 @@ namespace RandomizerCommon
                 opt["bosses"] = true;
                 opt["enemies"] = true;
                 opt["edittext"] = true;
-
-                // TODO: teach Archipelago to choose a Yhorm location and place Storm Ruler appropriately
-                opt["yhormruler"] = true;
-
                 opt["mimics"] = archiOptions["randomize_mimics_with_enemies"];
                 opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"];
                 opt["reducepassive"] = archiOptions["reduce_harmless_enemies"];
