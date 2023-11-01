@@ -84,6 +84,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3800198
   ID: 9540
+  Map: common
   Comment: Awarding "my thanks" when player dies to Tsorig, depending on death flags and if the player is closeby. Event 13805595 does this when Tsorig dies, based on death flags.
   DebugInfo:
   - 3800196 (catacombs c0000_0014 - Knight Slayer Tsorig)
@@ -127,6 +128,7 @@ EnemyEvents:
     - Cmd: SetEventFlag(6780, OFF)
       After: IfCharacterDeadalive
   ID: 13000380
+  Map: m30_00_00_00
   Comment: Loot for tower darkwraith. Modify this to always drop the lot for basic NG+ safety. This couldn't backfire right
   DebugInfo:
   - 3000660 (highwall c3170_0000 - Darkwraith)
@@ -144,6 +146,7 @@ EnemyEvents:
   - Type: loc
     Animation: pose 3000404 703 1703
   ID: 13005025
+  Map: m30_00_00_00
   Comment: Waking the hollow up when the Undead Hunter Charm pot is broken
   DebugInfo:
   - 3000404 (highwall c1100_0062 - Hollow Soldier)
@@ -166,6 +169,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13005200
+  Map: m30_00_00_00
   Comment: AI replan idling hollows (starting left corridor). They have other wakeups elsewhere
   DebugInfo:
   - 3000427 (highwall c1100_0388 - Hollow Soldier)
@@ -219,6 +223,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13005210
+  Map: m30_00_00_00
   Comment: AI replan idling hollows (starting left corridor, lantern event message check in anim a004_03005). TODO event message 20
   DebugInfo:
   - 3000427 (highwall c1100_0388 - Hollow Soldier)
@@ -274,6 +279,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13005220
+  Map: m30_00_00_00
   Comment: AI replan idling hollows (bino area)
   DebugInfo:
   - 3000427 (highwall c1100_0388 - Hollow Soldier)
@@ -340,6 +346,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13005230
+  Map: m30_00_00_00
   Comment: AI replan idling hollows (below/after Tower on the Wall)
   DebugInfo:
   - 3000418 (highwall c1100_0407 - Hollow Soldier)
@@ -396,6 +403,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13005240
+  Map: m30_00_00_00
   Comment: AI replan idling hollows (starting right corridor)
   DebugInfo:
   - 3000255 (highwall c1105_0001 - Large Hollow Soldier)
@@ -450,6 +458,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback; 5450
   ID: 13005510
+  Map: m30_00_00_00
   Comment: AI replan hollows around pus of man transformers. The starting hollows are not randomized
   DebugInfo:
   - 3000610 (highwall c1100_0000 - Hollow Soldier)
@@ -484,6 +493,7 @@ EnemyEvents:
   - Type: remove
     Entities: 3000496 3000580 3000526 3000522
   ID: 13005530
+  Map: m30_00_00_00
   Comment: Adjust wall-hanging hollow positions (it's very close to their starting positions, though). These will also be rewritten (see common func)
   DebugInfo:
   - 3000496 (highwall c1100_0373 - Hollow Soldier)
@@ -505,6 +515,7 @@ EnemyEvents:
   - Type: loc
     Animation: wakeup 3000488 3004
   ID: 13005535
+  Map: m30_00_00_00
   Comment: Wakeup routine for Tower on the Wall hollow (first on the left)
   DebugInfo:
   - 3000488 (highwall c1100_0254 - Hollow Soldier)
@@ -541,6 +552,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13005640
+  Map: m30_00_00_00
   Comment: Oceiros dialogue setup
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -574,6 +586,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3000800, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 3000800, 0, 902240)
   ID: 13005810
+  Map: m30_00_00_00
   Comment: Start Vordt and positioning. If already encountered and no summons, does a fist slam down, otherwise warps to facing forward
   DebugInfo:
   - 3000800 (highwall c2240_0000 - Vordt of the Boreal Valley)
@@ -636,6 +649,7 @@ EnemyEvents:
       - HandleBossDefeat(3000800)
       - ChangeCamera(-1, -1)
   ID: 13005811
+  Map: m30_00_00_00
   Comment: Vordt end
   DebugInfo:
   - 3000800 (highwall c2240_0000 - Vordt of the Boreal Valley)
@@ -659,6 +673,7 @@ EnemyEvents:
     DefeatFlag: 13000800
     MusicFlag: IfCharacterHasEventMessage -> 13005815
   ID: 13005815
+  Map: m30_00_00_00
   Comment: Vordt music transition
   DebugInfo:
   - 3000800 (highwall c2240_0000 - Vordt of the Boreal Valley)
@@ -674,6 +689,7 @@ EnemyEvents:
     Regions:
     - event arenafull 3002801
   ID: 13005817
+  Map: m30_00_00_00
   Comment: Starting camera for Vordt
   DebugInfo:
   - region 3002801 (領域_フルアーマー獣_開始領域)
@@ -687,6 +703,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13005820
+  Map: m30_00_00_00
   Comment: Vordt events
   DebugInfo:
   - object 3001800 (highwall o000401_2000)
@@ -724,6 +741,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3000830, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 3000830, 0, 902090)
   ID: 13005830
+  Map: m30_00_00_00
   Comment: Start Oceiros
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -784,6 +802,7 @@ EnemyEvents:
       - HandleBossDefeat(3000830)
       - ChangeCamera(-1, -1)
   ID: 13005831
+  Map: m30_00_00_00
   Comment: Oceiros end
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -808,6 +827,7 @@ EnemyEvents:
     DefeatFlag: 13000830
     MusicFlag: IfCharacterHasEventMessage -> 13005835
   ID: 13005835
+  Map: m30_00_00_00
   Comment: Oceiros music transition
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -819,6 +839,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13005836
+  Map: m30_00_00_00
   Comment: Oceiros voice line
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -835,6 +856,7 @@ EnemyEvents:
     Add:
     - Cmd: SetSpEffect(3000830, 6950)
   ID: 13005837
+  Map: m30_00_00_00
   Comment: Oceiros NPC part setup
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -848,6 +870,7 @@ EnemyEvents:
     DefeatFlag: 13000830
     Replace: IfEventFlag -> IfCharacterHasSpEffect(AND_01, 3000830, 6950, true, ComparisonType.Equal, 1)
   ID: 13005838
+  Map: m30_00_00_00
   Comment: Oceiros NPC part loop
   DebugInfo:
   - 3000830 (highwall c2090_0000 - Consumed King Oceiros)
@@ -872,6 +895,7 @@ EnemyEvents:
     NewEvent:
     - InitializeCommonEvent(20005837, 13000830, 3000830, 1148829696, 2090, 2090, 13005855, 13005855)
   ID: 13005840
+  Map: m30_00_00_00
   Comment: Oceiros events
   DebugInfo:
   - object 3001830 (highwall o000401_5000)
@@ -903,6 +927,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3000899, true, CharacterUpdateFrequency.AlwaysUpdate)
       - ChangeCamera(3000, 3000)
   ID: 13005889
+  Map: m30_00_00_00
   Comment: Start Dancer for host (triggered by main initialization), sets "seen" flag
   DebugInfo:
   - 3000899 (highwall c5270_0001 - Dancer of the Boreal Valley)
@@ -939,6 +964,7 @@ EnemyEvents:
       - ChangeCharacterEnableState(3000899, Enabled)
       - SetCharacterAnimationState(3000899, Enabled)
   ID: 13005890
+  Map: m30_00_00_00
   Comment: Start Dancer, including either basin trigger or fog gate entry, with dancer position change. The actual initialization is in the other event though
   DebugInfo:
   - object 3001890 (highwall o000401_4000)
@@ -1045,6 +1071,7 @@ EnemyEvents:
     MusicFlag: IfCharacterHasEventMessage -> 13005891
     Remove: 3002898
   ID: 13005891
+  Map: m30_00_00_00
   Comment: Activate additional Dancer BGM region ("heat up"). Make this event flag based, in both variants
   DebugInfo:
   - 3000899 (highwall c5270_0001 - Dancer of the Boreal Valley)
@@ -1058,6 +1085,7 @@ EnemyEvents:
     Entity: 3000899
     DefeatFlag: 13000890
   ID: 13005892
+  Map: m30_00_00_00
   Comment: Dancer NPC part loop
   DebugInfo:
   - 3000899 (highwall c5270_0001 - Dancer of the Boreal Valley)
@@ -1071,6 +1099,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13005893
+  Map: m30_00_00_00
   Comment: Joining Dancer fight as summon
   DebugInfo:
   - object 3001895 (highwall o300370_4000)
@@ -1117,6 +1146,7 @@ EnemyEvents:
       - HandleBossDefeat(3000899)
       - ChangeCamera(-1, -1)
   ID: 13005895
+  Map: m30_00_00_00
   Comment: Dancer end
   DebugInfo:
   - 3000899 (highwall c5270_0001 - Dancer of the Boreal Valley)
@@ -1155,6 +1185,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13015230
+  Map: m30_01_00_00
   Comment: When the player enters the room to the left of the wyvern fire, make the Undead Hunter Charm-throwing run or not
   DebugInfo:
   - region 3012451 (領域_ガーデン側道　ロイドの護符亡者が襲ってくる_領域)
@@ -1185,6 +1216,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13015310
+  Map: m30_01_00_00
   Comment: For the priest toward the end of the hallway before the first bonfire, if damaged or the two knights die and have a "wait for event script" effect, push away from the wall and take out a dagger
   DebugInfo:
   - 3010418 (lothric c1281_0007 - Lothric Castle Lothric Knight)
@@ -1237,6 +1269,7 @@ EnemyEvents:
   - Type: loc
     Animation: pose X0 700 1700
   ID: 13015556
+  Map: m30_01_00_00
   Comment: Kills the left wyvern when the pus of man dies. The pus of man only becomes damageable when 13010890 is set, when the wyvern is damaged. (This is probably fine for most enemies?)
   DebugInfo:
   - 3010830 (lothric c3141_0000 - Ancient Wyvern)
@@ -1285,6 +1318,7 @@ EnemyEvents:
   - Type: loc
     Animation: pose X0 700 1700
   ID: 13015557
+  Map: m30_01_00_00
   Comment: Kills the right wyvern when the pus of man dies. The pus of man only becomes damageable when 13010891 is set, when the wyvern is damaged.
   DebugInfo:
   - 3010831 (lothric c3141_0001 - Ancient Wyvern)
@@ -1337,6 +1371,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3010835
   ID: 13015558
+  Map: m30_01_00_00
   Comment: Some kind of hacky script to repeatedly warp the pus of man to a left wyvern dummypoly, slower if the player is closer
   DebugInfo:
   - 3010835 (lothric c1090_0001 - Pus of Man)
@@ -1357,6 +1392,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3010836
   ID: 13015559
+  Map: m30_01_00_00
   Comment: Some kind of hacky script to repeatedly warp the pus of man to a right wyvern dummypoly, slower if the player is closer (it's super janky)
   DebugInfo:
   - 3010836 (lothric c1090_0003 - Pus of Man)
@@ -1402,6 +1438,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3010800, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 3010800, 0, 903160)
   ID: 13015810
+  Map: m30_01_00_00
   Comment: Start Dragonslayer, which forces an animation when the player enters
   DebugInfo:
   - 3010800 (lothric c3160_0000 - Dragonslayer Armour)
@@ -1458,6 +1495,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13015811
+  Map: m30_01_00_00
   Comment: Make Dragonslayer Armour collapse dramatically at 70% health, and apparently also, make butterflies damageable and active. This event is itself the phase 2 music flag
   DebugInfo:
   - 3010801 (lothric c3080_0000 - Pilgrim Butterfly)
@@ -1493,6 +1531,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3010800, false, CharacterUpdateFrequency.AlwaysUpdate)
       - ChangeCamera(-1, -1)
   ID: 13015812
+  Map: m30_01_00_00
   Comment: End Dragonslayer Armour
   DebugInfo:
   - 3010800 (lothric c3160_0000 - Dragonslayer Armour)
@@ -1526,6 +1565,7 @@ EnemyEvents:
     Regions:
     - event arenafull 3012830
   ID: 13015815
+  Map: m30_01_00_00
   Comment: Starting camera for Dragonslayer Armour
   DebugInfo:
   - region 3012830 (領域_竜の守護騎士_初戦開始領域)
@@ -1540,6 +1580,7 @@ EnemyEvents:
   - Type: loc
     Animation: wakeup X0 3006
   ID: 13105225
+  Map: m31_00_00_00
   Comment: Makes the thrall in the first building jump down or fight
   DebugInfo:
   - 3100401 (settlement c1200_0004 - Hollow Slave)
@@ -1567,6 +1608,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13105230
+  Map: m31_00_00_00
   Comment: Makes grave skeletons wake up entering a region or getting damaged
   DebugInfo:
   - region 3102553 (領域_地下墓地_宝箱前　スケルトン)
@@ -1601,6 +1643,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105240
+  Map: m31_00_00_00
   Comment: Manages backread on the bridge to the tower
   DebugInfo:
   - 3100657 (settlement c0100_0015 - Dummy)
@@ -1638,6 +1681,7 @@ EnemyEvents:
   - Type: loc
     Remove: ForceAnimationPlayback
   ID: 13105250
+  Map: m31_00_00_00
   Comment: Wakes up cage spiders when approaching the two evangelists after the demon. The animations are hanging, and shaking around before falling
   DebugInfo:
   - region 3102532 (領域_サブルート集落_牢蜘蛛が落ちてくる_02)
@@ -1675,6 +1719,7 @@ EnemyEvents:
 - Template:
   - Type: chrarg
   ID: 13105260
+  Map: m31_00_00_00
   Comment: AI stuff for Hollow Manservant upon entering combat
   DebugInfo:
   - 3100356 (settlement c1260_0019 - Hollow Manservant)
@@ -1691,6 +1736,7 @@ EnemyEvents:
 - Template:
   - Type: remove
   ID: 13105270
+  Map: m31_00_00_00
   Comment: Sets AI ids around big bonfire, and changes them after the evangelist dies
   DebugInfo:
   - 3100200 (settlement c1240_0201 - Peasant Hollow)
@@ -1744,6 +1790,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105290
+  Map: m31_00_00_00
   Comment: Sets platoon rate speffect on bridge gang when some dummy chr reaches the stairs (does it actually do anything?)
   DebugInfo:
   - region 3102600 (領域_ボス前集団巡回_目的地到着の判定用)
@@ -1777,6 +1824,7 @@ EnemyEvents:
     Entity: 3100353
     Remove: IfInoutsideArea(AND_01, InsideOutsideState.Inside, 10000, 3102240, 1)
   ID: 13105300
+  Map: m31_00_00_00
   Comment: Hollow manservant who can drop down into the pit when the player approaches the corner
   DebugInfo:
   - 3100353 (settlement c1260_0016 - Hollow Manservant)
@@ -1811,6 +1859,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105340
+  Map: m31_00_00_00
   Comment: Sets character patrol behaviors when they enter the area in front of the tower bridge
   DebugInfo:
   - 3100462 (settlement c1100_0014 - Hollow Soldier)
@@ -1847,6 +1896,7 @@ EnemyEvents:
   - Type: loc
     Remove: IssueShortWarpRequest; ForceAnimationPlayback
   ID: 13105470
+  Map: m31_00_00_00
   Comment: Warps the rats in, in the sewer before Irina. TODO Can maybe move them to the ground
   DebugInfo:
   - 3100556 (settlement c2110_0028 - Hound Rat)
@@ -1896,6 +1946,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105480
+  Map: m31_00_00_00
   Comment: Crows flying (unknown speffect)
   DebugInfo:
   - object 3101615 (settlement o316100_0007)
@@ -2028,6 +2079,7 @@ EnemyEvents:
     - Cmd: SetCharacterAIState(3100831, Enabled)
       Before: start
   ID: 13105742
+  Map: m31_00_00_00
   Comment: Interaction between Siegward and the fire demon
   DebugInfo:
   - 3100831 (settlement c3060_0001 - Demon)
@@ -2118,6 +2170,7 @@ EnemyEvents:
       - SetLockOnPoint(3100800, 221, Enabled)
       - DisplayBossHealthBar(Enabled, 3100800, 0, 905180)
   ID: 13105810
+  Map: m31_00_00_00
   Comment: Start Greatwood, if the player is in the last quarter of the arena on first encounter. Remove the turning animation. Use group for peasants.
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2259,6 +2312,7 @@ EnemyEvents:
     - Cmd: WaitFixedTimeSeconds(1.5)
     - Cmd: ForceAnimationPlayback(3100800, 20000, false, false, true, 0, 1)
   ID: 13105811
+  Map: m31_00_00_00
   Comment: Greatwood floor collapse when Greatwood has an event message. TODO Replace this with phase change info (may need to be custom?)
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2287,6 +2341,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Disabled, 3100800, 0, 905180)
       - ChangeCamera(-1, -1)
   ID: 13105812
+  Map: m31_00_00_00
   Comment: Greatwood end
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2306,6 +2361,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105813
+  Map: m31_00_00_00
   Comment: Sets no-fall-damage effects on player and greatwood if they pass through a region below the floor. Done in common_func for others
   DebugInfo:
   - region 3102802 (ボスエリア_入口横の凸凹部分_00)
@@ -2328,6 +2384,7 @@ EnemyEvents:
     Entity: 3100800
     Replace: IfCharacterHasEventMessage -> IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 13105811)
   ID: 13105814
+  Map: m31_00_00_00
   Comment: Manages various floor pieces on collapse. The event is the music flag
   DebugInfo:
   - object 3101801 (settlement o311900_7000)
@@ -2431,6 +2488,7 @@ EnemyEvents:
     Entity: 3100800
     DefeatFlag: 13100800
   ID: 13105815
+  Map: m31_00_00_00
   Comment: Greatwood NPC part setup
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2470,6 +2528,7 @@ EnemyEvents:
     NewEvent:
     - InitializeCommonEvent(20005837, 13100800, 3100800, 1098907648, 5180, 5180, 13105805, 13105805)
   ID: 13105820
+  Map: m31_00_00_00
   Comment: Greatwood events
   DebugInfo:
   - object 3101800 (settlement o000402_1000)
@@ -2492,6 +2551,7 @@ EnemyEvents:
     DefeatFlag: 13100800
     StartFlag: 13105805
   ID: 13105825
+  Map: m31_00_00_00
   Comment: Greatwood NPC part destruction
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2536,6 +2596,7 @@ EnemyEvents:
     DefeatFlag: 13100800
     StartFlag: 13105805
   ID: 13105830
+  Map: m31_00_00_00
   Comment: Greatwood NPC part destruction
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2584,6 +2645,7 @@ EnemyEvents:
     DefeatFlag: 13100800
     StartFlag: 13105805
   ID: 13105835
+  Map: m31_00_00_00
   Comment: Greatwood NPC part destruction
   DebugInfo:
   - 3100800 (settlement c5180_0000 - Rotted Greatwood)
@@ -2635,6 +2697,7 @@ EnemyEvents:
     - Cmd: IfCharacterHasSpEffect(MAIN, 3100800, 6950, true, ComparisonType.Equal, 1)
       Before: start
   ID: 13105850
+  Map: m31_00_00_00
   Comment: Hollow wakeup in Greatwood, entering boss wakeup area. Replace this with a boss radius check, to avoid immediately wakeup
   DebugInfo:
   - region 3102805 (ボス_一戦目の起動領域)
@@ -2705,6 +2768,7 @@ EnemyEvents:
     - Cmd: IfCharacterHasSpEffect(MAIN, 3100800, 6950, true, ComparisonType.Equal, 1)
       Before: start
   ID: 13105870
+  Map: m31_00_00_00
   Comment: Enabling generator enemies when they generate
   DebugInfo:
   - region 3102840 (巨像テスト)
@@ -2743,6 +2807,7 @@ EnemyEvents:
     DefeatFlag: 13100800
     StartFlag: 13105805
   ID: 13105880
+  Map: m31_00_00_00
   Comment: Multiplayer setup for greatwood hollows
   DebugInfo:
   - group 3105801 [3100259 (settlement c1240_0008 - Peasant Hollow), 3100261 (settlement c1240_0010 - Peasant Hollow), 3100252 (settlement c1240_0012 - Peasant Hollow), 3100254 (settlement c1240_0014 - Peasant Hollow), 3100257 (settlement c1240_0017 - Peasant Hollow), 3100258 (settlement c1240_0018 - Peasant Hollow), 3100262 (settlement c1240_0019 - Peasant Hollow), 3100264 (settlement c1240_0021 - Peasant Hollow), 3100265 (settlement c1240_0022 - Peasant Hollow), 3100266 (settlement c1240_0023 - Peasant Hollow)]
@@ -2756,6 +2821,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105910
+  Map: m31_00_00_00
   Comment: Waking up the dogs behind the settlement starting gate, turning on then off 13100280 while this is the case (unless lever-puller is dead)
   DebugInfo:
   - 3100504 (settlement c2021_0002 - Starved Hound)
@@ -2791,6 +2857,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13105911
+  Map: m31_00_00_00
   Comment: Enabling lever hollow AI
   DebugInfo:
   - 3100295 (settlement c1240_0253 - Peasant Hollow)
@@ -2817,6 +2884,7 @@ EnemyEvents:
     Entity: 3100590
     Remove: SetCharacterAIId
   ID: 13105912
+  Map: m31_00_00_00
   Comment: Enabling the 3rd hound, at least until they get all the way to the wagons
   DebugInfo:
   - 3100590 (settlement c2021_0000 - Starved Hound)
@@ -2849,6 +2917,7 @@ EnemyEvents:
       - HandleBossDefeat(3200800)
       - ChangeCamera(-1, -1)
   ID: 13200811
+  Map: m32_00_00_00
   Comment: Ancient Wyvern end and warp to mausoleum bonfire
   DebugInfo:
   - 3200800 (archdragon c3141_0000 - Ancient Wyvern)
@@ -2890,6 +2959,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(1.2)
       - HandleBossDefeat(3200851)
   ID: 13200862
+  Map: m32_00_00_00
   Comment: Nameless King end and warp to ground level
   DebugInfo:
   - 3200851 (archdragon c5010_0000 - Nameless King)
@@ -2929,6 +2999,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3200851
   ID: 13200863
+  Map: m32_00_00_00
   Comment: Nameless King end sound effect. Merge this into end cond
   DebugInfo:
   - 3200851 (archdragon c5010_0000 - Nameless King)
@@ -2940,6 +3011,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205260
+  Map: m32_00_00_00
   Comment: Unknown AI activation for snakes in the run-up to altar
   DebugInfo:
   - 3200260 (archdragon c1391_0008 - Large Serpent-Man)
@@ -2968,6 +3040,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3200228
   ID: 13205290
+  Map: m32_00_00_00
   Comment: Temporarily activate some kind of cliff-edge wall hit when a nearby large snake has an event request (on getting staggered?)
   DebugInfo:
   - collision 3204280 (archdragon h900300)
@@ -2981,6 +3054,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205300
+  Map: m32_00_00_00
   Comment: Death flag for Wyvern mob
   DebugInfo:
   - 3200300 (archdragon c3140_0003 - Ancient Wyvern Mob)
@@ -3005,6 +3079,7 @@ EnemyEvents:
     - EndUnconditionally(EventEndType.End)
     - Label0()
   ID: 13205310
+  Map: m32_00_00_00
   Comment: Wyvern mob enable state and positioning
   DebugInfo:
   - 3200300 (archdragon c3140_0003 - Ancient Wyvern Mob)
@@ -3092,6 +3167,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3200300
   ID: 13205320
+  Map: m32_00_00_00
   Comment: Loop for gravity/animation/positioning for wyvern mob
   DebugInfo:
   - 3200300 (archdragon c3140_0003 - Ancient Wyvern Mob)
@@ -3169,6 +3245,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3200300
   ID: 13205330
+  Map: m32_00_00_00
   Comment: More Wyvern positioning
   DebugInfo:
   - region 3202302 (【イベント】ヘルカイトB_別棟から再登場領域)
@@ -3242,6 +3319,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3200300
   ID: 13205340
+  Map: m32_00_00_00
   Comment: More wyvern mob animations and whatnot
   DebugInfo:
   - region 3202303 (【イベント】ヘルカイトB_登る2階段側)
@@ -3321,6 +3399,7 @@ EnemyEvents:
     - Cmd: IfCharacterDeadalive(AND_01, X0_4, DeathState.Alive, ComparisonType.Equal, 1)
       Before: IfConditionGroup(MAIN, PASS, AND_01)
   ID: 13205350
+  Map: m32_00_00_00
   Comment: Summoner flag management. Sets X0 when both X4 and X12 are off. The animation is a000_003005, and 11292 seems to prevent them from summoning
   DebugInfo:
   - 3200235 (archdragon c1380_0009 - Serpent-Man Summoner)
@@ -3345,6 +3424,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205360
+  Map: m32_00_00_00
   Comment: Event flag management for summoning. Waits for X0 (from prev event) amd sets one of X4/X8 (from prev event) which triggers next event
   DebugInfo: []
   DebugInit:
@@ -3369,6 +3449,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205370
+  Map: m32_00_00_00
   Comment: X0/X28 = summoned NPC, X4 = active flag, X8 = must be off to proceed, X12 = spawn 1, X16 = spawn 2, X20 = region check for spawn 1, X24 = summoner
   DebugInfo:
   - 3200290 (archdragon c1000_0003 - Invisible)
@@ -3422,6 +3503,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205375
+  Map: m32_00_00_00
   Comment: X0/X20 = summoned NPC, X4 = active flag, X8 = must be off, X12 = spawn region, X16 = summoner
   DebugInfo:
   - 3200295 (archdragon c1000_0006 - Invisible)
@@ -3463,6 +3545,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205380
+  Map: m32_00_00_00
   Comment: Make treasure spawn for the knight corpse after Oceiros
   DebugInfo:
   - 3200291 (archdragon c1000_0004 - Drakeblood Knight)
@@ -3476,6 +3559,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205381
+  Map: m32_00_00_00
   Comment: Make treasure spawn for the knight corpse by Stray Demon
   DebugInfo:
   - 3200299 (archdragon c1000_0010 - Havel Knight)
@@ -3516,6 +3600,7 @@ EnemyEvents:
       - ForceAnimationPlayback(3200800, 20001, false, true, false, 0, 1)
       - DisplayBossHealthBar(Enabled, 3200800, 0, 903140)
   ID: 13205810
+  Map: m32_00_00_00
   Comment: Start Ancient Wyvern
   DebugInfo:
   - 3200800 (archdragon c3141_0000 - Ancient Wyvern)
@@ -3544,6 +3629,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205820
+  Map: m32_00_00_00
   Comment: Ancient Wyvern events
   DebugInfo:
   - object 3201800 (archdragon o000402_1000)
@@ -3605,6 +3691,7 @@ EnemyEvents:
       - ChangeCharacterEnableState(3200851, Disabled)
       - SetCharacterAnimationState(3200851, Disabled)
   ID: 13205860
+  Map: m32_00_00_00
   Comment: Start Nameless King, flying in
   DebugInfo:
   - group 3205850 [3200851 (archdragon c5010_0000 - Nameless King), 3200850 (archdragon c5030_0000 - King of the Storm)]
@@ -3674,6 +3761,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3200851, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 3200851, 0, 905010)
   ID: 13205861
+  Map: m32_00_00_00
   Comment: Nameless King phase change (checks <=0.01 HP% since phase 1 immortal in vanilla), and forces an animation before cutscene
   DebugInfo:
   - 3200850 (archdragon c5030_0000 - King of the Storm)
@@ -3723,6 +3811,7 @@ EnemyEvents:
     StartFlag: 13205855
     Remove: SkipIfNumberOfClientsOfType; 13205852; ChangeCamera(5030, 5030)
   ID: 13205864
+  Map: m32_00_00_00
   Comment: Nameless King cameras
   DebugInfo: []
   DebugCommands:
@@ -3743,6 +3832,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13205870
+  Map: m32_00_00_00
   Comment: Nameless King events
   DebugInfo:
   - object 3201850 (archdragon o320400_2000)
@@ -3766,6 +3856,7 @@ EnemyEvents:
     Entity: 3200850
     DefeatFlag: 13200850
   ID: 13205880
+  Map: m32_00_00_00
   Comment: Nameless King phase 1 stagger loop
   DebugInfo:
   - 3200850 (archdragon c5030_0000 - King of the Storm)
@@ -3780,6 +3871,7 @@ EnemyEvents:
     Entity: 3300560
     DefeatFlag: 13300560
   ID: 13300310
+  Map: m33_00_00_00
   Comment: Management for the Stray Demon helper (the legs falling off?)
   DebugInfo:
   - 3300560 (farronkeep c5200_0000 - Stray Demon)
@@ -3830,6 +3922,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305201
+  Map: m33_00_00_00
   Comment: Changes patrol behavior on spotting player
   DebugInfo:
   - 3300200 (farronkeep c2270_0000 - Greater Crab)
@@ -3843,6 +3936,7 @@ EnemyEvents:
     Regions:
     - arg chrpoint 3302270 3302271 3302272 3302273
   ID: 13305202
+  Map: m33_00_00_00
   Comment: Warp crabs away when they burrow into the ground
   DebugInfo:
   - 3300200 (farronkeep c2270_0000 - Greater Crab)
@@ -3951,6 +4045,7 @@ EnemyEvents:
   - Type: chr
     Entity: 3300484
   ID: 13305210
+  Map: m33_00_00_00
   Comment: Give AI speffect to a storyteller corvian before Halfway Fortress, when it wakes up
   DebugInfo:
   - 3300484 (farronkeep c2210_0044 - Corvian)
@@ -3964,6 +4059,7 @@ EnemyEvents:
 - Template:
   - Type: remove
   ID: 13305211
+  Map: m33_00_00_00
   Comment: Modifies corvian mob AI when storyteller sees player (TODO, can it wake up by itself? remove this event vanilla?)
   DebugInfo:
   - 3300477 (farronkeep c2210_0037 - Corvian)
@@ -3994,6 +4090,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305230
+  Map: m33_00_00_00
   Comment: AI/patrol management for second manservant on path to cathedral when player enters region approaching it
   DebugInfo:
   - region 3302281 (起動_貧民下男 接続路1)
@@ -4026,6 +4123,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305300
+  Map: m33_00_00_00
   Comment: Change crystal lizard position depending on where the player is approaching from (left or right side), except it might always do it?
   DebugInfo:
   - region 3302360 (領域_結晶トカゲワープα)
@@ -4057,6 +4155,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305320
+  Map: m33_00_00_00
   Comment: Running behavior in hollows after Stray Demon
   DebugInfo:
   - 3300551 (farronkeep c1100_0001 - Hollow Soldier)
@@ -4084,6 +4183,7 @@ EnemyEvents:
       - IfConditionGroup(MAIN, PASS, AND_01)
       - HandleBossDefeatAndDisplayBanner(3300801, TextBannerType.LordofCinderFallen)
   ID: 13305800
+  Map: m33_00_00_00
   Comment: Abyss Watchers end
   DebugInfo:
   - 3300801 (farronkeep c3040_0000 - Abyss Watchers)
@@ -4134,6 +4234,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(3300803, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 3300801, 0, 903040)
   ID: 13305810
+  Map: m33_00_00_00
   Comment: Start Abyss Watchers
   DebugInfo:
   - group 3305800 [3300801 (farronkeep c3040_0000 - Abyss Watchers), 3300802 (farronkeep c3040_0001 - Abyss Watchers), 3300803 (farronkeep c3040_0002 - Abyss Watchers), dummyenemy 3300800 (farronkeep c2000_0000), dummyenemy 3300804 (farronkeep c3040_0003)]
@@ -4197,6 +4298,7 @@ EnemyEvents:
     - Cmd: ChangeCharacterEnableState(3300802, Enabled)
       Before: ForceAnimationPlayback(3300802, 30000, false, false, false, 0, 1)
   ID: 13305811
+  Map: m33_00_00_00
   Comment: Enables first Abyss helper after 20 seconds (or 80% health, the first time), and loops
   DebugInfo:
   - 3300802 (farronkeep c3040_0001 - Abyss Watchers)
@@ -4240,6 +4342,7 @@ EnemyEvents:
     - Cmd: ChangeCharacterEnableState(3300803, Enabled)
       Before: ForceAnimationPlayback(3300803, 30001, false, false, false, 0, 1)
   ID: 13305812
+  Map: m33_00_00_00
   Comment: Enables second Abyss helper after 40 seconds (or 60% health, the first time), and loops
   DebugInfo:
   - 3300803 (farronkeep c3040_0002 - Abyss Watchers)
@@ -4284,6 +4387,7 @@ EnemyEvents:
     RemoveDupe: 13305802
     Replace: WaitFixedTimeSeconds(0.3 -> 2.5)
   ID: 13305814
+  Map: m33_00_00_00
   Comment: Phase transition for Abyss Watchers, warping the main dude
   DebugInfo:
   - 3300801 (farronkeep c3040_0000 - Abyss Watchers)
@@ -4318,6 +4422,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305829
+  Map: m33_00_00_00
   Comment: Abyss Watchers events
   DebugInfo:
   - object 3301800 (farronkeep o000401_5000)
@@ -4355,6 +4460,7 @@ EnemyEvents:
     - ForceCharacterDeath(3300852, false)
     - ForceCharacterDeath(3300853, false)
   ID: 13305850
+  Map: m33_00_00_00
   Comment: Crystal Sage end
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4424,6 +4530,7 @@ EnemyEvents:
     - SetCharacterHPBarDisplay(3300852, Disabled)
     - SetCharacterHPBarDisplay(3300853, Disabled)
   ID: 13305860
+  Map: m33_00_00_00
   Comment: Start Crystal Sage
   DebugInfo:
   - group 3305850 [3300850 (farronkeep c1320_0000 - Crystal Sage in Farron), 3300851 (farronkeep c1320_0001 - Crystal Sage in Farron), 3300852 (farronkeep c1320_0002 - Crystal Sage in Farron), 3300853 (farronkeep c1320_0003 - Crystal Sage in Farron), dummyenemy 3300854 (farronkeep c1320_0004)]
@@ -4466,6 +4573,7 @@ EnemyEvents:
     Add:
     - Cmd: SetSpEffect(3300850, 6950)
   ID: 13305861
+  Map: m33_00_00_00
   Comment: Crystal Sage phase 2. The flag is used in other events, so replace those with progress speffects
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4476,6 +4584,7 @@ EnemyEvents:
   - Type: chrboss
     Entity: 3300850
   ID: 13305862
+  Map: m33_00_00_00
   Comment: Camera management for Crystal Sage doing some animation
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4494,6 +4603,7 @@ EnemyEvents:
     Regions:
     - event arenapartition 3302861 3302862 3302863 3302864
   ID: 13305863
+  Map: m33_00_00_00
   Comment: Crystal Sage phase 2, when casting, pick a random clone configuration based on quadrant
   DebugInfo:
   - region 3302861 (領域_結晶の古老_判定場所（A）)
@@ -4546,6 +4656,7 @@ EnemyEvents:
   - Type: chr
     Entity: 3300850
   ID: 13305864
+  Map: m33_00_00_00
   Comment: Once Crystal sage has been warped somewhere, make him appear again. This uses flag set in warp event below
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4565,6 +4676,7 @@ EnemyEvents:
     Entity: 3300850
     Replace: IfEventFlag(AND_01, ON, TargetEventFlagType.EventFlag, 13305851) -> IfCharacterHasSpEffect(AND_01, 3300850, 6950, true, ComparisonType.Equal, 1)
   ID: 13305865
+  Map: m33_00_00_00
   Comment: Once boss+helper warps complete (flag 13305890), warp all of them in
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4608,6 +4720,7 @@ EnemyEvents:
   - Type: multichronly
     Entity: 3300850
   ID: 13305866
+  Map: m33_00_00_00
   Comment: Making Crystal Sage helpers disappear when they are hit, or main one recasts
   DebugInfo:
   - 3300851 (farronkeep c1320_0001 - Crystal Sage in Farron)
@@ -4644,6 +4757,7 @@ EnemyEvents:
     Regions:
     - arg arenapartitionpoint 3302872 3302870 3302871 3302873 3302877 3302875 3302876 3302874 3302881 3302879 3302878 3302880
   ID: 13305870
+  Map: m33_00_00_00
   Comment: Deciding where to warp main sage based on selected configuration in first phase. Viewed from the entrance, the quadrants are DA/CB
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4695,6 +4809,7 @@ EnemyEvents:
     Regions:
     - arg arenapartitionpoint 3302872 3302870 3302871 3302873 3302877 3302875 3302876 3302874 3302881 3302879 3302878 3302880
   ID: 13305885
+  Map: m33_00_00_00
   Comment: Deciding where to warp helper sages depending on selected configuration, also, spawning attacks (more at lower boss health). these are the same as the previous event
   DebugInfo:
   - 3300850 (farronkeep c1320_0000 - Crystal Sage in Farron)
@@ -4763,6 +4878,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13305900
+  Map: m33_00_00_00
   Comment: Crystal Sage events, at least the standard ones
   DebugInfo:
   - object 3301850 (farronkeep o000401_6001)
@@ -4782,6 +4898,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13410300
+  Map: m34_01_00_00
   Comment: Drop for rooftop winged knights once all are defeated
   DebugInfo:
   - 3410500 (archives c1290_0000 - Winged Knight)
@@ -4834,6 +4951,7 @@ EnemyEvents:
     - ForceCharacterDeath(3410830, true)
     - ForceCharacterDeath(3410831, true)
   ID: 13410832
+  Map: m34_01_00_00
   Comment: End Twin Princes, checking for Lothric HP and playing an animation based on whether Lorian has speffect
   DebugInfo:
   - 3410831 (archives c5251_0000 - Twin Princes Helper)
@@ -4871,6 +4989,7 @@ EnemyEvents:
     Entity: 3410200
     Remove: ForceAnimationPlayback
   ID: 13415350
+  Map: m34_01_00_00
   Comment: Initializes Crystal Sage in archives
   DebugInfo:
   - region 3412500 (領域_書庫入口_結晶の古老登場)
@@ -4913,6 +5032,7 @@ EnemyEvents:
     Entity: 3410200
     Remove: RequestCharacterAICommand; IfCharacterHasEventMessage; SetCharacterAIId; ForceAnimationPlayback; IfConditionGroup(OR_04, PASS, AND_06); IfConditionGroup(OR_04, PASS, AND_07); IfConditionGroup(OR_04, PASS, AND_08)
   ID: 13415351
+  Map: m34_01_00_00
   Comment: Crystal Sage warping, based on getting damaged by player. X4-X20 are checks, X24-X36 are warp areas
   DebugInfo:
   - 3410200 (archives c1321_0000 - Crystal Sage in Archives)
@@ -5027,6 +5147,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13415355
+  Map: m34_01_00_00
   Comment: Managing crystal sage backread (and unknown)
   DebugInfo:
   - region 3412611 (領域_書庫の筒抜け部分)
@@ -5047,6 +5168,7 @@ EnemyEvents:
   - Type: remove
     Entities: 3410500 3410501 3410502
   ID: 13415450
+  Map: m34_01_00_00
   Comment: Making Winged Knights drop down from the roof when the player approaches the front of the tower. Just start them down, with location change
   DebugInfo:
   - region 3412522 (領域_屋上_デブが降りてくる)
@@ -5086,6 +5208,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13415600
+  Map: m34_01_00_00
   Comment: Talk setup for Prince Lothric
   DebugInfo:
   - 3410831 (archives c5251_0000 - Twin Princes Helper)
@@ -5159,6 +5282,7 @@ EnemyEvents:
       - SetCharacterAnimationState(3410831, Disabled)
       End: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 13410830)
   ID: 13415830
+  Map: m34_01_00_00
   Comment: Start Twin Princes, setting Lorian position on the bed the first time
   DebugInfo:
   - 3410830 (archives c5250_0000 - Twin Princes)
@@ -5266,6 +5390,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Enabled, 3410830, 0, 905250)
       - DisplayBossHealthBar(Enabled, 3410831, 1, 905251)
   ID: 13415831
+  Map: m34_01_00_00
   Comment: Twin Princes phase transition
   DebugInfo:
   - 3410832 (archives c5250_0001 - Twin Princes)
@@ -5310,6 +5435,7 @@ EnemyEvents:
     Replace: SetEventFlag(13415842, OFF) -> ClearSpEffect(3410830, 6950); SetEventFlag(13415842, ON) -> SetSpEffect(3410830, 6950)
     RemoveDupe: SetCharacterAnimationState(3410831, Disabled)
   ID: 13415840
+  Map: m34_01_00_00
   Comment: Some kind of Twin Princes cycle, setting a flag during speffect 11601 (character attachment)
   DebugInfo:
   - 3410830 (archives c5250_0000 - Twin Princes)
@@ -5329,6 +5455,7 @@ EnemyEvents:
     Entity: 3410830
     Replace: IfEventFlag -> IfCharacterHasSpEffect(MAIN, 3410830, 6950, true, ComparisonType.Equal, 1)
   ID: 13415841
+  Map: m34_01_00_00
   Comment: Warping Lothric to Lorian position while attached
   DebugInfo:
   - 3410831 (archives c5251_0000 - Twin Princes Helper)
@@ -5343,6 +5470,7 @@ EnemyEvents:
     DefeatFlag: 13410830
     Remove: 73410100
   ID: 13415843
+  Map: m34_01_00_00
   Comment: Twin Princes resurrection loop
   DebugInfo:
   - 3410830 (archives c5250_0000 - Twin Princes)
@@ -5375,6 +5503,7 @@ EnemyEvents:
     Regions:
     - event arenafull 3412830
   ID: 13415845
+  Map: m34_01_00_00
   Comment: Twin Princes starting camera
   DebugInfo:
   - region 3412830 (領域_闇の双皇子_ボス戦開始領域)
@@ -5388,6 +5517,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13500276
+  Map: m35_00_00_00
   Comment: Item drop for sorcerer grub before Rosaria
   DebugInfo:
   - 3500668 (cathedral c2180_0018 - Corpse-grub)
@@ -5411,6 +5541,7 @@ EnemyEvents:
     Entity: 3500300
     Remove: ForceAnimationPlayback; SetCharacterAIId
   ID: 13500783
+  Map: m35_00_00_00
   Comment: Warp giant upon Patches trickery
   DebugInfo:
   - region 3502722 (会話NPC：カットシーン再生)
@@ -5463,6 +5594,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13500786
+  Map: m35_00_00_00
   Comment: State for enemies related to Patches quest
   DebugInfo:
   - 3500720 (cathedral c0000_0012 - Unbreakable Patches)
@@ -5541,6 +5673,7 @@ EnemyEvents:
       - HandleBossDefeat(3500800)
       - ResetOmissionModeCountsToDefault()
   ID: 13501800
+  Map: m35_00_00_00
   Comment: Deacons end
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -5593,6 +5726,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13504400
+  Map: m35_00_00_00
   Comment: Corpse generator
   DebugInfo:
   - group 3506400 [object 3501400 (cathedral o350012_1001), object 3501405 (cathedral o359900_1001)]
@@ -5617,6 +5751,7 @@ EnemyEvents:
     DefeatFlag: 13500800
     StartFlag: 13505805
   ID: 13504899
+  Map: m35_00_00_00
   Comment: Deacons AI syncing and buff calculation while fight is ongoing
   DebugInfo:
   - group 3505801 [3500810 (cathedral c5221_0000 - Wide Deacon of the Deep), 3500811 (cathedral c5221_0001 - Wide Deacon of the Deep), 3500812 (cathedral c5221_0002 - Wide Deacon of the Deep), 3500813 (cathedral c5221_0003 - Wide Deacon of the Deep), 3500814 (cathedral c5222_0001 - Tall Deacon of the Deep), 3500815 (cathedral c5222_0002 - Tall Deacon of the Deep), 3500816 (cathedral c5222_0003 - Tall Deacon of the Deep), 3500817 (cathedral c5222_0004 - Tall Deacon of the Deep), 3500837 (cathedral c5223_0005 - Cathedral Deacon), 3500838 (cathedral c5223_0006 - Cathedral Deacon), 3500839 (cathedral c5223_0007 - Cathedral Deacon), 3500818 (cathedral c5223_0010 - Cathedral Deacon), 3500819 (cathedral c5223_0011 - Cathedral Deacon), 3500820 (cathedral c5223_0012 - Cathedral Deacon), 3500821 (cathedral c5223_0013 - Cathedral Deacon), 3500822 (cathedral c5223_0014 - Cathedral Deacon), 3500823 (cathedral c5223_0015 - Cathedral Deacon), 3500824 (cathedral c5223_0016 - Cathedral Deacon), 3500825 (cathedral c5223_0017 - Cathedral Deacon), 3500826 (cathedral c5223_0018 - Cathedral Deacon), 3500827 (cathedral c5223_0019 - Cathedral Deacon), 3500828 (cathedral c5223_0020 - Cathedral Deacon), 3500834 (cathedral c5223_0027 - Cathedral Deacon), 3500835 (cathedral c5223_0029 - Cathedral Deacon), 3500836 (cathedral c5223_0030 - Cathedral Deacon), 3500840 (cathedral c5223_0031 - Cathedral Deacon), 3500841 (cathedral c5223_0032 - Cathedral Deacon), 3500842 (cathedral c5223_0033 - Cathedral Deacon), dummyenemy 3500829 (cathedral c5223_0021), dummyenemy 3500830 (cathedral c5223_0022), dummyenemy 3500831 (cathedral c5223_0023), dummyenemy 3500832 (cathedral c5223_0024), dummyenemy 3500833 (cathedral c5223_0026)]
@@ -5636,6 +5771,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3500800
   ID: 13504900
+  Map: m35_00_00_00
   Comment: Kill deacons if they somehow enter inside the central box. This is a convenient event that applies to all deacons but we don't need it
   DebugInfo:
   - region 3502803 (領域_枢機卿団棺の中)
@@ -5728,6 +5864,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505210
+  Map: m35_00_00_00
   Comment: Corpse generation
   DebugInfo:
   - region 3502200 (起動_よみがえり_墓地スタート)
@@ -5760,6 +5897,7 @@ EnemyEvents:
   - Type: loc
     Remove: 5450
   ID: 13505220
+  Map: m35_00_00_00
   Comment: Wakeup behavior for a few hollows along the outer loop
   DebugInfo:
   - 3500213 (cathedral c1440_0013 - Cathedral Hollow Soldier)
@@ -5784,6 +5922,7 @@ EnemyEvents:
   - Type: loc
     Remove: 5450
   ID: 13505230
+  Map: m35_00_00_00
   Comment: Wakeup behavior for a few hollows along the outer loop
   DebugInfo:
   - 3500218 (cathedral c1440_0018 - Cathedral Hollow Soldier)
@@ -5808,6 +5947,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13505240
+  Map: m35_00_00_00
   Comment: Wakeup behavior for some hollows on the outer loop, including the ones in front of the estus shard
   DebugInfo:
   - 3500240 (cathedral c1440_0040 - Cathedral Hollow Soldier)
@@ -5848,6 +5988,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13505245
+  Map: m35_00_00_00
   Comment: Wakeup behavior for some hollows in the outer loop, including the ones staring at the statue near the first double door
   DebugInfo:
   - 3500227 (cathedral c1440_0027 - Cathedral Hollow Soldier)
@@ -5888,6 +6029,7 @@ EnemyEvents:
   - Type: locarg
     Animation: gravity X0 X4 X8
   ID: 13505255
+  Map: m35_00_00_00
   Comment: Wakeup for the blob before the stairs down to the pensive evangelist
   DebugInfo:
   - 3500344 (cathedral c2131_0004 - Anor Londo Writhing Flesh)
@@ -5923,6 +6065,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3500310
   ID: 13505261
+  Map: m35_00_00_00
   Comment: AI behavior for the knight starting out in the accursed room
   DebugInfo:
   - 3500310 (cathedral c1190_0000 - Cathedral Knight)
@@ -5954,6 +6097,7 @@ EnemyEvents:
   - Type: locarg
     Animation: gravity X0 X4 X8
   ID: 13505270
+  Map: m35_00_00_00
   Comment: Deep Accused dropdown and enable state. The animation is turning from upside down to rightside up, incl downward root motion
   DebugInfo:
   - 3500292 (cathedral c3110_0000 - Deep Accursed)
@@ -5996,6 +6140,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505271
+  Map: m35_00_00_00
   Comment: Make the Fallen Knight a runner
   DebugInfo:
   - 3500176 (cathedral c0000_0016 - Fallen Knight)
@@ -6071,6 +6216,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505275
+  Map: m35_00_00_00
   Comment: Activation for Heysel grub in Rosaria's room
   DebugInfo:
   - 3500669 (cathedral c2180_0019 - Corpse-grub)
@@ -6089,6 +6235,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505300
+  Map: m35_00_00_00
   Comment: Backread management for giants
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6113,6 +6260,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3500300
   ID: 13505310
+  Map: m35_00_00_00
   Comment: Giant animations when player is traversing the top area
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6150,6 +6298,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3500300
   ID: 13505311
+  Map: m35_00_00_00
   Comment: Animation id offset speffect for giant, depending on whether players are in upper level or not
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6171,6 +6320,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3500300
   ID: 13505312
+  Map: m35_00_00_00
   Comment: Warping back to home if some event message is triggered (no animation appears to do this, though)
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6183,6 +6333,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505320
+  Map: m35_00_00_00
   Comment: Set flag when giant in area and gate flag is off (the gate is up). These are used in AI scripts.
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6205,6 +6356,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505322
+  Map: m35_00_00_00
   Comment: Warp giant on load-in to opposite side, when its area+gate flag is set
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6222,6 +6374,7 @@ EnemyEvents:
 - Template:
   - Type: chrarg
   ID: 13505324
+  Map: m35_00_00_00
   Comment: Animation for giants based on speffect
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6243,6 +6396,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505401
+  Map: m35_00_00_00
   Comment: More corpse generator business
   DebugInfo:
   - group 3506400 [object 3501400 (cathedral o350012_1001), object 3501405 (cathedral o359900_1001)]
@@ -6339,6 +6493,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505760
+  Map: m35_00_00_00
   Comment: Big long Siegward event. Disables the self-immolation boy sometimes.
   DebugInfo:
   - 3500238 (cathedral c1440_0038 - Cathedral Hollow Soldier)
@@ -6411,6 +6566,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505780
+  Map: m35_00_00_00
   Comment: Big long Patches event. Can disable the grubs in his room.
   DebugInfo:
   - group 3505651 [3500651 (cathedral c2180_0001 - Corpse-grub), 3500652 (cathedral c2180_0002 - Corpse-grub), 3500653 (cathedral c2180_0003 - Corpse-grub), 3500654 (cathedral c2180_0004 - Corpse-grub)]
@@ -6514,6 +6670,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505784
+  Map: m35_00_00_00
   Comment: Patches dialogue trigger ("shame on you") when giants are dead
   DebugInfo:
   - 3500300 (cathedral c3021_0000 - Giant Slave)
@@ -6528,6 +6685,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505787
+  Map: m35_00_00_00
   Comment: Disable grubs in Patches room
   DebugInfo:
   - group 3505651 [3500651 (cathedral c2180_0001 - Corpse-grub), 3500652 (cathedral c2180_0002 - Corpse-grub), 3500653 (cathedral c2180_0003 - Corpse-grub), 3500654 (cathedral c2180_0004 - Corpse-grub)]
@@ -6542,6 +6700,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505788
+  Map: m35_00_00_00
   Comment: Disable immolating hollow with Siegward quest state
   DebugInfo:
   - 3500705 (cathedral c0100_0010 - Dummy)
@@ -6617,6 +6776,7 @@ EnemyEvents:
       - DeactivateGenerator(3503845, Enabled)
       - DeactivateGenerator(3503846, Enabled)
   ID: 13505810
+  Map: m35_00_00_00
   Comment: Start Deacons (for simplified version, can probably treat archdeacon like regular enemy. TODO see if two congregations can coexist)
   DebugInfo:
   - generator 3503830 [3500837 (cathedral c5223_0005 - Cathedral Deacon), 3500838 (cathedral c5223_0006 - Cathedral Deacon), 3500839 (cathedral c5223_0007 - Cathedral Deacon), 3500818 (cathedral c5223_0010 - Cathedral Deacon), 3500819 (cathedral c5223_0011 - Cathedral Deacon), 3500820 (cathedral c5223_0012 - Cathedral Deacon), 3500811 (cathedral c5221_0001 - Wide Deacon of the Deep), 3500812 (cathedral c5221_0002 - Wide Deacon of the Deep)]
@@ -6699,6 +6859,7 @@ EnemyEvents:
     - Cmd: SetCharacterInvincibility(3505802, Disabled)
       After: ChangeCharacterEnableState(3505802, Enabled)
   ID: 13505812
+  Map: m35_00_00_00
   Comment: Deacons phase 2, warp in the pope
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6751,6 +6912,7 @@ EnemyEvents:
     Regions:
     - event arenasfx 3503800
   ID: 13505813
+  Map: m35_00_00_00
   Comment: Spawn curse accumulation based on boss speffects
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6782,6 +6944,7 @@ EnemyEvents:
     Regions:
     - event arenasfx 3503800 3503801
   ID: 13505814
+  Map: m35_00_00_00
   Comment: Spawn 2nd level curse accumulation
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6822,6 +6985,7 @@ EnemyEvents:
     Regions:
     - event dist10 3502801
   ID: 13505815
+  Map: m35_00_00_00
   Comment: Applies curse together with the deacon friends
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6859,6 +7023,7 @@ EnemyEvents:
     Entity: 3500800
     DefeatFlag: 13500800
   ID: 13505816
+  Map: m35_00_00_00
   Comment: Coordination with curse-casting deacons
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6894,6 +7059,7 @@ EnemyEvents:
     DefeatFlag: 13500800
     StartFlag: 13505805
   ID: 13505820
+  Map: m35_00_00_00
   Comment: In deacons phase 1 only (when initialized with 805 and 810 but not yet 802), randomly select a deacon flag if all of the flags are off. TODO replace 13505802 with archdeacon ref, and maybe a cooldown? avoid constant selection
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -6919,6 +7085,7 @@ EnemyEvents:
     DefeatFlag: 13500800
     Replace: IfEventFlag(AND_01, OFF, TargetEventFlagType.EventFlag, 13505802) -> IfCharacterHasSpEffect(AND_01, 3500800, 6950, false, ComparisonType.Equal, 1)
   ID: 13505821
+  Map: m35_00_00_00
   Comment: Damaging archdeacon when subdeacon dies. X0 = deacon selected flag, X4 = deacon active flag, X8 = deacon, X12 = effect to set on archdeacon (they appear to be identical)
   DebugInfo:
   - 3500800 (cathedral c5220_0000 - Archdeacon of the Deep)
@@ -7039,6 +7206,7 @@ EnemyEvents:
     DefeatFlag: 13500800
     Replace: IfEventFlag(AND_01, OFF, TargetEventFlagType.EventFlag, 13505802) -> IfCharacterHasSpEffect(AND_01, 3500800, 6950, false, ComparisonType.Equal, 1)
   ID: 13505861
+  Map: m35_00_00_00
   Comment: Activating a deacon which was selected
   DebugInfo:
   - 3500810 (cathedral c5221_0000 - Wide Deacon of the Deep)
@@ -7127,6 +7295,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13505899
+  Map: m35_00_00_00
   Comment: Deacons events
   DebugInfo:
   - object 3501800 (cathedral o000400_9000)
@@ -7156,6 +7325,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13700111
+  Map: m37_00_00_00
   Comment: Sets event flag when cathedral interior left front deacon dies (is this referenced anywhere??)
   DebugInfo:
   - 3700381 (irithyll c5226_0006 - Irirthyll Tall Deacon)
@@ -7179,6 +7349,7 @@ EnemyEvents:
       - HandleBossDefeatAndDisplayBanner(3700800, TextBannerType.LordofCinderFallen)
       - ChangeCamera(-1, -1)
   ID: 13700800
+  Map: m37_00_00_00
   Comment: Aldrich end, and start elevating
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7214,6 +7385,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(3.5)
       - HandleBossDefeat(3700850)
   ID: 13700861
+  Map: m37_00_00_00
   Comment: Pontiff end
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7233,6 +7405,7 @@ EnemyEvents:
 - Template:
   - Type: chrpartarg
   ID: 13705230
+  Map: m37_00_00_00
   Comment: Sulyvahn beast stagger loop
   DebugInfo:
   - 3700240 (irithyll c2250_0004 - Sulyvahn's Beast)
@@ -7253,6 +7426,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705235
+  Map: m37_00_00_00
   Comment: Camera on bridge into Irithyll when the boy shows up
   DebugInfo:
   - 3700240 (irithyll c2250_0004 - Sulyvahn's Beast)
@@ -7273,6 +7447,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705239
+  Map: m37_00_00_00
   Comment: Enable state for the boy based on death flag (13700250). It spawns under the bridge when 13700240 is set, but initially disabled. (It checks 13705251 but it's a temp flag.) Note the first command is in a disabled layer, the flag is actually set in event 13705246 when the player goes up the central Irithyll stairs
   DebugInfo:
   - 3700240 (irithyll c2250_0004 - Sulyvahn's Beast)
@@ -7315,6 +7490,7 @@ EnemyEvents:
     Entity: 3700240
     Remove: ForceAnimationPlayback
   ID: 13705240
+  Map: m37_00_00_00
   Comment: Spawns in the boy. On the bridge (13700240 off), 13705241 means currently active, so it can disappear and reappear. Otherwise, jump down.
   DebugInfo:
   - region 3702240 (【イベント】ティンダロス_登場（橋）)
@@ -7400,6 +7576,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705244
+  Map: m37_00_00_00
   Comment: Shooting a bullet at the boy, perhaps when it tries to enter Irithyll? however it forget its doll -.-
   DebugInfo:
   - 3700249 (irithyll c1000_0008 - Invisible)
@@ -7437,6 +7614,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705245
+  Map: m37_00_00_00
   Comment: Makes the boy disappear when 13705240 event says so (speffect)
   DebugInfo:
   - 3700240 (irithyll c2250_0004 - Sulyvahn's Beast)
@@ -7456,6 +7634,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705246
+  Map: m37_00_00_00
   Comment: Takes the boy off the bridge when player goes up Irithyll stairs, also making them disappear
   DebugInfo:
   - region 3704321 (【ティンダロス】絶対帰巣領域_橋-広場側)
@@ -7475,6 +7654,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705260
+  Map: m37_00_00_00
   Comment: Awards FAP ring when reservoir dogs are dead
   DebugInfo:
   - 3700241 (irithyll c2250_0002 - Sulyvahn's Beast)
@@ -7494,6 +7674,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13705360
+  Map: m37_00_00_00
   Comment: Dropdowns for flesh. They have fall damage resistance.
   DebugInfo:
   - 3700390 (irithyll c2131_0010 - Anor Londo Writhing Flesh)
@@ -7560,6 +7741,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705652
+  Map: m37_00_00_00
   Comment: Makes Anri stop fighting after defeating their Aldrich
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7577,6 +7759,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705700
+  Map: m37_00_00_00
   Comment: Pontiff clone move copying
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7641,6 +7824,7 @@ EnemyEvents:
       - SetCharacterAIState(3700800, Enabled)
       - DisplayBossHealthBar(Enabled, 3700800, 0, 905150)
   ID: 13705810
+  Map: m37_00_00_00
   Comment: Start Aldrich (wlth layer flag check - Anri related?)
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7673,6 +7857,7 @@ EnemyEvents:
     StartFlag: 13705805
     Remove: SkipIfNumberOfClientsOfType
   ID: 13705811
+  Map: m37_00_00_00
   Comment: Aldrich camera management
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7707,6 +7892,7 @@ EnemyEvents:
     DefeatFlag: 13700800
     MusicFlag: 13705815
   ID: 13705815
+  Map: m37_00_00_00
   Comment: Aldrich phase 2 music
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7724,6 +7910,7 @@ EnemyEvents:
     - event arenapartitionpoint 3702823 3702822 3702821 3702820
     - event arenapoint 3702824
   ID: 13705819
+  Map: m37_00_00_00
   Comment: Aldrich warping quadrants (3702810 is in the opposite corner as 3702820, e.g.)
   DebugInfo:
   - 3700800 (irithyll c5150_0001 - Aldrich, Devourer of Gods)
@@ -7765,6 +7952,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705820
+  Map: m37_00_00_00
   Comment: Aldrich events
   DebugInfo:
   - object 3701800 (irithyll o000401_3003)
@@ -7813,6 +8001,7 @@ EnemyEvents:
       - SetCharacterAIState(3700850, Enabled)
       - DisplayBossHealthBar(Enabled, 3700850, 0, 905140)
   ID: 13705860
+  Map: m37_00_00_00
   Comment: Start Pontiff. Invincibility is for attempted compatibility with fog gate randomizer
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7847,6 +8036,7 @@ EnemyEvents:
     DefeatFlag: 13700850
     MusicFlag: 13705865
   ID: 13705865
+  Map: m37_00_00_00
   Comment: Pontiff phase 2 music
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7858,6 +8048,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13705870
+  Map: m37_00_00_00
   Comment: Pontiff events
   DebugInfo:
   - object 3701850 (irithyll o000402_3001)
@@ -7879,6 +8070,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705880
+  Map: m37_00_00_00
   Comment: Pontiff clone syncing loop
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7910,6 +8102,7 @@ EnemyEvents:
     DefeatFlag: 13700850
     Remove: SetNetworkUpdateRate
   ID: 13705881
+  Map: m37_00_00_00
   Comment: Pontiff clone initialization. Annoyingly, this sets NoUpdate in a separate event from canceling it
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7927,6 +8120,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705882
+  Map: m37_00_00_00
   Comment: Pontiff clone death loop
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7952,6 +8146,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705883
+  Map: m37_00_00_00
   Comment: Some Pontiff clone speffect interaction
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7972,6 +8167,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705885
+  Map: m37_00_00_00
   Comment: Killing Pontiff clone when Pontiff dies
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -7986,6 +8182,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705886
+  Map: m37_00_00_00
   Comment: Initial AI speffects for pontiff
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -8001,6 +8198,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705887
+  Map: m37_00_00_00
   Comment: Management for Pontiff clone warping
   DebugInfo:
   - 3700850 (irithyll c5140_0000 - Pontiff Sulyvahn)
@@ -8031,6 +8229,7 @@ EnemyEvents:
     Entity: 3700850
     DefeatFlag: 13700850
   ID: 13705889
+  Map: m37_00_00_00
   Comment: Executing Pontiff clone-warping
   DebugInfo:
   - 3700851 (irithyll c5140_0001 - Pontiff Sulyvahn)
@@ -8065,6 +8264,7 @@ EnemyEvents:
       - IfConditionGroup(MAIN, PASS, AND_01)
       - HandleBossDefeat(3800800)
   ID: 13800800
+  Map: m38_00_00_00
   Comment: End Wolnir and warp away, killing skeletons. Also disable their generators in case several Wolnirs are back-to-back
   DebugInfo:
   - object 3801561 (catacombs o000371_7000)
@@ -8125,6 +8325,7 @@ EnemyEvents:
       - IfCharacterDeadalive(MAIN, 3800830, DeathState.Dead, ComparisonType.Equal, 1)
       - HandleBossDefeat(3800830)
   ID: 13800830
+  Map: m38_00_00_00
   Comment: ODK end
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -8152,6 +8353,7 @@ EnemyEvents:
     #- Label0()
     #- + SetCharacterInvincibility(X0_4*, Disabled)
   ID: 13804815
+  Map: m38_00_00_00
   Comment: Wake Wolnir skeleton up and spawn it relative to Wolnir dummypoly. Remove the warping and initialization parts
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -8201,6 +8403,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805240
+  Map: m38_00_00_00
   Comment: Set patrol for initially passive skeletons near top of stairs
   DebugInfo:
   - 3800302 (catacombs c1170_0002 - Carthus Curved Sword Skeleton)
@@ -8216,6 +8419,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805245
+  Map: m38_00_00_00
   Comment: Different patrol behaviors for skeletons in hallway parallel to second ball hall
   DebugInfo:
   - 3800311 (catacombs c1170_0011 - Carthus Curved Sword Skeleton)
@@ -8235,6 +8439,7 @@ EnemyEvents:
     Entity: 3800260
     Remove: RequestCharacterAICommand
   ID: 13805270
+  Map: m38_00_00_00
   Comment: Make second ball sorcerer skeleton run away if player gets close
   DebugInfo:
   - 3800260 (catacombs c1070_0060 - Skeleton)
@@ -8261,6 +8466,7 @@ EnemyEvents:
     Entity: 3800270
     Remove: RequestCharacterAICommand
   ID: 13805272
+  Map: m38_00_00_00
   Comment: Running away for first ball skeleton sorcerer
   DebugInfo:
   - 3800270 (catacombs c1070_0070 - Skeleton)
@@ -8306,6 +8512,7 @@ EnemyEvents:
     Entity: 3800200
     Remove: SetCharacterAIId
   ID: 13805280
+  Map: m38_00_00_00
   Comment: When the bridge is broken, replan AI of various skeletons in the post-gate area
   DebugInfo:
   - object 3801403 (catacombs o381015_7000)
@@ -8324,6 +8531,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805300
+  Map: m38_00_00_00
   Comment: Insta-kill skeletons when they fall into a region under the bridge
   DebugInfo:
   - 3800200 (catacombs c1070_0000 - Skeleton)
@@ -8396,6 +8604,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 13805340
+  Map: m38_00_00_00
   Comment: Fixed animation for ghru until player comes closeby
   DebugInfo:
   - 3800352 (catacombs c1211_0002 - Smouldering Ghru Grunt)
@@ -8434,6 +8643,7 @@ EnemyEvents:
   - Type: loc
     Remove: WaitFixedTimeSeconds
   ID: 13805350
+  Map: m38_00_00_00
   Comment: Clear fire speffect on flesh before it's up? (normally it lasts 0.4s)
   DebugInfo:
   - 3800427 (catacombs c2132_0007 - Smouldering Writhing Flesh)
@@ -8456,6 +8666,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805360
+  Map: m38_00_00_00
   Comment: Solaire backread management
   DebugInfo:
   - region 3802392 (領域_サンドワーム常時更新)
@@ -8474,6 +8685,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3800500
   ID: 13805361
+  Map: m38_00_00_00
   Comment: Apply some kind of AI command when Demon leaves area (goes up stairs?)
   DebugInfo:
   - 3800500 (catacombs c3060_0000 - Demon)
@@ -8489,6 +8701,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805366
+  Map: m38_00_00_00
   Comment: Sets up non-randomized cleric helpers and kills them when the controller dies (the two in the main hallway and one before the stairs)
   DebugInfo:
   - 3800342 (catacombs c3070_0002 - Demon Cleric)
@@ -8510,6 +8723,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805370
+  Map: m38_00_00_00
   Comment: Make a ghru grunt run around
   DebugInfo:
   - 3800352 (catacombs c1211_0002 - Smouldering Ghru Grunt)
@@ -8518,6 +8732,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805371
+  Map: m38_00_00_00
   Comment: Make the rats in the catacombs corner fast bois
   DebugInfo:
   - dummyenemy 3800480 (catacombs c2280_0000)
@@ -8537,6 +8752,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805372
+  Map: m38_00_00_00
   Comment: Make lake Tsorig run around
   DebugInfo:
   - 3800198 (catacombs c0000_0015 - Knight Slayer Tsorig)
@@ -8545,6 +8761,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805553
+  Map: m38_00_00_00
   Comment: First skeleton ball rolling and treasure, once sorcerer dies
   DebugInfo:
   - object 3801390 (catacombs o000499_0022)
@@ -8595,6 +8812,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805557
+  Map: m38_00_00_00
   Comment: Second skeleton ball rolling and treasure (and crab!!!!) once sorcerer dies
   DebugInfo:
   - object 3801391 (catacombs o000499_0023)
@@ -8673,6 +8891,7 @@ EnemyEvents:
       - SetCharacterAIState(3805800, Disabled)
       - SetCharacterAIState(3800800, Disabled)
   ID: 13805809
+  Map: m38_00_00_00
   Comment: Initialize Wolnir, though start is put in other event always
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -8831,6 +9050,7 @@ EnemyEvents:
     - SetSpEffect(3800800, 12254)
     - SetSpEffect(3800800, 12256)
   ID: 13805810
+  Map: m38_00_00_00
   Comment: Start Wolnir, first time. The damage effects are 10507 10508 12610 12611 12612 12617 12618 (maybe filter this based on IfDamageType)
   DebugInfo:
   - collision 3804810 (catacombs h020006)
@@ -8883,6 +9103,7 @@ EnemyEvents:
     DefeatFlag: 13800800
     MusicFlag: 13805802
   ID: 13805811
+  Map: m38_00_00_00
   Comment: Wolnir phase 2 music
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -8899,6 +9120,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3800800, 6950)
       Before: EndUnconditionally(EventEndType.End)
   ID: 13805812
+  Map: m38_00_00_00
   Comment: Complicated event that creates NPC parts on load-in depending on 13805813 slots 0 and 1 (if not already shattered), left and right bracelet
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -8926,6 +9148,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3800800, 6953)
       Before: EndUnconditionally(EventEndType.End)
   ID: 13804814
+  Map: m38_00_00_00
   Comment: Wolnir NPC part setup when 13805813 slot 1 gets set (note, event id out of order), setting up left double bracelet again
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -8977,6 +9200,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3800800, 6954)
       After: IncrementEventValue(13805816, 2, 3)
   ID: 13805813
+  Map: m38_00_00_00
   Comment: Wolnir bracelet breaking
   DebugInfo:
   - region 3802806 (領域_死霊の王 ボス部屋全域)
@@ -9036,6 +9260,7 @@ EnemyEvents:
     - Cmd: IfCharacterHasSpEffect(AND_03, 3800800, 6955, true, ComparisonType.Equal, 1)
       After: IfEventValue(AND_03, 13805816, 2, ComparisonType.Equal, 2)
   ID: 13805820
+  Map: m38_00_00_00
   Comment: Activate skeleton generators based on fight progression flag, on summoning, and turn on corresponding flag
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -9072,6 +9297,7 @@ EnemyEvents:
     Comment: Flag 13804813 is used by Lua and the rest are temporary, so make them global. Also, it's multichr only
     Entity: 3800800
   ID: 13805824
+  Map: m38_00_00_00
   Comment: Sets AI commands for Wolnir, evidently, once helpers are spawned and meet some drawgroup condition
   DebugInfo:
   - 3800800 (catacombs c5160_0000 - High Lord Wolnir)
@@ -9124,6 +9350,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Enabled, 3800830, 0, 903050)
       - SetNetworkUpdateRate(3800830, true, CharacterUpdateFrequency.AlwaysUpdate)
   ID: 13805840
+  Map: m38_00_00_00
   Comment: Start ODK, including a bunch of animations
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -9159,6 +9386,7 @@ EnemyEvents:
     DefeatFlag: 13800830
     MusicFlag: 13805832
   ID: 13805841
+  Map: m38_00_00_00
   Comment: ODK phase 2 music
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -9170,6 +9398,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3800830
   ID: 13805842
+  Map: m38_00_00_00
   Comment: Put ODK in certain pose if first encounter. Ignoring first encounter for now
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -9182,6 +9411,7 @@ EnemyEvents:
     Entity: 3800830
     DefeatFlag: 13800830
   ID: 13805843
+  Map: m38_00_00_00
   Comment: Make ODK collapse at 15% health
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -9197,6 +9427,7 @@ EnemyEvents:
     Entity: 3800830
     Remove: 13805830
   ID: 13805844
+  Map: m38_00_00_00
   Comment: ODK stagger loop. The defeat flag is not present anywhere else in emevd, so probably safe to ignore
   DebugInfo:
   - 3800830 (catacombs c3050_0000 - Old Demon King)
@@ -9212,6 +9443,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13805857
+  Map: m38_00_00_00
   Comment: ODK special fog gate entry event? But relatively standard in terms of boss logic
   DebugInfo:
   - object 3801830 (catacombs o000400_5000)
@@ -9261,6 +9493,7 @@ EnemyEvents:
     NewEvent:
     - InitializeCommonEvent(20005837, 13800830, 3800830, 1094713344, 5290, 5290, 13805835, 13805835)
   ID: 13805859
+  Map: m38_00_00_00
   Comment: ODK events
   DebugInfo:
   - object 3801830 (catacombs o000400_5000)
@@ -9282,6 +9515,7 @@ EnemyEvents:
   - Type: remove
     Entity: 3900254
   ID: 13900260
+  Map: m39_00_00_00
   Comment: Third door in dungeon main hallway, using inside/outside ObjAct flag. But anim doesn't exist so this seems to default anim
   DebugInfo:
   - 3900254 (dungeon c1220_0004 - Reanimated Corpse)
@@ -9297,6 +9531,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13900726
+  Map: m39_00_00_00
   Comment: Behavior for Siegward when Yhorm dies
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -9324,6 +9559,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905220
+  Map: m39_00_00_00
   Comment: Set speffect on invisible jailers when approaching them, and wake-up event not activated
   DebugInfo:
   - 3900225 (dungeon c2230_0011 - Jailer)
@@ -9353,6 +9589,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905225
+  Map: m39_00_00_00
   Comment: Wake up jailers, assuming invisible event activated, when damaged or going down hallway toward key
   DebugInfo:
   - 3900225 (dungeon c2230_0011 - Jailer)
@@ -9381,6 +9618,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905230
+  Map: m39_00_00_00
   Comment: After picking up certain items (screaming ones?), AI and patrol change for jailers on the ground level and two on the bridge
   DebugInfo:
   - 3900204 (dungeon c2230_0019 - Jailer)
@@ -9417,6 +9655,7 @@ EnemyEvents:
   - Type: loc
     Animation: pose 3900251 702 1702
   ID: 13905251
+  Map: m39_00_00_00
   Comment: When player enters cell in room after bonfire, wake up corpse
   DebugInfo:
   - 3900251 (dungeon c1220_0019 - Reanimated Corpse)
@@ -9445,6 +9684,7 @@ EnemyEvents:
     Comment: Not all of these are passive, though some are from other events
     Animation: pose X0 X4 X8
   ID: 13905255
+  Map: m39_00_00_00
   Comment: For all of the corpses in the cell opposite to the entryway hallway (by the jailer at the end of the hallway), wake them up if various pots/buckets outside are destroyed
   DebugInfo:
   - 3900257 (dungeon c1220_0001 - Reanimated Corpse)
@@ -9499,6 +9739,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905320
+  Map: m39_00_00_00
   Comment: Wake up basilisks when the player picks up Old Cell Key and enters the chest area (from base of stairs). There's also a "jump forward" common event but unclear if it activates
   DebugInfo:
   - region 3902320 (【起動領域】バジリスク_下水)
@@ -9550,6 +9791,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3900360, 4050)
       After: SetSpEffect(3900360, 640)
   ID: 13905360
+  Map: m39_00_00_00
   Comment: Gargoyle jumping in when player approaches from dungeon
   DebugInfo:
   - 3900360 (dungeon c2191_0004 - Profaned Capital Gargoyle)
@@ -9596,6 +9838,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3900361, 4050)
       After: SetSpEffect(3900361, 640)
   ID: 13905361
+  Map: m39_00_00_00
   Comment: Gargoyle jumping in on way to toxic swamp
   DebugInfo:
   - 3900361 (dungeon c2191_0001 - Profaned Capital Gargoyle)
@@ -9643,6 +9886,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3900363, 4050)
       After: SetSpEffect(3900363, 640)
   ID: 13905363
+  Map: m39_00_00_00
   Comment: Gargoyle jumping in on left side room of Yhorm building
   DebugInfo:
   - 3900363 (dungeon c2191_0006 - Profaned Capital Gargoyle)
@@ -9701,6 +9945,7 @@ EnemyEvents:
     - Cmd: SetSpEffect(3900364, 4050)
       After: SetSpEffect(3900364, 640)
   ID: 13905364
+  Map: m39_00_00_00
   Comment: Gargoyle jumping in on right side room of Yhorm building
   DebugInfo:
   - 3900364 (dungeon c2191_0007 - Profaned Capital Gargoyle)
@@ -9736,6 +9981,7 @@ EnemyEvents:
   - Type: loc
     Animation: pose 3900380 30000 20000
   ID: 13905380
+  Map: m39_00_00_00
   Comment: Waking up the giant when you traverse beneath him or damage him
   DebugInfo:
   - 3900380 (dungeon c3021_0000 - Giant Slave)
@@ -9757,6 +10003,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905381
+  Map: m39_00_00_00
   Comment: Update rate management for giant
   DebugInfo:
   - 3900380 (dungeon c3021_0000 - Giant Slave)
@@ -9774,6 +10021,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 13905475
+  Map: m39_00_00_00
   Comment: Disabling Profaned Flame fire when the jailer behind it wakes up or leaves their home
   DebugInfo:
   - 3900223 (dungeon c2230_0036 - Jailer)
@@ -9821,6 +10069,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Enabled, 3900800, 0, 905260)
       - SetEventFlag(13905819, ON)  # Extra, Storm Ruler award
   ID: 13905810
+  Map: m39_00_00_00
   Comment: Start Yhorm, with optional complex Siegward variant if 1388 and 1395. Merge the variants here with goto spaghetti, to only use the second. (position edited elsewhere)
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -9909,6 +10158,7 @@ EnemyEvents:
       - HandleBossDefeatAndDisplayBanner(3900800, TextBannerType.LordofCinderFallen)
       - ChangeCamera(-1, -1)
   ID: 13905811
+  Map: m39_00_00_00
   Comment: Yhorm defeat
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -9930,6 +10180,7 @@ EnemyEvents:
     DefeatFlag: 13900800
     MusicFlag: 13905815
   ID: 13905815
+  Map: m39_00_00_00
   Comment: Yhorm phase 2 music
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -9950,6 +10201,7 @@ EnemyEvents:
     NewEvent:
     - InitializeCommonEvent(20005837, 13900800, 3900800, 1088421888, 5260, 5260, 13905805, 13905805)
   ID: 13905820
+  Map: m39_00_00_00
   Comment: Yhorm events
   DebugInfo:
   - object 3901800 (dungeon o000401_0000)
@@ -9969,6 +10221,7 @@ EnemyEvents:
     Entity: 3900800
     DefeatFlag: 13900800
   ID: 13905830
+  Map: m39_00_00_00
   Comment: Yhorm NPC part stagger loops
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -9989,6 +10242,7 @@ EnemyEvents:
     Entity: 3900800
     DefeatFlag: 13900800
   ID: 13905835
+  Map: m39_00_00_00
   Comment: Another Yhorm stagger loop
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -10011,6 +10265,7 @@ EnemyEvents:
     - Cmd: IfCharacterAIState(MAIN, 3900800, AIStateType.Combat, ComparisonType.Equal, 1)
       Before: SetSpEffect(10000, 4510)
   ID: 13905840
+  Map: m39_00_00_00
   Comment: Supercharging Storm Ruler, using Yhorm AI state. This is not loc so vanilla Siegward becomes a bit useless
   DebugInfo:
   - region 3902800 (【ボス】ボスエリア)
@@ -10028,6 +10283,7 @@ EnemyEvents:
     Entity: 3900800
     DefeatFlag: 13900800
   ID: 13905850
+  Map: m39_00_00_00
   Comment: Yhorm phase 2 transition?
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -10050,6 +10306,7 @@ EnemyEvents:
     Entity: 3900800
     DefeatFlag: 13900800
   ID: 13905860
+  Map: m39_00_00_00
   Comment: Lots of Yhorm speffect management. The flags here are based on NumberOfCoopClients from event 13905861, so, meh
   DebugInfo:
   - 3900800 (dungeon c5260_0000 - Yhorm the Giant)
@@ -10148,6 +10405,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14000859
+  Map: m40_00_00_00
   Comment: Champion Gundyr events
   DebugInfo:
   - object 4001800 (firelink o000401_1000)
@@ -10168,6 +10426,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14005300
+  Map: m40_00_00_00
   Comment: Rehome grave warden from left side path to near ashen estus location when it notices player
   DebugInfo:
   - 4000330 (firelink c1250_0000 - Grave Warden)
@@ -10182,6 +10441,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14005560
+  Map: m40_00_00_00
   Comment: Long Hawkwood event, disable the hound when he stands off by the gravestone
   DebugInfo:
   - dummyenemy 4000762 (firelink c0100_0001)
@@ -10302,6 +10562,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(4)
       - HandleBossDefeat(4000800)
   ID: 14005800
+  Map: m40_00_00_00
   Comment: End Iudex Gundyr
   DebugInfo:
   - 4000800 (firelink c5110_0000 - Iudex Gundyr)
@@ -10357,6 +10618,7 @@ EnemyEvents:
     - SetLockOnPoint(4000800, 221, Disabled)
     - ChangeCharacterHitmask(4000800, 0, ON)
   ID: 14005810
+  Map: m40_00_00_00
   Comment: Start Iudex Gundyr, waiting for either forced animation or repeat fight (14000802); use second version only
   DebugInfo:
   - 4000800 (firelink c5110_0000 - Iudex Gundyr)
@@ -10401,6 +10663,7 @@ EnemyEvents:
   - Type: remove
     Entity: 4000800
   ID: 14005811
+  Map: m40_00_00_00
   Comment: Iudex Gundyr sword pulling, or second-time initialization
   DebugInfo:
   - 4000800 (firelink c5110_0000 - Iudex Gundyr)
@@ -10434,6 +10697,7 @@ EnemyEvents:
     Add:
     - Cmd: SetSpEffect(4000800, 6950)
   ID: 14005812
+  Map: m40_00_00_00
   Comment: Iudex transformation, add pus lock-on point, and set music flag
   DebugInfo:
   - 4000800 (firelink c5110_0000 - Iudex Gundyr)
@@ -10450,6 +10714,7 @@ EnemyEvents:
     StartFlag: 14005805
     Replace: 14005802 -> IfCharacterHasSpEffect(AND_01, 4000800, 6950, true, ComparisonType.Equal, 1)
   ID: 14005813
+  Map: m40_00_00_00
   Comment: Iudex Gundyr phase 2 camera and end
   DebugInfo:
   - 4000800 (firelink c5110_0000 - Iudex Gundyr)
@@ -10466,6 +10731,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14005820
+  Map: m40_00_00_00
   Comment: Iudex Gundyr events
   DebugInfo:
   - object 4001800 (firelink o000401_1000)
@@ -10484,6 +10750,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14005829
+  Map: m41_00_00_00
   Comment: Cinder events (in kiln file, actually)
   DebugInfo:
   - object 4101800 (kiln o000402_3000)
@@ -10513,6 +10780,7 @@ EnemyEvents:
       - HandleBossDefeat(4000830)
       - ChangeCamera(-1, -1)
   ID: 14005830
+  Map: m40_00_00_00
   Comment: End Champion Gundyr
   DebugInfo:
   - 4000830 (firelink c5110_0001 - Champion Gundyr)
@@ -10564,6 +10832,7 @@ EnemyEvents:
     - SetLockOnPoint(4000830, 221, Disabled)
     - ChangeCharacterHitmask(4000830, 0, ON)
   ID: 14005840
+  Map: m40_00_00_00
   Comment: Start Champion Gundyr, with region check if first time
   DebugInfo:
   - 4000830 (firelink c5110_0001 - Champion Gundyr)
@@ -10603,6 +10872,7 @@ EnemyEvents:
     DefeatFlag: 14000830
     MusicFlag: 14005832
   ID: 14005841
+  Map: m40_00_00_00
   Comment: Champion Gundyr phase 2 music
   DebugInfo:
   - 4000830 (firelink c5110_0001 - Champion Gundyr)
@@ -10642,6 +10912,7 @@ EnemyEvents:
       - IfCharacterDeadalive(MAIN, 4100800, DeathState.Dead, ComparisonType.Equal, 1)
       - HandleBossDefeatAndDisplayBanner(4100800, TextBannerType.LordofCinderFallen)
   ID: 14100800
+  Map: m41_00_00_00
   Comment: Cinder end
   DebugInfo:
   - 4100800 (kiln c5280_0000 - Lords of Cinder)
@@ -10690,6 +10961,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Enabled, 4100800, 0, 905280)
       - SetNetworkUpdateRate(4100800, true, CharacterUpdateFrequency.AlwaysUpdate)
   ID: 14105810
+  Map: m41_00_00_00
   Comment: Start Cinder, based on radius the first time (this is very janky...), fog gate the second time
   DebugInfo:
   - 4100800 (kiln c5280_0000 - Lords of Cinder)
@@ -10728,6 +11000,7 @@ EnemyEvents:
     MusicFlag: 14105802
     Remove: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 14105802)
   ID: 14105811
+  Map: m41_00_00_00
   Comment: Cinder phase transition, and music flag (sets their immortality also)
   DebugInfo:
   - 4100800 (kiln c5280_0000 - Lords of Cinder)
@@ -10748,6 +11021,7 @@ EnemyEvents:
     Entity: 4100800
     Remove: 4100800
   ID: 14105812
+  Map: m41_00_00_00
   Comment: On first encounter, pose Cinder in a certain way, and also set First Flame object animation (with sword below ground)
   DebugInfo:
   - 4100800 (kiln c5280_0000 - Lords of Cinder)
@@ -10764,6 +11038,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14500702
+  Map: m45_00_00_00
   Comment: Switching between nice and naughty Vilhelm, activating him on entering the mountain pass building
   DebugInfo:
   - region 4502700 (【会話】葬送騎士 会話開始領域)
@@ -10817,6 +11092,7 @@ EnemyEvents:
       - SetCharacterAnimationState(4500800, Disabled)
       - HandleBossDefeatAndDisplayBanner(4500800, TextBannerType.HeirofFireDestroyed)
   ID: 14500800
+  Map: m45_00_00_00
   Comment: End Friede
   DebugInfo:
   - 4500800 (ariandel c6020_0000 - Sister Friede)
@@ -10854,6 +11130,7 @@ EnemyEvents:
       - IfConditionGroup(MAIN, PASS, AND_02)
       - HandleBossDefeat(4500860)
   ID: 14500860
+  Map: m45_00_00_00
   Comment: End Gravetender
   DebugInfo:
   - 4500860 (ariandel c0000_0009 - Champion's Gravetender)
@@ -10877,6 +11154,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505180
+  Map: m45_00_00_00
   Comment: Dunnel initial state
   DebugInfo:
   - 4500176 (ariandel c0000_0010 - Livid Pyromancer Dunnel)
@@ -10887,6 +11165,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505182
+  Map: m45_00_00_00
   Comment: Fake invasion by mad dark spirit Dunnel
   DebugInfo:
   - 4500176 (ariandel c0000_0010 - Livid Pyromancer Dunnel)
@@ -10915,6 +11194,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505183
+  Map: m45_00_00_00
   Comment: Dunnel defeat and awarding his pyromancy
   DebugInfo:
   - 4500176 (ariandel c0000_0010 - Livid Pyromancer Dunnel)
@@ -10940,6 +11220,7 @@ EnemyEvents:
     Replace: 0.6 -> 0
     Remove: ForceAnimationPlayback; RequestCharacterAICommand
   ID: 14505200
+  Map: m45_00_00_00
   Comment: Greatwolf 1 end, if not defeated (14500200) or boss defeated (14500860). Disappear (anim 3025) if <=60% HP, or normal disappear if fully spawned in and wolf not in play area OR player not in play area and wolf jumped down
   DebugInfo:
   - region 4502200 (敵退場 狼（王） B退場_ホスト)
@@ -10990,6 +11271,7 @@ EnemyEvents:
     Entity: 4500201
     Remove: SetCharacterImmortality; ForceAnimationPlayback
   ID: 14505201
+  Map: m45_00_00_00
   Comment: Enable/disable state for first Greatwolf, including howling (20007) and making it spawn in (20002). Require neither defeated, wolf 2 not spawned (or gravetender spawned)
   DebugInfo:
   - 4500201 (ariandel c6030_0001 - Greatwolf)
@@ -11065,6 +11347,7 @@ EnemyEvents:
     Entity: 4500201
     Remove: ForceAnimationPlayback
   ID: 14505202
+  Map: m45_00_00_00
   Comment: First Greatwolf encounter, including it jumping down (20005), upon previous event completing + player in area or wolf damaged
   DebugInfo:
   - 4500201 (ariandel c6030_0001 - Greatwolf)
@@ -11106,6 +11389,7 @@ EnemyEvents:
     - ForceCharacterDeath(4500201, false)
     - ChangeCharacterEnableState(4500201, Disabled)
   ID: 14505203
+  Map: m45_00_00_00
   Comment: Cases where Greatwolf 1 is disabled - howling and disappear animation on event request 10 -> message 100, or dead
   DebugInfo:
   - 4500201 (ariandel c6030_0001 - Greatwolf)
@@ -11135,6 +11419,7 @@ EnemyEvents:
     Entity: 4500201
     Remove: ForceAnimationPlayback
   ID: 14505204
+  Map: m45_00_00_00
   Comment: Howling when 2 of 6 wolves remain, leading to speffects on other wolves
   DebugInfo:
   - group 4505212 [4500212 (ariandel c6040_0002 - Wolf), 4500240 (ariandel c6050_0000 - Wolf), 4500241 (ariandel c6050_0001 - Wolf), 4500242 (ariandel c6050_0002 - Wolf), 4500243 (ariandel c6050_0003 - Wolf), 4500244 (ariandel c6050_0004 - Wolf)]
@@ -11181,6 +11466,7 @@ EnemyEvents:
     Replace: 0.6 -> 0
     Remove: ForceAnimationPlayback; RequestCharacterAICommand
   ID: 14505210
+  Map: m45_00_00_00
   Comment: Greatwolf 2 end, if not defeated (14500210) or boss defeated (14500860). Disappear (anim 3025) if <=60% HP, or normal disappear if fully spawned in and wolf not in play area OR player not in play area
   DebugInfo:
   - region 4502210 (敵退場 狼（王） C退場_ホスト1)
@@ -11226,6 +11512,7 @@ EnemyEvents:
     Entity: 4500202
     Remove: SetCharacterImmortality; ForceAnimationPlayback
   ID: 14505211
+  Map: m45_00_00_00
   Comment: More Greatwolf animations. When the player is climbing up the hill after tower, do a howl and jump down animation
   DebugInfo:
   - 4500202 (ariandel c6030_0002 - Greatwolf)
@@ -11288,6 +11575,7 @@ EnemyEvents:
     - ForceCharacterDeath(4500202, false)
     - ChangeCharacterEnableState(4500202, Disabled)
   ID: 14505213
+  Map: m45_00_00_00
   Comment: Disable second greatwolf, when event request 10 -> message 100
   DebugInfo:
   - 4500202 (ariandel c6030_0002 - Greatwolf)
@@ -11312,6 +11600,7 @@ EnemyEvents:
 - Template:
   - Type: chrarg
   ID: 14505240
+  Map: m45_00_00_00
   Comment: AI speffect on some random wolves after first dropdown (makes it either go left or right within AI act)
   DebugInfo:
   - 4500212 (ariandel c6040_0002 - Wolf)
@@ -11332,6 +11621,7 @@ EnemyEvents:
     - SetCharacterAIState(X0_4, Enabled)
     - SetCharacterEventTarget(X0_4, 10000)
   ID: 14505260
+  Map: m45_00_00_00
   Comment: When player starts climbing up post-Millwood hill and Greatwolf howls, make mountain-top wolves jump down
   DebugInfo:
   - region 4502211 (敵起動 狼（王） C登場)
@@ -11398,6 +11688,7 @@ EnemyEvents:
     Entity: 4500247
     Remove: SetCharacterGravity; SetCharacterMaphit; ForceAnimationPlayback; 5450
   ID: 14505270
+  Map: m45_00_00_00
   Comment: Make wolves jump down into wolf area upon speffect 13020 (applied in other event)
   DebugInfo:
   - 4500247 (ariandel c6050_0007 - Wolf)
@@ -11461,6 +11752,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505280
+  Map: m45_00_00_00
   Comment: More wolf speffect application, used by wakeup scripts
   DebugInfo:
   - 4500212 (ariandel c6040_0002 - Wolf)
@@ -11481,6 +11773,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505281
+  Map: m45_00_00_00
   Comment: More wolf speffect application, upon a certain target wolf getting sp 13029
   DebugInfo:
   - 4500210 (ariandel c6040_0000 - Wolf)
@@ -11514,6 +11807,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505282
+  Map: m45_00_00_00
   Comment: Wolf speffect application upon entering an area shortly after dropdown
   DebugInfo:
   - 4500242 (ariandel c6050_0002 - Wolf)
@@ -11537,6 +11831,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505290
+  Map: m45_00_00_00
   Comment: Wolf speffect application upon other speffect
   DebugInfo:
   - 4500242 (ariandel c6050_0002 - Wolf)
@@ -11560,6 +11855,7 @@ EnemyEvents:
   - Type: remove
     Entity: 4500860
   ID: 14505298
+  Map: m45_00_00_00
   Comment: Disabling gravetender's small wolves when coming from above
   DebugInfo:
   - 4500263 (ariandel c6050_0023 - Wolf)
@@ -11584,6 +11880,7 @@ EnemyEvents:
     Entity: 4500350
     Remove: RequestCharacterAICommand
   ID: 14505300
+  Map: m45_00_00_00
   Comment: AI management for Pontiff tree woman
   DebugInfo:
   - 4500350 (ariandel c6060_0050 - Tree Woman)
@@ -11610,6 +11907,7 @@ EnemyEvents:
   - Type: chr
     Entity: 4500570
   ID: 14505360
+  Map: m45_00_00_00
   Comment: Just setting an AI speffect on one of the followers in the starting area, nearby the snow edge
   DebugInfo:
   - 4500570 (ariandel c6000_0050 - Farron Follower)
@@ -11622,6 +11920,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 14505370
+  Map: m45_00_00_00
   Comment: Wakeup for one of the followers on the way to the snow edge, near the looparound drop point. It does disable their gravity which seems unnecessary
   DebugInfo:
   - 4500576 (ariandel c6000_0056 - Farron Follower)
@@ -11678,6 +11977,7 @@ EnemyEvents:
     - event dist30 4502476
     - event dist5 4502475
   ID: 14505380
+  Map: m45_00_00_00
   Comment: While Millwood knight alive and player is not in cave (4502475), set speffect 4680 (used in 610000_PowerKnight_MagicAxe), and clear it when they enter cave or get too far away
   DebugInfo:
   - 4500500 (ariandel c6100_0000 - Millwood Knight)
@@ -11714,6 +12014,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505382
+  Map: m45_00_00_00
   Comment: Make cave-guarding knight target player when they enter the overall area (I guess to shoot bows?)
   DebugInfo:
   - region 4502476 (敵起動 雪山 パワー騎士06 アースクエイク03)
@@ -11737,6 +12038,7 @@ EnemyEvents:
   - Type: locarg
     Animation: gravity X0 X4 X8
   ID: 14505400
+  Map: m45_00_00_00
   Comment: Perched corvian knights dropping down
   DebugInfo:
   - 4500401 (ariandel c6070_0001 - Corvian Knight)
@@ -11785,6 +12087,7 @@ EnemyEvents:
     Entity: 4500403
     Remove: RequestCharacterAICommand
   ID: 14505410
+  Map: m45_00_00_00
   Comment: Corvian knight-on-settler violence?
   DebugInfo:
   - region 4502423 (敵起動 廃村 カラス村人 逃亡１)
@@ -11811,6 +12114,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505411
+  Map: m45_00_00_00
   Comment: Once two settlers die, remove speffect from village knight
   DebugInfo:
   - group 4505483 [4500483 (ariandel c6080_0073 - Corvian Settler), 4500484 (ariandel c6080_0074 - Corvian Settler), 4500485 (ariandel c6080_0075 - Corvian Settler)]
@@ -11825,6 +12129,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505412
+  Map: m45_00_00_00
   Comment: Village knight update rate management
   DebugInfo:
   - region 4502423 (敵起動 廃村 カラス村人 逃亡１)
@@ -11849,6 +12154,7 @@ EnemyEvents:
   - Type: remove
     Entity: 4500455
   ID: 14505420
+  Map: m45_00_00_00
   Comment: Playing animations for settlers (bowing on the ground, then getting up), except it's only two settlers near the shortcut gate?
   DebugInfo:
   - 4500455 (ariandel c6080_0045 - Corvian Settler)
@@ -11892,6 +12198,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505430
+  Map: m45_00_00_00
   Comment: Setting various event points for settlers when the knight is active and at least one of them has died
   DebugInfo:
   - dummyenemy 4500480 (ariandel c6080_0070)
@@ -11938,6 +12245,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 14505470
+  Map: m45_00_00_00
   Comment: Settlers kneeling on roofs, and running off and tackling player (20000) upon entering region below them
   DebugInfo:
   - 4500460 (ariandel c6080_0050 - Corvian Settler)
@@ -11988,6 +12296,7 @@ EnemyEvents:
   - Type: remove
     Entity: 4500672
   ID: 14505490
+  Map: m45_00_00_00
   Comment: Making a crab spawn with player region entry/exit
   DebugInfo:
   - region 4502490 (敵起動 死臭蟹　谷底A)
@@ -12045,6 +12354,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505495
+  Map: m45_00_00_00
   Comment: Item lot when two crabs are killed
   DebugInfo:
   - 4500670 (ariandel c6130_0000 - Adriandel Greater Crab)
@@ -12073,6 +12383,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505670
+  Map: m45_00_00_00
   Comment: Ladder drop when Pontiff tree killed
   DebugInfo:
   - 4500350 (ariandel c6060_0050 - Tree Woman)
@@ -12100,6 +12411,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505700
+  Map: m45_00_00_00
   Comment: Vilhelm quest enable/disable state
   DebugInfo:
   - 4500700 (ariandel c0000_0011 - Sir Vilhelm)
@@ -12157,6 +12469,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505740
+  Map: m45_00_00_00
   Comment: Management of chair Friede, and talk setup for boss
   DebugInfo:
   - 4500710 (ariandel c6020_0002 - Sister Friede)
@@ -12230,6 +12543,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505750
+  Map: m45_00_00_00
   Comment: X0 is friendly Ariandel, X4 is boss. This is just talk setup for them, though.
   DebugInfo:
   - 4500803 (ariandel c6010_0001 - Father Ariandel)
@@ -12345,6 +12659,7 @@ EnemyEvents:
       - SetCharacterAIState(4500802, Disabled)
       End: Label1()
   ID: 14505810
+  Map: m45_00_00_00
   Comment: Start Friede
   DebugInfo:
   - group 4505800 [4500802 (ariandel c6010_0000 - Father Ariandel), 4500803 (ariandel c6010_0001 - Father Ariandel), 4500800 (ariandel c6020_0000 - Sister Friede), 4500801 (ariandel c6020_0001 - Sister Friede)]
@@ -12520,6 +12835,7 @@ EnemyEvents:
     - SetCharacterEventTarget(4500800, 4500802)
     - CreateReferredDamagePair(4500800, 4500802)
   ID: 14505811
+  Map: m45_00_00_00
   Comment: Friede phase 2 transition
   DebugInfo:
   - 4500801 (ariandel c6020_0001 - Sister Friede)
@@ -12620,6 +12936,7 @@ EnemyEvents:
     Add:
     - Cmd: SetSpEffect(4500800, 6950)
   ID: 14505812
+  Map: m45_00_00_00
   Comment: Friede phase 3. AwardItemLot is moved to phase 3 end
   DebugInfo:
   - 4500802 (ariandel c6010_0000 - Father Ariandel)
@@ -12660,6 +12977,7 @@ EnemyEvents:
     - Cmd: IfCharacterHasSpEffect(AND_01, 4500800, 6950, true, ComparisonType.Equal, 1)
       Before: IfConditionGroup(MAIN, PASS, AND_01)
   ID: 14505813
+  Map: m45_00_00_00
   Comment: Friede phase 2 to 3 resurrection. Make edits to avoid Friedes from interfering with each other
   DebugInfo:
   - 4500800 (ariandel c6020_0000 - Sister Friede)
@@ -12691,6 +13009,7 @@ EnemyEvents:
     DefeatFlag: 14500800
     StartFlag: 14505802
   ID: 14505820
+  Map: m45_00_00_00
   Comment: Camera management for Ariandel attacks
   DebugInfo:
   - 4500802 (ariandel c6010_0000 - Father Ariandel)
@@ -12739,6 +13058,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505829
+  Map: m45_00_00_00
   Comment: Friede events
   DebugInfo:
   - object 4501800 (ariandel o000401_8000)
@@ -12760,6 +13080,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505832
+  Map: m45_00_00_00
   Comment: Delayed Gael summoning for the fight, with chr-specific speffects evidently
   DebugInfo:
   - 4500170 (ariandel c0000_0007 - Slave Knight Gael)
@@ -12824,6 +13145,7 @@ EnemyEvents:
       - DisplayDecoratedBossHealthBar(Enabled, 4500860, 0, 30000, 3)
       - RotateCharacter(4500860, 10000, -1, false)
   ID: 14505870
+  Map: m45_00_00_00
   Comment: Start Gravetender. Wolf wakeup is managed by common_func, TODO we may need to move it here manually?
   DebugInfo:
   - 4500860 (ariandel c0000_0009 - Champion's Gravetender)
@@ -12878,6 +13200,7 @@ EnemyEvents:
     - Cmd: SetCharacterAnimationState(4500861, Enabled)
       After: ChangeCharacterEnableState(4500861, Enabled)
   ID: 14505871
+  Map: m45_00_00_00
   Comment: Greatwolf coming in at 45% health, sets phase 2 music also (animation is root motion so... no)
   DebugInfo:
   - 4500861 (ariandel c6030_0004 - Greatwolf)
@@ -12927,6 +13250,7 @@ EnemyEvents:
     Entity: 4500860
     DefeatFlag: 14500860
   ID: 14505872
+  Map: m45_00_00_00
   Comment: Greatwolf speffect when gravetender dies
   DebugInfo:
   - 4500860 (ariandel c0000_0009 - Champion's Gravetender)
@@ -12940,6 +13264,7 @@ EnemyEvents:
     Entity: 4500860
     DefeatFlag: 14500860
   ID: 14505873
+  Map: m45_00_00_00
   Comment: Gravetender speffect when greatwolf dies
   DebugInfo:
   - 4500861 (ariandel c6030_0004 - Greatwolf)
@@ -12953,6 +13278,7 @@ EnemyEvents:
     Entity: 4500860
     DefeatFlag: 14500860
   ID: 14505874
+  Map: m45_00_00_00
   Comment: Greatwolf to gravetender one-time speffect interaction
   DebugInfo:
   - 4500861 (ariandel c6030_0004 - Greatwolf)
@@ -12979,6 +13305,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 14505889
+  Map: m45_00_00_00
   Comment: Gravetender events
   DebugInfo:
   - object 4501860 (ariandel o000402_9500)
@@ -13026,6 +13353,7 @@ EnemyEvents:
     - Cmd: IfEntityInoutsideRadiusOfEntity(OR_01, InsideOutsideState.Inside, 10000, X0_4, 20, 1)
       Before: IfConditionGroup(MAIN, PASS, OR_01)
   ID: 15005200
+  Map: m50_00_00_00
   Comment: Angel initialization
   DebugInfo:
   - 5000200 (dregheap c6250_0000 - Angel)
@@ -13054,6 +13382,7 @@ EnemyEvents:
     Regions:
     - arg chrgenangel 5004200 5004201 5004202
   ID: 15005210
+  Map: m50_00_00_00
   Comment: Angel spawning in, invoked from animation 20000 in pilgrim
   DebugInfo:
   - 5000210 (dregheap c6240_0000 - Angel Pilgrim)
@@ -13083,6 +13412,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005220
+  Map: m50_00_00_00
   Comment: Respawns angels after they die
   DebugInfo:
   - 5000200 (dregheap c6250_0000 - Angel)
@@ -13118,6 +13448,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5000201
   ID: 15005240
+  Map: m50_00_00_00
   Comment: Swamp angel targeting player when they enter the cave
   DebugInfo:
   - 5000201 (dregheap c6250_0001 - Angel)
@@ -13141,6 +13472,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005250
+  Map: m50_00_00_00
   Comment: Kills angels when the pilgrims die
   DebugInfo:
   - 5000210 (dregheap c6240_0000 - Angel Pilgrim)
@@ -13160,6 +13492,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5000200
   ID: 15005260
+  Map: m50_00_00_00
   Comment: Manages some speffect on thrall angel when player enters swamp or post-Zoey branches
   DebugInfo:
   - region 5002202 (領域：触の蝶A　出現_毒沼全域)
@@ -13184,6 +13517,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5000200
   ID: 15005261
+  Map: m50_00_00_00
   Comment: First angel targeting thrall when player approaches
   DebugInfo:
   - 5000287 (dregheap c1201_0017 - Dreg Heap Hollow Slave)
@@ -13213,6 +13547,7 @@ EnemyEvents:
     - Cmd: IfEntityInoutsideRadiusOfEntity(OR_02, InsideOutsideState.Inside, 10000, 5000212, 20, 1)
       Before: IfConditionGroup(AND_01, PASS, OR_02)
   ID: 15005265
+  Map: m50_00_00_00
   Comment: Summoning angel after Grand Archives ruins. Try radius 20 for now?
   DebugInfo:
   - 5000212 (dregheap c6240_0002 - Angel Pilgrim)
@@ -13260,6 +13595,7 @@ EnemyEvents:
     - Cmd: IfEntityInoutsideRadiusOfEntity(OR_02, InsideOutsideState.Inside, 10000, 5000211, 20, 1)
       Before: IfConditionGroup(AND_01, PASS, OR_02)
   ID: 15005266
+  Map: m50_00_00_00
   Comment: Summoning swamp angel
   DebugInfo:
   - 5000211 (dregheap c6240_0001 - Angel Pilgrim)
@@ -13301,6 +13637,7 @@ EnemyEvents:
 - Template:
   - Type: chrarg
   ID: 15005270
+  Map: m50_00_00_00
   Comment: Setting angels network update authority
   DebugInfo:
   - 5000200 (dregheap c6250_0000 - Angel)
@@ -13322,6 +13659,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005280
+  Map: m50_00_00_00
   Comment: Some different spawn in animations for swamp angel, though it already has a spawn-in event
   DebugInfo:
   - 5000211 (dregheap c6240_0001 - Angel Pilgrim)
@@ -13352,6 +13690,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005285
+  Map: m50_00_00_00
   Comment: Death flags for angels
   DebugInfo:
   - 5000200 (dregheap c6250_0000 - Angel)
@@ -13377,6 +13716,7 @@ EnemyEvents:
 - Template:
   - Type: chrarg
   ID: 15005290
+  Map: m50_00_00_00
   Comment: Angel speffect AI interaction
   DebugInfo:
   - 5000200 (dregheap c6250_0000 - Angel)
@@ -13393,6 +13733,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005310
+  Map: m50_00_00_00
   Comment: Setting speffect on a summoner when a murkman dies. Some AI manipulation maybe
   DebugInfo:
   - 5000335 (dregheap c6230_0035 - Murkman Summoner)
@@ -13422,6 +13763,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005340
+  Map: m50_00_00_00
   Comment: Disable the sprite if the murkman is dead, enable the sprite and disable the murkman when the murkman gets speffect 16247
   DebugInfo:
   - 5000316 (dregheap c6230_0016 - Murkman Summoner)
@@ -13492,6 +13834,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005360
+  Map: m50_00_00_00
   Comment: Similar replace and warp for these murkmen, but warp back at the end, and reset
   DebugInfo:
   - region 5002390 (イベント：敵ジェネ ワープ)
@@ -13527,6 +13870,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15005365
+  Map: m50_00_00_00
   Comment: Manage death for special sprites, loop
   DebugInfo:
   - 5000520 (dregheap c6232_0020 - Humanity Sprite)
@@ -13547,6 +13891,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005390
+  Map: m50_00_00_00
   Comment: If summoner X0 (in room before FAP dropdown, and war banner area) is not dead and player in region X4, activate generator X8 (it generates murkman summoners without any scripting)
   DebugInfo:
   - 5000324 (dregheap c6230_0024 - Murkman Summoner)
@@ -13596,6 +13941,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005400
+  Map: m50_00_00_00
   Comment: Regeneration for these murkman/sprites when they die (sprite generators are deleted, though)
   DebugInfo:
   - 5000335 (dregheap c6230_0035 - Murkman Summoner)
@@ -13642,6 +13988,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 15005410
+  Map: m50_00_00_00
   Comment: Wakeup for summoner after lothric knight building
   DebugInfo:
   - 5000319 (dregheap c6230_0019 - Murkman Summoner)
@@ -13675,6 +14022,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005440
+  Map: m50_00_00_00
   Comment: When either thrall is damaged by the angel, set speffect 5000, or else don't if they enter shelter area (this does an area check for an enemy??)
   DebugInfo:
   - 5000288 (dregheap c1201_0018 - Dreg Heap Hollow Slave)
@@ -13700,6 +14048,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005444
+  Map: m50_00_00_00
   Comment: Disable different thralls based on whether Zoey is dead or not
   DebugInfo:
   - 5000290 (dregheap c1201_0020 - Dreg Heap Hollow Slave)
@@ -13736,6 +14085,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005447
+  Map: m50_00_00_00
   Comment: Set speffect on enemy based on Zoey location, but it's dummied out
   DebugInfo:
   - dummyenemy 5000272 (dregheap c1201_0002)
@@ -13752,6 +14102,7 @@ EnemyEvents:
   - Type: locarg
     Animation: gravity X0 X4 X8
   ID: 15005448
+  Map: m50_00_00_00
   Comment: Initial dropdown animation for thralls by the shed near the angel
   DebugInfo:
   - 5000273 (dregheap c1201_0003 - Dreg Heap Hollow Slave)
@@ -13803,6 +14154,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 15005460
+  Map: m50_00_00_00
   Comment: Wakeup animations for the lothric knights at the start
   DebugInfo:
   - 5000223 (dregheap c1283_0003 - Dreg Heap Lothric Knight)
@@ -13848,6 +14200,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5000236
   ID: 15005470
+  Map: m50_00_00_00
   Comment: Make first harald knight jump down when player goes up the stairs but still far away enough (TODO verify)
   DebugInfo:
   - 5000236 (dregheap c6320_0006 - Harald Legion Knight)
@@ -13879,6 +14232,7 @@ EnemyEvents:
     - Cmd: GotoUnconditionally(Label.LABEL0)
       Before: start
   ID: 15005480
+  Map: m50_00_00_00
   Comment: Some kind of dummy that helps Zoey, as her event flag guards it. (thrall effect is always skipped)
   DebugInfo:
   - 5000190 (dregheap c0100_0000 - Dummy)
@@ -13918,6 +14272,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005701
+  Map: m50_00_00_00
   Comment: Disable enemy and treasure if Patches fetches slab for you
   DebugInfo:
   - object 5001345 (dregheap o000250_0045)
@@ -13966,6 +14321,7 @@ EnemyEvents:
       Commands:
       - HandleBossDefeatAndDisplayBanner(5000802, TextBannerType.HeirofFireDestroyed)
   ID: 15005800
+  Map: m50_00_00_00
   Comment: End Demon Prince
   DebugInfo:
   - 5000801 (dregheap c5020_0001 - Demon Prince)
@@ -14032,6 +14388,7 @@ EnemyEvents:
       - DisplayBossHealthBar(Enabled, 5000801, 0, 905020)
       - DisplayBossHealthBar(Enabled, 5000802, 1, 905021)
   ID: 15005810
+  Map: m50_00_00_00
   Comment: Start Demon Prince
   DebugInfo:
   - group 5005800 [5000800 (dregheap c5020_0000 - Demon Prince), 5000801 (dregheap c5020_0001 - Demon Prince), 5000802 (dregheap c5020_0002 - Demon Prince), 5000810 (dregheap c5021_0000 - Demon Prince Helper 1), 5000811 (dregheap c5022_0000 - Demon Prince Helper 2), 5000812 (dregheap c5022_0001 - Demon Prince Helper 2), 5000813 (dregheap c5022_0002 - Demon Prince Helper 2), 5000814 (dregheap c5022_0003 - Demon Prince Helper 2)]
@@ -14096,6 +14453,7 @@ EnemyEvents:
     - Cmd: WaitFixedTimeFrames(10)
       After: IfConditionGroup(MAIN, PASS, OR_01)
   ID: 15005811
+  Map: m50_00_00_00
   Comment: Setup for 2nd prince, with some duplication. The start flag is not the main flag, but the only one used here
   DebugInfo:
   - 5000802 (dregheap c5020_0002 - Demon Prince)
@@ -14128,6 +14486,7 @@ EnemyEvents:
     MusicFlag: 15005802
     Replace: 15005803 -> SetSpEffect(5000801, 6951); 15005804 -> SetSpEffect(5000802, 6952)
   ID: 15005812
+  Map: m50_00_00_00
   Comment: Demon Prince phase 2 (pick one) and phase 2 music
   DebugInfo:
   - 5000801 (dregheap c5020_0001 - Demon Prince)
@@ -14176,6 +14535,7 @@ EnemyEvents:
     Entity: 5000801
     DefeatFlag: 15000800
   ID: 15005813
+  Map: m50_00_00_00
   Comment: Setting speffects on one prince once the other one "dies"
   DebugInfo:
   - 5000801 (dregheap c5020_0001 - Demon Prince)
@@ -14212,6 +14572,7 @@ EnemyEvents:
     DefeatFlag: 15000800
     Replace: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 15005803) -> EndIfCharacterHasSpEffect(EventEndType.End, 5000801, 6951, true, ComparisonType.Equal, 1)
   ID: 15005820
+  Map: m50_00_00_00
   Comment: When helpers are dead, turn their flag off (only if second prince)
   DebugInfo:
   - 5000802 (dregheap c5020_0002 - Demon Prince)
@@ -14246,6 +14607,7 @@ EnemyEvents:
     Regions:
     - arg arenagen 5004810 5004811 5004812 5004813 5004814
   ID: 15005825
+  Map: m50_00_00_00
   Comment: When helpers are dead and main boss has a speffect, respawn them and warp them in
   DebugInfo:
   - 5000802 (dregheap c5020_0002 - Demon Prince)
@@ -14327,6 +14689,7 @@ EnemyEvents:
     Regions:
     - event arenafull 5002800
   ID: 15005835
+  Map: m50_00_00_00
   Comment: Camera management for Demon Princes
   DebugInfo:
   - region 5002800 (ボス 腐敗蝙蝠 戦闘開始)
@@ -14422,6 +14785,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15005849
+  Map: m50_00_00_00
   Comment: Demon Prince events
   DebugInfo:
   - object 5001800 (dregheap o000402_9000)
@@ -14471,6 +14835,7 @@ EnemyEvents:
     Entity: 5000801
     Remove: IfCharacterHasSpEffect
   ID: 15005850
+  Map: m50_00_00_00
   Comment: Spawn map SFX while princes are within a corresponding region and they have speffect 5404 (animation offset 1M)
   DebugInfo:
   - 5000801 (dregheap c5020_0001 - Demon Prince)
@@ -14585,6 +14950,7 @@ EnemyEvents:
     - SetSpEffect(5100200, 5404)
     - ForceAnimationPlayback(5100200, 30003, true, false, false, 0, 1)
   ID: 15105200
+  Map: m51_00_00_00
   Comment: Controls the spawn location of Bridge Midir
   DebugInfo:
   - 5100200 (ringedcity c6210_0000 - Bridge Darkeater Midir)
@@ -14653,6 +15019,7 @@ EnemyEvents:
     Entity: 5100201
     Remove: 5100200
   ID: 15105230
+  Map: m51_00_00_00
   Comment: Bridge Midir flying in and future repositioning
   DebugInfo:
   - region 5102230 (イベント 闇ドラゴン 崖道2 起動1)
@@ -14671,6 +15038,7 @@ EnemyEvents:
     Entity: 5100201
     DefeatFlag: 15100200
   ID: 15105231
+  Map: m51_00_00_00
   Comment: Bridge Midir stagger
   DebugInfo:
   - 5100200 (ringedcity c6210_0000 - Bridge Darkeater Midir)
@@ -14704,6 +15072,7 @@ EnemyEvents:
     - IfCharacterDeadalive(MAIN, 5100201, DeathState.Dead, ComparisonType.Equal, 1)
     - SetNetworkconnectedEventFlag(15100200, ON)
   ID: 15105232
+  Map: m51_00_00_00
   Comment: Midir "defeat"
   DebugInfo:
   - 5100200 (ringedcity c6210_0000 - Bridge Darkeater Midir)
@@ -14714,6 +15083,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105234
+  Map: m51_00_00_00
   Comment: Sets a Midir position flag upon reaching the Shared Grave bonfire
   DebugInfo:
   - region 5102232 (イベント 闇ドラゴン 崖道2 待機2予約)
@@ -14727,6 +15097,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5100201
   ID: 15105235
+  Map: m51_00_00_00
   Comment: Camera for bridge Midir. Maybe transplant this, but the transplanted fights are not much like the original.
   DebugInfo:
   - region 5102235 (イベント 闇ドラゴン 崖道2 カメラ切り替え範囲)
@@ -14754,6 +15125,7 @@ EnemyEvents:
     Entity: 5100201
     Remove: 5100200
   ID: 15105236
+  Map: m51_00_00_00
   Comment: Turning off encounter flag when defeated, or speffect. Remove this for interaction purposes
   DebugInfo:
   - 5100200 (ringedcity c6210_0000 - Bridge Darkeater Midir)
@@ -14778,6 +15150,7 @@ EnemyEvents:
     DefeatFlag: 15100200
     StartFlag: 15100230
   ID: 15105237
+  Map: m51_00_00_00
   Comment: Create NPC part for bridge midir (and regular midir, strangely) until bridge midir defeated
   DebugInfo:
   - 5100200 (ringedcity c6210_0000 - Bridge Darkeater Midir)
@@ -14795,6 +15168,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 15105280
+  Map: m51_00_00_00
   Comment: Wakeup for skeletons
   DebugInfo:
   - 5100280 (ringedcity c1071_0010 - Ringed City Skeleton)
@@ -14836,6 +15210,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105300
+  Map: m51_00_00_00
   Comment: Judicator events
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -14858,6 +15233,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105301
+  Map: m51_00_00_00
   Comment: Update rate for judicator
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -14883,6 +15259,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105302
+  Map: m51_00_00_00
   Comment: Update rate for judicator
   DebugInfo:
   - 5100310 (ringedcity c6280_0002 - Judicator)
@@ -14905,6 +15282,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105303
+  Map: m51_00_00_00
   Comment: Update rate for judicator
   DebugInfo:
   - 5100320 (ringedcity c6280_0003 - Judicator)
@@ -14928,6 +15306,7 @@ EnemyEvents:
   - Type: chr
     Entity: 5100310
   ID: 15105305
+  Map: m51_00_00_00
   Comment: Sets speffect for swamp judicator when they're in combat
   DebugInfo:
   - 5100310 (ringedcity c6280_0002 - Judicator)
@@ -14983,6 +15362,7 @@ EnemyEvents:
     Entity: 5100320
     Remove: 5100300
   ID: 15105309
+  Map: m51_00_00_00
   Comment: Initialization for non-swamp judicators
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -14999,6 +15379,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15105310
+  Map: m51_00_00_00
   Comment: Backread management for judicator helpers based on judicators
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -15023,6 +15404,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15105315
+  Map: m51_00_00_00
   Comment: Spawning helpers upon judicator speffect, either warping them to player or around judicator, based on area-set speffects
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -15072,6 +15454,7 @@ EnemyEvents:
 - Template:
   - Type: multichrarg
   ID: 15105320
+  Map: m51_00_00_00
   Comment: Judicator helper speffect management
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -15102,6 +15485,7 @@ EnemyEvents:
     Regions:
     - arg chrrel 5102305 5102306 5102315 5102325 5102326 5102327
   ID: 15105340
+  Map: m51_00_00_00
   Comment: Sets X4 on player when they're in any of X12-X28, and within X8 of the Judicator
   DebugInfo:
   - 5100300 (ringedcity c6280_0001 - Judicator)
@@ -15138,6 +15522,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105350
+  Map: m51_00_00_00
   Comment: Sets epffect X4 on player (lasts 3 seconds) while they are in any of X12-X14, setting flag X0 if they're still there after X8 seconds. This seems to prevent long-distance attacks. Maybe make it a chr
   DebugInfo:
   - region 5102309 (敵起動 巨人（城壁） 竜頭石)
@@ -15190,6 +15575,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105360
+  Map: m51_00_00_00
   Comment: Unknown initialization for some locust preachers, they have speffect until entering an area
   DebugInfo:
   - 5100360 (ringedcity c6331_0000 - Small Locust Preacher)
@@ -15238,6 +15624,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105380
+  Map: m51_00_00_00
   Comment: Small locusts that get an speffect once their preacher dies
   DebugInfo:
   - 5100369 (ringedcity c6331_0009 - Small Locust Preacher)
@@ -15289,6 +15676,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105400
+  Map: m51_00_00_00
   Comment: Other small locusts that get the speffect when their judicator has an speffect
   DebugInfo:
   - 5100363 (ringedcity c6331_0003 - Small Locust Preacher)
@@ -15328,6 +15716,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 15105420
+  Map: m51_00_00_00
   Comment: Small locusts that wake up when attacked or when near a big locust
   DebugInfo:
   - 5100390 (ringedcity c6331_0030 - Small Locust Preacher)
@@ -15372,6 +15761,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105440
+  Map: m51_00_00_00
   Comment: Running thief on the stairs down after outer bonfire
   DebugInfo:
   - 5100406 (ringedcity c6270_0006 - Lothric Thief)
@@ -15385,6 +15775,7 @@ EnemyEvents:
   - Type: locarg
     Animation: pose X0 X4 X8
   ID: 15105450
+  Map: m51_00_00_00
   Comment: Dragonslayer Armour miniboss waking up, animations
   DebugInfo:
   - 5100285 (ringedcity c3160_0000 - Dragonslayer Armour)
@@ -15410,6 +15801,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105460
+  Map: m51_00_00_00
   Comment: Update rate for ringed knights on the way to purging monument
   DebugInfo:
   - 5100252 (ringedcity c6260_0012 - Ringed Knight)
@@ -15455,6 +15847,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105470
+  Map: m51_00_00_00
   Comment: Update rate for harald knights, using aggro'd speffect
   DebugInfo:
   - 5100260 (ringedcity c6320_0000 - Harald Legion Knight)
@@ -15512,6 +15905,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105480
+  Map: m51_00_00_00
   Comment: Helper perhaps for locust preacher between sunken buildings in the humanity swamp (TODO check it? what??)
   DebugInfo:
   - 5100493 (ringedcity c0100_0003 - Dummy)
@@ -15544,6 +15938,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5100172
   ID: 15105490
+  Map: m51_00_00_00
   Comment: Some kind of AI behavior for Alva, during invasion perhaps, but outside of very large area? TODO try deleting this
   DebugInfo:
   - region 5102185 (イベント 闇霊 アルバ 思考切り替え)
@@ -15564,6 +15959,7 @@ EnemyEvents:
     Entity: 5100800
     StartFlag: 15105805
   ID: 15105703
+  Map: m51_00_00_00
   Comment: Setup for Judicator Argo
   DebugInfo:
   - 5100810 (ringedcity c6280_0000 - Judicator)
@@ -15588,6 +15984,7 @@ EnemyEvents:
     Entity: 5100800
     StartFlag: 75100101
   ID: 15105704
+  Map: m51_00_00_00
   Comment: After Judicator Argo line ("Foolishness"), and then forces some animation on him if he's still alive after some time
   DebugInfo:
   - 5100810 (ringedcity c6280_0000 - Judicator)
@@ -15607,6 +16004,7 @@ EnemyEvents:
     Entity: 5100800
     StartFlag: 75100101
   ID: 15105705
+  Map: m51_00_00_00
   Comment: Another Judicator Argo animation 9 seconds later (summoning?)
   DebugInfo:
   - 5100810 (ringedcity c6280_0000 - Judicator)
@@ -15639,6 +16037,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(1)
       - HandleBossDefeatAndDisplayBanner(5100800, TextBannerType.HeirofFireDestroyed)
   ID: 15105800
+  Map: m51_00_00_00
   Comment: Halflight end. Only look at cases where flag 2100 is on, TODO try to force this in the event itself
   DebugInfo:
   - 5100800 (ringedcity c0000_0010 - Halflight, Spear of the Church)
@@ -15690,6 +16089,7 @@ EnemyEvents:
       Commands:
       - DisplayBossHealthBar(Enabled, 5100800, 0, 45000)  # Extra, so the fight isn't so confusing
   ID: 15105810
+  Map: m51_00_00_00
   Comment: Start Halflight. Sets 15100801 (used by judicator's t510780, starting everything else) and later 9600 (online-related flag)
   DebugInfo:
   - 5100800 (ringedcity c0000_0010 - Halflight, Spear of the Church)
@@ -15737,6 +16137,7 @@ EnemyEvents:
     - Cmd: WaitFixedTimeSeconds(35)
       After: IfConditionGroup(MAIN, PASS, AND_01)
   ID: 15105811
+  Map: m51_00_00_00
   Comment: Spawns in first painting guardian at flag 75100132 (set when speech is done, ~35 seconds after 75100101) and later kills judicator, turning music flag on (15105811)
   DebugInfo:
   - 5100801 (ringedcity c0000_0011 - Painting Guardian)
@@ -15776,6 +16177,7 @@ EnemyEvents:
     DefeatFlag: 15100800
     Remove: 2100; DisplayBossHealthBar
   ID: 15105812
+  Map: m51_00_00_00
   Comment: Start Halflight part of fight when judicator dies (15104811 set). Flag 2100 determines eligibility for this version (it must be on - TODO maybe edit this event. also, add death check to avoid interference)
   DebugInfo:
   - 5100800 (ringedcity c0000_0010 - Halflight, Spear of the Church)
@@ -15875,6 +16277,7 @@ EnemyEvents:
 - Template:
   - Type: remove
   ID: 15105813
+  Map: m51_00_00_00
   Comment: Online verseion of Halflight start
   DebugInfo:
   - 5100801 (ringedcity c0000_0011 - Painting Guardian)
@@ -15897,6 +16300,7 @@ EnemyEvents:
     Entity: 5100800
     DefeatFlag: 15100800
   ID: 15105814
+  Map: m51_00_00_00
   Comment: Spawning second painting guardian, also managing their enabling
   DebugInfo:
   - 5100803 (ringedcity c0000_0024 - Painting Guardian)
@@ -15964,6 +16368,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(1.5)
       - HandleBossDefeatAndDisplayBanner(5100850, TextBannerType.HeirofFireDestroyed)
   ID: 15105850
+  Map: m51_00_00_00
   Comment: End Midir
   DebugInfo:
   - 5100850 (ringedcity c6211_0000 - Darkeater Midir)
@@ -16007,6 +16412,7 @@ EnemyEvents:
       - SetNetworkUpdateRate(5100850, true, CharacterUpdateFrequency.AlwaysUpdate)
       - DisplayBossHealthBar(Enabled, 5100850, 0, 906210)
   ID: 15105860
+  Map: m51_00_00_00
   Comment: Start Midir. TODO maybe should remove smaller radius condition? we do add invincibility
   DebugInfo:
   - 5100850 (ringedcity c6211_0000 - Darkeater Midir)
@@ -16056,6 +16462,7 @@ EnemyEvents:
     DefeatFlag: 15100850
     MusicFlag: 15105852
   ID: 15105861
+  Map: m51_00_00_00
   Comment: Midir music change
   DebugInfo:
   - 5100850 (ringedcity c6211_0000 - Darkeater Midir)
@@ -16069,6 +16476,7 @@ EnemyEvents:
     Entity: 5100850
     DefeatFlag: 15100850
   ID: 15105862
+  Map: m51_00_00_00
   Comment: Midir stagger loop
   DebugInfo:
   - 5100850 (ringedcity c6211_0000 - Darkeater Midir)
@@ -16089,6 +16497,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15105888
+  Map: m51_00_00_00
   Comment: Some kind of online Midir invader interaction
   DebugInfo:
   - 5100850 (ringedcity c6211_0000 - Darkeater Midir)
@@ -16114,6 +16523,7 @@ EnemyEvents:
     NewEvent:
     - InitializeCommonEvent(20005839, 15100850, 5100850, 1094713344, 6213, 6212, 15105855, 15105855, 5102870)
   ID: 15105889
+  Map: m51_00_00_00
   Comment: Midir events
   DebugInfo:
   - object 5101850 (ringedcity o000401_9502)
@@ -16137,6 +16547,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5100800
   ID: 15105920
+  Map: m51_00_00_00
   Comment: Halflight multiplayer tuning (setting speffects), also SL ranges - perhaps for invasions
   DebugInfo:
   - 5100800 (ringedcity c0000_0010 - Halflight, Spear of the Church)
@@ -16212,6 +16623,7 @@ EnemyEvents:
   - Type: remove
     Entity: 5100800
   ID: 15105960
+  Map: m51_00_00_00
   Comment: More Halflight tuning for SL ranges
   DebugInfo:
   - 5100800 (ringedcity c0000_0010 - Halflight, Spear of the Church)
@@ -16262,6 +16674,7 @@ EnemyEvents:
       - WaitFixedTimeSeconds(3)
       - HandleBossDefeatAndDisplayBanner(5110800, TextBannerType.HeirofFireDestroyed)
   ID: 15115800
+  Map: m51_01_00_00
   Comment: Gael end
   DebugInfo:
   - 5110800 (filianore c6200_0000 - Slave Knight Gael 2)
@@ -16348,6 +16761,7 @@ EnemyEvents:
       Commands:
       - CreateReferredDamagePair(5110801, 5110800)
   ID: 15115810
+  Map: m51_01_00_00
   Comment: Start Gael, warping based on encountered flag (15110801). TODO do the objects do anything? they're in the same locations and get exchanged between phases
   DebugInfo:
   - group 5115800 [5110800 (filianore c6200_0000 - Slave Knight Gael 2), 5110801 (filianore c6201_0000 - Slave Knight Gael)]
@@ -16483,6 +16897,7 @@ EnemyEvents:
       - ForceAnimationPlayback(5110800, 3037, false, false, false, 0, 1)
       - DisplayBossHealthBar(Enabled, 5110800, 0, 906200)
   ID: 15115811
+  Map: m51_01_00_00
   Comment: Gael phase change, without cutscenes or player warping
   DebugInfo:
   - 5110800 (filianore c6200_0000 - Slave Knight Gael 2)
@@ -16552,6 +16967,7 @@ EnemyEvents:
     MusicFlag: 15115803
     Remove: DeleteMapSFX; SpawnMapSFX
   ID: 15115812
+  Map: m51_01_00_00
   Comment: Gael phase 2 SFX respawning, but based on first Gael sfx. Also sets music flag
   DebugInfo:
   - 5110800 (filianore c6200_0000 - Slave Knight Gael 2)
@@ -16589,6 +17005,7 @@ EnemyEvents:
     - IfEntityInoutsideRadiusOfEntity(MAIN, InsideOutsideState.Inside, 10000, 5110240, 69, 1)
     - SetCharacterAIState(5110240, Enabled)
   ID: 15115849
+  Map: m51_01_00_00
   Comment: Gael events
   DebugInfo:
   - object 5111800 (filianore o000400_1000)
@@ -16610,6 +17027,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15115850
+  Map: m51_01_00_00
   Comment: Shira defeat flags
   DebugInfo:
   - 5110850 (filianore c0000_0005 - Shira)
@@ -16624,6 +17042,7 @@ EnemyEvents:
 - Template:
   - Type: default
   ID: 15115860
+  Map: m51_01_00_00
   Comment: Shira invasion
   DebugInfo:
   - 5110850 (filianore c0000_0005 - Shira)
