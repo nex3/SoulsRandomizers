@@ -16,6 +16,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
@@ -118,7 +119,9 @@ namespace RandomizerCommon
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
-            var random = new Random(session.RoomState.Seed.GetHashCode());
+            var seed = session.RoomState.Seed.GetHashCode();
+            opt.Seed = (uint)seed;
+            var random = new Random(seed);
 
             // A map from locations in the game where items can appear to the list of items that
             // should appear in those locations.
@@ -237,6 +240,17 @@ namespace RandomizerCommon
                 characters.Write(random, opt);
             }
 
+            if (options["randomize_enemies"])
+            {
+                EventConfig eventConfig;
+                using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+                {
+                    IDeserializer deserializer = new DeserializerBuilder().Build();
+                    eventConfig = deserializer.Deserialize<EventConfig>(reader);
+                }
+                new EnemyRandomizer(game, events, eventConfig).Run(opt);
+            }
+
             MiscSetup.DS3CommonPass(game, events, opt);
 
             status.Text = "Writing game files...";
@@ -257,6 +271,29 @@ namespace RandomizerCommon
             opt["nongplusrings"] = !archiOptions["enable_ngp"];
             opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
                                      // when we add enemizer support.
+            if (archiOptions["randomize_enemies"])
+            {
+                opt["bosses"] = true;
+                opt["enemies"] = true;
+                opt["edittext"] = true;
+
+                // TODO: teach Archipelago to choose a Yhorm location and place Storm Ruler appropriately
+                opt["yhormruler"] = true;
+
+                opt["mimics"] = archiOptions["randomize_mimics_with_enemies"];
+                opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"];
+                opt["reducepassive"] = archiOptions["reduce_harmless_enemies"];
+                opt["earlyreq"] = archiOptions["simple_early_bosses"];
+                opt["scale"] = archiOptions["scale_enemies"];
+                opt["chests"] = archiOptions["all_chests_are_mimics"];
+                opt["supermimics"] = archiOptions["impatient_mimics"];
+            }
+            if (archiOptions["enable_dlc"])
+            {
+                opt["dlc1"] = true;
+                opt["dlc2"] = true;
+                opt["dlc2fromdlc1"] = true;
+            }
             return opt;
         }
 

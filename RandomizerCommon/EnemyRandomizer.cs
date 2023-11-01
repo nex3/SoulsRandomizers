@@ -84,7 +84,7 @@ namespace RandomizerCommon
             return newId;
         }
 
-        public EnemyLocations Run(RandomizerOptions opt, Preset preset)
+        public EnemyLocations Run(RandomizerOptions opt, Preset preset = null)
         {
             if (game.Sekiro)
             {
@@ -3818,12 +3818,12 @@ namespace RandomizerCommon
                 if (disableEvents) break;
                 foreach (EMEVD.Event e in entry.Value.Events)
                 {
-                    // All animation events are initialization-based from constructor
+                        // All animation events are initialization-based from constructor
                     // Segment events are a mix of constructor 0, and 200 in a few cases in Elden Ring
-                    for (int i = 0; i < e.Instructions.Count; i++)
-                    {
-                        Instr init = events.Parse(e.Instructions[i]);
-                        if (!init.Init) continue;
+                        for (int i = 0; i < e.Instructions.Count; i++)
+                        {
+                            Instr init = events.Parse(e.Instructions[i]);
+                            if (!init.Init) continue;
                         if (init.TryCalleeKey(segmentEvents, entry.Key, out EventKey callee))
                         {
                             foreach (EnemyTemplate t in templates[callee].Template)
