@@ -986,7 +986,7 @@ namespace RandomizerCommon
                 }
                 return assign;
             }
-            if (ann.Classes == null)
+            if (ann.Classes == null || ann.Classes.Count == 0)
             {
                 Boss = processPools(Boss, "Boss");
                 Miniboss = processPools(Miniboss, "Miniboss");

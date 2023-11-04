@@ -1,26 +1,20 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
-using Microsoft.VisualBasic.ApplicationServices;
 using Newtonsoft.Json.Linq;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace RandomizerCommon
 {
@@ -245,14 +239,18 @@ namespace RandomizerCommon
                 EventConfig eventConfig;
                 using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
                 {
-                    IDeserializer deserializer = new DeserializerBuilder().Build();
+                    var deserializer = new DeserializerBuilder().Build();
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);
                 }
 
-                var preset = new Preset {
-                    RemoveSource = "Yhorm the Giant",
-                    Enemies = new Dictionary<string, string>() { { (String)slotData["yhorm"], "Yhorm the Giant" } }
-                };
+                // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
+                // any way to deserialize from an object graph
+                var preset = Preset.ParsePreset("archipelago", (string)slotData["random_enemy_preset"]);
+                preset.RemoveSource = preset.RemoveSource == null
+                    ? "Yhorm the Giant"
+                    : preset.RemoveSource + ";Yhorm the Giant";
+                preset.Enemies ??= new Dictionary<string, string>();
+                preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
