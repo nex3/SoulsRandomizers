@@ -754,6 +754,11 @@ namespace RandomizerCommon
 
             List<int> getIds(string name)
             {
+                if (name.Contains(';'))
+                {
+                    return name.Split(';').SelectMany(name => getIds(name.Trim())).ToList();
+                }
+
                 if (!enemiesForName.TryGetValue(name, out SortedSet<int> ids))
                 {
                     string findId = "";
