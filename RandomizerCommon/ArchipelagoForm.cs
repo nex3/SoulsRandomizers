@@ -250,6 +250,9 @@ namespace RandomizerCommon
                     : preset.RemoveSource + ";Yhorm the Giant";
                 preset.Enemies ??= new Dictionary<string, string>();
                 preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
+
+                // Crystal Sage is currently bugged so any replacement cannot be damaged.
+                preset.Enemies["Crystal Sage 3300850"] = "norandom";
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
