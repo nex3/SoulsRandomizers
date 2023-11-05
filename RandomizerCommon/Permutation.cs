@@ -242,7 +242,7 @@ namespace RandomizerCommon
             double newEnd = start * Math.Pow(2, subdivs * (index + 1) / total);
             return (newStart, newEnd);
         }
-        public void Logic(Random random, RandomizerOptions options, Preset preset)
+        public void Logic(Random random, RandomizerOptions options, Preset preset, List<RandomSilo> silos = null)
         {
             if (preset != null)
             {
@@ -418,6 +418,11 @@ namespace RandomizerCommon
             // Do randomizations per silo
             foreach (KeyValuePair<RandomSilo, SiloPermutation> siloEntry in Silos)
             {
+                if (silos != null && !silos.Contains(siloEntry.Key))
+                {
+                    continue;
+                }
+
                 RandomSilo siloType = siloEntry.Key;
                 SiloPermutation silo = siloEntry.Value;
 #if DEBUG

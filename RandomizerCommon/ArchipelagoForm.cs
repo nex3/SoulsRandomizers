@@ -208,8 +208,7 @@ namespace RandomizerCommon
                         group => group.Key,
                         group => group.Select(entry => entry.Key).ToList()));
 
-            // TODO: Respect randomization exclusions here as well.
-            permutation.NoLogic(random, new List<Permutation.RandomSilo> {
+            permutation.Logic(random, opt, null, new List<Permutation.RandomSilo> {
                 Permutation.RandomSilo.INFINITE,
                 Permutation.RandomSilo.INFINITE_SHOP,
                 Permutation.RandomSilo.INFINITE_GEAR,
@@ -274,6 +273,10 @@ namespace RandomizerCommon
             opt["nongplusrings"] = !archiOptions["enable_ngp"];
             opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
                                      // when we add enemizer support.
+            // Used for infinite items from shops and enemy drops
+            opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"];
+            opt["soulsprogression"] = archiOptions["smooth_soul_locations"];
+
             if (archiOptions["randomize_enemies"])
             {
                 opt["bosses"] = true;
@@ -287,12 +290,18 @@ namespace RandomizerCommon
                 opt["chests"] = archiOptions["all_chests_are_mimics"];
                 opt["supermimics"] = archiOptions["impatient_mimics"];
             }
+
             if (archiOptions["enable_dlc"])
             {
                 opt["dlc1"] = true;
                 opt["dlc2"] = true;
                 opt["dlc2fromdlc1"] = true;
             }
+
+            // These options aren't actually used, but they're necessary to run the offlien item
+            // randomizer for infinite items.
+            opt.Difficulty = 50;
+
             return opt;
         }
 
