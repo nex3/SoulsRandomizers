@@ -6,12 +6,10 @@ using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -120,7 +118,6 @@ namespace RandomizerCommon
             // The Archipelago API doesn't guarantee that the seed is a number, so we hash it so
             // that we can use it as a seed for C#'s RNG.
             var seed = HashStringToInt(session.RoomState.Seed);
-            Debug.WriteLine($"seed: {seed}");
             opt.Seed = (uint)seed;
             var random = new Random(seed);
 

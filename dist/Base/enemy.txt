@@ -6941,7 +6941,8 @@ Enemies:
   DebugText: cathedral - c5220_0000 - npc 522000 - think 522000 - team Enemy - id 3500800 (3505800,3505701) - Archdeacon of the Deep
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Clear SpEffect; Display Boss Health Bar; Force Animation Playback; Force Character Death; GOTO IF Character Has SpEffect; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has SpEffect; IF Character HP Ratio; Initialize Common Event; Set Character AI State; Set Character Event Target; Set Network Update Authority; Set SpEffect; Spawn Oneshot SFX; Warp Character and Copy Floor
   Class: Boss
-  Tags: mid bossonlymulti
+  # Exclude Wolnir whose wrists end up outside the arena and unreachable
+  Tags: mid bossonlymulti exclude:3800800
   Groups: [3505800, 3505801, 3505802, 3505803]
   ExtraName: Deacons of the Deep
   FullName: $1 of the Deep
