@@ -6,9 +6,13 @@ using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Policy;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamlDotNet.Serialization;
@@ -113,7 +117,10 @@ namespace RandomizerCommon
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
-            var seed = session.RoomState.Seed.GetHashCode();
+            // The Archipelago API doesn't guarantee that the seed is a number, so we hash it so
+            // that we can use it as a seed for C#'s RNG.
+            var seed = HashStringToInt(session.RoomState.Seed);
+            Debug.WriteLine($"seed: {seed}");
             opt.Seed = (uint)seed;
             var random = new Random(seed);
 
@@ -253,6 +260,7 @@ namespace RandomizerCommon
 
                 // Crystal Sage is currently bugged so any replacement cannot be damaged.
                 preset.Enemies["Crystal Sage 3300850"] = "norandom";
+                //preset.Enemies["Lords of Cinder 4100800"] = "norandom";
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
@@ -306,6 +314,17 @@ namespace RandomizerCommon
             opt.Difficulty = 50;
 
             return opt;
+        }
+
+        /// <summary>
+        /// Computes a stable hash of the given string and reduces it to a single integer.
+        /// </summary>
+        private static int HashStringToInt(string str)
+        {
+            using (var hash = SHA256.Create())
+            {
+                return BitConverter.ToInt32(hash.ComputeHash(Encoding.UTF8.GetBytes(str)), 0);
+            }
         }
 
         /// <summary>
