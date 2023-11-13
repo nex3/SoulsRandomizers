@@ -130,7 +130,6 @@ namespace RandomizerCommon
             // they're assigned elsewhere).
             var itemsToRemove = new Dictionary<SlotKey, SlotKey>();
 
-            long? dragonLocation = null;
             foreach (var info in locations.Locations)
             {
                 var targetScope = apLocationsToScopes[info.Location];
@@ -164,20 +163,27 @@ namespace RandomizerCommon
 
                 var targetSlot = ann.Slots[targetScope];
                 var itemName = session.Items.GetItemName(info.Item);
-                var isDragon = itemName == "Path of the Dragon";
-                if (isDragon) dragonLocation = info.Location;
+                var player = session.Players.Players[session.ConnectionInfo.Team]
+                    .First(player => player.Slot == info.Player);
 
                 if (info.Player != session.ConnectionInfo.Slot)
                 {
-                    var player = session.Players.Players[session.ConnectionInfo.Team]
-                        .First(player => player.Slot == info.Player);
                     // Create a fake key item for each item from another world.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"{player.Alias}'s {itemName}",
                         $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
                         archipelagoLocationId: info.Location));
                 }
-                else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false) && !isDragon)
+                else if (itemName == "Path of the Dragon")
+                {
+                    AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
+                        $"Path of the Dragon",
+                        "A gesture of meditation channeling the eternal essence of the ancient dragons",
+                        "The path to ascendence can be achieved only by the most resolute of seekers. Proper utilization of this technique can grant deep inner focus.",
+                        iconId: 7039,
+                        archipelagoLocationId: info.Location));
+                }
+                else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
                 {
                     // The Archipelago mod can't replace items that appear in shops or are dropped
                     // by the crow, so we have to put literal items there. Everywhere else, we
@@ -221,15 +227,6 @@ namespace RandomizerCommon
             });
 
             writer.Write(random, permutation, opt);
-
-            if (dragonLocation != null)
-            {
-                // Annotate the existing fake Path of the Dragon item with information that
-                // allows the Archipelago mod to inform the server it was found.
-                var row = game.Params["EquipParamGoods"][9030];
-                row["VagrantItemLotId"].Value = (int)((ulong)dragonLocation & 0xffffffffUL);
-                row["VagrantBonusEneDropItemLotId"].Value = (int)((ulong)dragonLocation >> 32);
-            }
 
             if (options["random_starting_loadout"])
             {

@@ -1347,6 +1347,32 @@ namespace RandomizerCommon
                                     "Set Event Flag (6079,1)",
                             });
                         }
+                        else
+                        {
+                            var fmgs = game.ItemFMGs["アイテム名"];
+                            var pathOfTheDragon = permutation.Silos.Values
+                                .SelectMany(silo => silo.Mapping.Values)
+                                .SelectMany(items => items)
+                                .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
+                                .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
+
+                            if (pathOfTheDragon != null)
+                            {
+                                // Archipelago handles Path of the Dragon as a synthetic item or
+                                // (when getting it from another world) manually triggering the
+                                // event 100001312.
+                                addNewEvent(new string[]
+                                {
+                                    "END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 6079)",
+                                    $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
+                                    $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
+                                    "IfConditionGroup(MAIN, PASS, OR_01)",
+                                    "Remove Item From Player (ItemType.Goods, 101312, 1)",
+                                    "Award Gesture Item (29,3,9030)",
+                                    "Set Event Flag (6079,1)",
+                                });
+                            }
+                        }
 
                         // Make every boss soul trigger the event to show it in the shop.
                         foreach (PARAM.Row row in shops.Rows)
@@ -1941,6 +1967,8 @@ namespace RandomizerCommon
         /// <param name="name">The item's name, as seen by the player.</param>
         /// <param name="shortDescription">A brief description of the item, seen on the normal
         /// inventory screen.</param>
+        /// <param name="iconId">The ID of the icon to use for this item. Defaults to the Prism
+        /// Stone icon.</param>
         /// <param name="longDescription">An additional, longer description of the item, seen when
         /// the player looks at the detail screen. The short description is always included at the
         /// beginning of the long description.</param>
@@ -1952,14 +1980,17 @@ namespace RandomizerCommon
         /// <param name="replaceWithQuantity">If replaceWith is set, this is the number of items it
         /// should be replaced with.</param>
         /// <returns>The SlotKey to use for the new item.</returns>
-        public SlotKey AddSyntheticItem(string name, string shortDescription,
-            string longDescription = null, long? archipelagoLocationId  = null,
-            ItemKey replaceWithInArchipelago = null, uint replaceWithQuantity = 1)
+        public SlotKey AddSyntheticItem(string name, string shortDescription = null,
+            string longDescription = null, uint? iconId = 42,
+            long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
+            uint replaceWithQuantity = 1)
         {
             var goods = game.Params["EquipParamGoods"];
-            var newRow = new PARAM.Row(goods[2005]); // Copy the basic structure from the Small Doll.
-            newRow.ID = goods.Rows.Count + 3780000; // 3780000 is the highest row in the actual game.
-            newRow["iconId"].Value = 42; // Prism Stone icon
+            var newRow = new PARAM.Row(goods[2005]) // Use the Small Doll as the basis for the row
+            {
+                ID = goods.Rows.Count + 3780000 // 3780000 is the highest row in the actual game.
+            };
+            newRow["iconId"].Value = iconId;
             newRow["sortId"].Value = 999999; // Sort external items last of all
 
             // An Archipelago ID can be up to 53 bits, so we have to store each one in two different
@@ -1978,8 +2009,11 @@ namespace RandomizerCommon
             goods.Rows.Add(newRow);
 
             game.ItemFMGs["アイテム名"][newRow.ID] = name;
-            game.ItemFMGs["アイテム説明"][newRow.ID] = shortDescription;
-            game.ItemFMGs["アイテムうんちく"][newRow.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
+            if (shortDescription != null)
+            {
+                game.ItemFMGs["アイテム説明"][newRow.ID] = shortDescription;
+                game.ItemFMGs["アイテムうんちく"][newRow.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
+            }
 
             var key = new ItemKey(ItemType.GOOD, newRow.ID);
             data.AddLocationlessItem(key);
