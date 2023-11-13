@@ -1229,16 +1229,6 @@ namespace RandomizerCommon
                 // Make it appear as a key item in shops
                 game.Params["EquipParamGoods"][9030]["goodsType"].Value = (byte)1;
 
-                // Replace transpose qwc flags with soul get flags
-                foreach (PARAM.Row row in shops.Rows)
-                {
-                    int mat = (int)row["mtrlId"].Value;
-                    if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul) && itemEventFlags.TryGetValue(soul, out int soulFlag) && soulFlag > 0)
-                    {
-                        row["qwcID"].Value = soulFlag;
-                    }
-                }
-
                 Dictionary<string, EMEVD> emevds = game.Emevds;
 
                 // Do this all manually for the moment, rather than from config
@@ -1312,20 +1302,23 @@ namespace RandomizerCommon
                             }
                         }
                     }
-                    // These should probably be in a config, although some of them would need to take args
-                    void addNewEvent(int id, IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
-                    {
-                        EMEVD.Event ev = new EMEVD.Event(id, rest);
-                        ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
-                        emevd.Events.Add(ev);
-                        emevd.Events[0].Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)id, (uint)0 }));
-                    }
+
                     if (map == "common")
                     {
+                        var nextEventId = 15000000; // no in-game event IDs go this high
+                        // These should probably be in a config, although some of them would need to take args
+                        void addNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
+                        {
+                            var id = nextEventId++;
+                            EMEVD.Event ev = new EMEVD.Event(id, rest);
+                            ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
+                            emevd.Events.Add(ev);
+                            emevd.Events[0].Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)id, (uint)0 }));
+                        }
                         // Hacky Greirat Lothric Castle softlock fix
                         // If you don't have Grand Archives key yet, mark him as having talked about looting Lothric
                         // (74000308) so the actual looting flag (74000309) isn't touched by ESD.
-                        addNewEvent(13000905, new string[]
+                        addNewEvent(new string[]
                         {
                             "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)",
                             "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)",
@@ -1335,7 +1328,7 @@ namespace RandomizerCommon
                         });
                         // Make Firelink Shrine greyed out by default, without having the Coiled Sword, in combination with param change above
                         // This doesn't always work just on its own, so there is a backup edit above.
-                        addNewEvent(14005107, new string[]
+                        addNewEvent(new string[]
                         {
                             "Set Event Flag (14005108,1)",
                             "IF Player Has/Doesn't Have Item (0,3,2137,1)",
@@ -1345,14 +1338,31 @@ namespace RandomizerCommon
                         {
                             // Do the Path of the Dragon swap
                             // We can't just use the item all of the time, since it would appear as a double drop.
-                            addNewEvent(13000904, new string[]
+                            addNewEvent(new string[]
                             {
-                                "END IF Event Flag (0,1,0,6079)",
-                                $"IF Event Flag (0,1,0,{dragonFlag})",
-                                "Remove Item From Player (3,9030,1)",
-                                "Award Gesture Item (29,3,9030)",
-                                "Set Event Flag (6079,1)",
+                                    "END IF Event Flag (0,1,0,6079)",
+                                    $"IF Event Flag (0,1,0,{dragonFlag})",
+                                    "Remove Item From Player (3,9030,1)",
+                                    "Award Gesture Item (29,3,9030)",
+                                    "Set Event Flag (6079,1)",
                             });
+                        }
+
+                        // Make every boss soul trigger the event to show it in the shop.
+                        foreach (PARAM.Row row in shops.Rows)
+                        {
+                            int mat = (int)row["mtrlId"].Value;
+                            if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
+                            {
+                                var eventFlag = (int)row["qwcID"].Value;
+                                Debug.Assert(soul.Type == ItemType.GOOD);
+                                addNewEvent(new string[]
+                                {
+                                    $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {eventFlag})",
+                                    $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
+                                    $"Set Event Flag ({eventFlag}, ON)"
+                                });
+                            }
                         }
                     }
                 }
