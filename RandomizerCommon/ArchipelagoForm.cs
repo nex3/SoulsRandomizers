@@ -228,6 +228,11 @@ namespace RandomizerCommon
 
             writer.Write(random, permutation, opt);
 
+            if (options["no_weapon_requirements"])
+            {
+                RemoveWeaponRequirements(game, data);
+            }
+
             if (options["random_starting_loadout"])
             {
                 var characters = new CharacterWriter(game, data);
@@ -403,7 +408,23 @@ namespace RandomizerCommon
             return result;
         }
 
-        private static Regex ApLocationRe = new(@"^[^:]+: (.*?)( #\d+| \(.*\))?$");
+        /// <summary>Sets all weapon stat requirements to 0.</summary>
+        private static void RemoveWeaponRequirements(GameData game, LocationData data)
+        {
+            foreach (var key in data.Data.Keys)
+            {
+                if (key.Type == ItemType.WEAPON)
+                {
+                    var row = game.Item(key);
+                    foreach (var stat in new[] { "Strength", "Agility", "Magic", "Faith" })
+                    {
+                        row[$"proper{stat}"].Value = 0;
+                    }
+                }
+            }
+        }
+
+        private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( #\d+| \(.*\))?$");
 
         /// <summary>
         /// Gets the name of the default item from an Archipelago location name.
