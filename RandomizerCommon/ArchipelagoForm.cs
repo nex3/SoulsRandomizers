@@ -267,9 +267,10 @@ namespace RandomizerCommon
                 preset.Enemies ??= new Dictionary<string, string>();
                 preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
 
-                // Crystal Sage is currently bugged so any replacement cannot be damaged.
-                preset.Enemies["Crystal Sage 3300850"] = "norandom";
-                //preset.Enemies["Lords of Cinder 4100800"] = "norandom";
+                // These bosses are currently bugged so any replacement cannot be damaged.
+                preset.Enemies["Crystal Sage 3300850"] = "Crystal Sage";
+                preset.Enemies["Lords of Cinder 4100800"] = "Lords of Cinder";
+                preset.Enemies["High Lord Wolnir 3800800"] = "High Lord Wolnir";
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
