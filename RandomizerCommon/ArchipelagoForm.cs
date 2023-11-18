@@ -233,6 +233,16 @@ namespace RandomizerCommon
                 RemoveWeaponRequirements(game, data);
             }
 
+            if (options["no_spell_requirements"])
+            {
+                RemoveSpellRequirements(game);
+            }
+
+            if (options["no_equip_load"])
+            {
+                RemoveEquipLoad(game, data);
+            }
+
             if (options["random_starting_loadout"])
             {
                 var characters = new CharacterWriter(game, data);
@@ -420,6 +430,28 @@ namespace RandomizerCommon
                     {
                         row[$"proper{stat}"].Value = 0;
                     }
+                }
+            }
+        }
+
+        /// <summary>Sets all spell stat requirements to 0.</summary>
+        private static void RemoveSpellRequirements(GameData game)
+        {
+            foreach (var row in game.Params["Magic"].Rows)
+            {
+                row["requirementIntellect"].Value = 0;
+                row["requirementFaith"].Value = 0;
+            }
+        }
+
+        /// <summary>Sets the equip burden of all items to 0.</summary>
+        private static void RemoveEquipLoad(GameData game, LocationData data)
+        {
+            foreach (var key in data.Data.Keys)
+            {
+                if (key.Type != ItemType.GOOD)
+                {
+                    game.Item(key)["weight"].Value = 0;
                 }
             }
         }
