@@ -87,7 +87,7 @@ namespace RandomizerCommon
             }
             else if (File.Exists("DarkSoulsIII.exe"))
             {
-                ret = "Error: Running from same directory as DarkSoulsIII.exe\r\nThe randomizer and its files must be in a subdirectory";
+                ret = "Error: Running from same directory as DarkSoulsIII.exe\r\nThe randomizer and its files must be in a subdirectory of DS3 or ModEngine2";
             }
             return ret == null;
         }
@@ -274,6 +274,12 @@ namespace RandomizerCommon
         {
             encrypted = true;
             ret = null;
+            if (File.Exists(@"..\launchmod_darksouls3.bat"))
+            {
+                // If we're running under ModEngine2, assume the player has it set up as they desire.
+                return false;
+            }
+
             if (!File.Exists(@"..\DarkSoulsIII.exe"))
             {
                 ret = "Error: DarkSoulsIII.exe not found in parent directory\r\nFor randomization to work, move the randomizer folder to your DS3 install location";
