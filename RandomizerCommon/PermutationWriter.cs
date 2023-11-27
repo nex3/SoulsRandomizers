@@ -1372,6 +1372,15 @@ namespace RandomizerCommon
                                     "Set Event Flag (6079,1)",
                                 });
                             }
+
+                            // Another Archipelago-specific event that display a message with a
+                            // special IDs that the mod can override to show its own messages.
+                            addNewEvent(new string[]
+                            {
+                                    "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
+                                    "Display Status Message (100001312, Enabled)",
+                                    "Set Event Flag (100001313, OFF)",
+                            });
                         }
 
                         // Make every boss soul trigger the event to show it in the shop.
