@@ -271,6 +271,12 @@ namespace RandomizerCommon
                 preset.Enemies["Crystal Sage 3300850"] = "Crystal Sage";
                 preset.Enemies["Lords of Cinder 4100800"] = "Lords of Cinder";
                 preset.Enemies["High Lord Wolnir 3800800"] = "High Lord Wolnir";
+                preset.Enemies["Pontiff Sulyvahn 3700850"] = "Pontiff Sulyvahn";
+                preset.Enemies["Dragonslayer Armour 3010800"] = "Dragonslayer Armour";
+                preset.Enemies["Ancient Wyvern 3200800"] = "Ancient Wyvern";
+                preset.Enemies["Champion's Gravetender and Gravetender Greatwolf 4500860"] =
+                    "Champion's Gravetender and Gravetender Greatwolf";
+                preset.Enemies["Darkeater Midir 5100850"] = "Darkeater Midir";
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
