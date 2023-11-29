@@ -1378,7 +1378,7 @@ namespace RandomizerCommon
                             addNewEvent(new string[]
                             {
                                     "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
-                                    "Display Status Message (100001312, Enabled)",
+                                    "Display Message (100001312, 1)",
                                     "Set Event Flag (100001313, OFF)",
                             });
                         }

@@ -5858,7 +5858,7 @@ namespace RandomizerCommon
                                         }
                                         if (!game.EldenRing && segment.Invincibility)
                                         {
-                                            setInvincibility(segment.Type.Contains("start"));
+                                            setInvincibility(!segment.Type.Contains("start"));
                                         }
                                         if (duals.Contains("endphase") && segment.Type == "end" && data.DupeIndex == -1)
                                         {
