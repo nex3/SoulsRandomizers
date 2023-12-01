@@ -1305,7 +1305,7 @@ namespace RandomizerCommon
 
                     if (map == "common")
                     {
-                        var nextEventId = 15000000; // no in-game event IDs go this high
+                        var nextEventId = 80000000; // no in-game event IDs go this high
                         // These should probably be in a config, although some of them would need to take args
                         void addNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
                         {
