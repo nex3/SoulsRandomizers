@@ -1971,6 +1971,8 @@ namespace RandomizerCommon
         /// inventory screen.</param>
         /// <param name="iconId">The ID of the icon to use for this item. Defaults to the Prism
         /// Stone icon.</param>
+        /// <param name="sortId">The sort order for this item. Defaults to the very end of the key
+        /// items.</param>
         /// <param name="longDescription">An additional, longer description of the item, seen when
         /// the player looks at the detail screen. The short description is always included at the
         /// beginning of the long description.</param>
@@ -1983,7 +1985,7 @@ namespace RandomizerCommon
         /// should be replaced with.</param>
         /// <returns>The SlotKey to use for the new item.</returns>
         public SlotKey AddSyntheticItem(string name, string shortDescription = null,
-            string longDescription = null, uint? iconId = 42,
+            string longDescription = null, uint? iconId = 42, uint? sortId = int.MaxValue,
             long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
             uint replaceWithQuantity = 1)
         {
@@ -1993,7 +1995,7 @@ namespace RandomizerCommon
                 ID = goods.Rows.Count + 3780000 // 3780000 is the highest row in the actual game.
             };
             newRow["iconId"].Value = iconId;
-            newRow["sortId"].Value = 999999; // Sort external items last of all
+            newRow["sortId"].Value = uint; // Sort external items last of all
 
             // An Archipelago ID can be up to 53 bits, so we have to store each one in two different
             // 32-bit parameter fields that aren't relevant to key items.

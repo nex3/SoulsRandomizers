@@ -172,6 +172,13 @@ namespace RandomizerCommon
                     var item = writer.AddSyntheticItem(
                         $"{player.Alias}'s {itemName}",
                         $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
+                        // The highest in-game sortId is 133,100, so for foreign items we start
+                        // from 200,000 to sort them after in-game key items. From there we add
+                        // the player ID as the primary sort, followed by the item ID (mod 10k
+                        // because Archipelago puts all item IDs in a single 54-bit numberspace).
+                        // This means that in shops, foregin items will be grouped first by player
+                        // and then by item.
+                        sortId: 200000 + (uint)info.Player * 10000 + (uint)(info.Item % 10000),
                         archipelagoLocationId: info.Location);
                     AddMulti(items, targetSlotKey, item);
 
