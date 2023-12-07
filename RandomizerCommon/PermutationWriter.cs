@@ -43,6 +43,12 @@ namespace RandomizerCommon
         // Reversed GameData.ItemLotTypes
         // private readonly Dictionary<ItemType, uint> lotValues;
 
+        /// <summary>
+        /// The event ID to use for the next synthetic event. We start with an ID that's larger
+        /// than any in-game IDs to ensure that we don't overlap with real events.
+        /// </summary>
+        private uint nextEventId = 80000000;
+
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
         [Localize]
@@ -1302,67 +1308,56 @@ namespace RandomizerCommon
                             }
                         }
                     }
+                }
 
-                    if (map == "common")
-                    {
-                        var nextEventId = 80000000; // no in-game event IDs go this high
-                        // These should probably be in a config, although some of them would need to take args
-                        void addNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
-                        {
-                            var id = nextEventId++;
-                            EMEVD.Event ev = new EMEVD.Event(id, rest);
-                            ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
-                            emevd.Events.Add(ev);
-                            emevd.Events[0].Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)id, (uint)0 }));
-                        }
-                        // Hacky Greirat Lothric Castle softlock fix
-                        // If you don't have Grand Archives key yet, mark him as having talked about looting Lothric
-                        // (74000308) so the actual looting flag (74000309) isn't touched by ESD.
-                        addNewEvent(new string[]
-                        {
+                // Hacky Greirat Lothric Castle softlock fix
+                // If you don't have Grand Archives key yet, mark him as having talked about looting Lothric
+                // (74000308) so the actual looting flag (74000309) isn't touched by ESD.
+                AddNewEvent(new string[]
+                {
                             "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)",
                             "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)",
                             "SetEventFlag(74000308, ON)",
                             "IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)",
                             "SetEventFlag(74000308, OFF)",
-                        });
-                        // Make Firelink Shrine greyed out by default, without having the Coiled Sword, in combination with param change above
-                        // This doesn't always work just on its own, so there is a backup edit above.
-                        addNewEvent(new string[]
-                        {
+                });
+                // Make Firelink Shrine greyed out by default, without having the Coiled Sword, in combination with param change above
+                // This doesn't always work just on its own, so there is a backup edit above.
+                AddNewEvent(new string[]
+                {
                             "Set Event Flag (14005108,1)",
                             "IF Player Has/Doesn't Have Item (0,3,2137,1)",
                             "Set Event Flag (14005108,0)",
-                        }, EMEVD.Event.RestBehaviorType.Restart);
-                        if (dragonFlag > 0)
-                        {
-                            // Do the Path of the Dragon swap
-                            // We can't just use the item all of the time, since it would appear as a double drop.
-                            addNewEvent(new string[]
-                            {
+                }, EMEVD.Event.RestBehaviorType.Restart);
+                if (dragonFlag > 0)
+                {
+                    // Do the Path of the Dragon swap
+                    // We can't just use the item all of the time, since it would appear as a double drop.
+                    AddNewEvent(new string[]
+                    {
                                     "END IF Event Flag (0,1,0,6079)",
                                     $"IF Event Flag (0,1,0,{dragonFlag})",
                                     "Remove Item From Player (3,9030,1)",
                                     "Award Gesture Item (29,3,9030)",
                                     "Set Event Flag (6079,1)",
-                            });
-                        }
-                        else
-                        {
-                            var fmgs = game.ItemFMGs["アイテム名"];
-                            var pathOfTheDragon = permutation.Silos.Values
-                                .SelectMany(silo => silo.Mapping.Values)
-                                .SelectMany(items => items)
-                                .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
-                                .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
+                    });
+                }
+                else
+                {
+                    var fmgs = game.ItemFMGs["アイテム名"];
+                    var pathOfTheDragon = permutation.Silos.Values
+                        .SelectMany(silo => silo.Mapping.Values)
+                        .SelectMany(items => items)
+                        .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
+                        .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
 
-                            if (pathOfTheDragon != null)
-                            {
-                                // Archipelago handles Path of the Dragon as a synthetic item or
-                                // (when getting it from another world) manually triggering the
-                                // event 100001312.
-                                addNewEvent(new string[]
-                                {
+                    if (pathOfTheDragon != null)
+                    {
+                        // Archipelago handles Path of the Dragon as a synthetic item or
+                        // (when getting it from another world) manually triggering the
+                        // event 100001312.
+                        AddNewEvent(new string[]
+                        {
                                     "END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 6079)",
                                     $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
                                     $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
@@ -1370,35 +1365,33 @@ namespace RandomizerCommon
                                     "Remove Item From Player (ItemType.Goods, 101312, 1)",
                                     "Award Gesture Item (29,3,9030)",
                                     "Set Event Flag (6079,1)",
-                                });
-                            }
+                        });
+                    }
 
-                            // Another Archipelago-specific event that display a message with a
-                            // special IDs that the mod can override to show its own messages.
-                            addNewEvent(new string[]
-                            {
+                    // Another Archipelago-specific event that display a message with a
+                    // special IDs that the mod can override to show its own messages.
+                    AddNewEvent(new string[]
+                    {
                                     "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
                                     "Display Message (100001312, 1)",
                                     "Set Event Flag (100001313, OFF)",
-                            });
-                        }
+                    });
+                }
 
-                        // Make every boss soul trigger the event to show it in the shop.
-                        foreach (PARAM.Row row in shops.Rows)
+                // Make every boss soul trigger the event to show it in the shop.
+                foreach (PARAM.Row row in shops.Rows)
+                {
+                    int mat = (int)row["mtrlId"].Value;
+                    if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
+                    {
+                        var eventFlag = (int)row["qwcID"].Value;
+                        Debug.Assert(soul.Type == ItemType.GOOD);
+                        AddNewEvent(new string[]
                         {
-                            int mat = (int)row["mtrlId"].Value;
-                            if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
-                            {
-                                var eventFlag = (int)row["qwcID"].Value;
-                                Debug.Assert(soul.Type == ItemType.GOOD);
-                                addNewEvent(new string[]
-                                {
                                     $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {eventFlag})",
                                     $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
                                     $"Set Event Flag ({eventFlag}, ON)"
-                                });
-                            }
-                        }
+                        });
                     }
                 }
             }
@@ -2028,6 +2021,19 @@ namespace RandomizerCommon
             data.AddLocationlessItem(key);
 
             return new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1));
+        }
+
+        /// <summary>
+        /// Adds a new event to the common EMEVD.
+        /// </summary>
+        public void AddNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
+        {
+            var id = nextEventId++;
+            var ev = new EMEVD.Event(id, rest);
+            ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
+            var emevd = game.Emevds["common"];
+            emevd.Events.Add(ev);
+            emevd.Events[0].Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)id, (uint)0 }));
         }
 
         private static readonly Regex phraseRe = new Regex(@"\s*;\s*");
