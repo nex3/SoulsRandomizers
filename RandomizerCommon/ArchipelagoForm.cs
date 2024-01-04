@@ -360,9 +360,9 @@ namespace RandomizerCommon
             // A map from item names to all the slots that correspond to those names.
             var itemNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
 
-            // A map from potential Archipelago location names to all the slots that correspond to
-            // those names.
-            var locationNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
+            // A map from (Archipelago region abbreviation, item name) pairsto all the slots that
+            // could correspond to those pairs.
+            var locationToSlots = new Dictionary<(string, string), Queue<AnnotationData.SlotAnnotation>>();
             foreach (var slot in ann.SlotsByAnnotationsKey.Values)
             {
                 var area = ann.Areas[slot.Area].Archipelago;
@@ -374,29 +374,14 @@ namespace RandomizerCommon
                     itemNameToSlots.TryAdd(itemKey, new());
                     itemNameToSlots[itemKey].Add(slot);
 
-                    var locationKey = $"{area}: {itemKey}";
-                    locationNameToSlots.TryAdd(locationKey, new());
-                    locationNameToSlots[locationKey].Add(slot);
+                    var locationKey = (area, itemKey);
+                    locationToSlots.TryAdd(locationKey, new());
+                    locationToSlots[locationKey].Enqueue(slot);
                 }
             }
 
-            // Unlike locationNameToSlot, this divides multiple copies of the same item in the same
-            // location up by their index and adds that index to the name.
-            var locationNameToSlot = new Dictionary<string, AnnotationData.SlotAnnotation>();
-            foreach (var (apName, slots) in locationNameToSlots)
-            {
-                if (slots.Count == 1)
-                {
-                    locationNameToSlot[apName] = slots.First();
-                }
-                else
-                {
-                    for (var i = 0; i < slots.Count; i++)
-                    {
-                        locationNameToSlot[$"{apName} #{i + 1}"] = slots[i];
-                    }
-                }
-            }
+            var locationToCounts =
+                locationToSlots.ToDictionary(pair => pair.Key, pair => pair.Value.Count);
 
             var result = new Dictionary<long, LocationScope>();
             foreach (var location in locations.Locations)
@@ -410,22 +395,48 @@ namespace RandomizerCommon
                 var apName = session.Locations.GetLocationNameFromId(location.Location)
                     // https://github.com/ArchipelagoMW/Archipelago.MultiClient.Net/issues/83
                     .Replace("Siegbr��u", "Siegbräu");
-                if (locationNameToSlot.TryGetValue(apName, out var slot))
+                var apKey = ParseArchipelagoLocation(apName);
+                var (apRegion, itemName) = apKey;
+                if (locationToSlots.TryGetValue(apKey, out var locationSlots))
                 {
-                    result[location.Location] = slot.LocationScope;
-                    continue;
+                    if (locationSlots.TryDequeue(out var slot))
+                    {
+                        result[location.Location] = slot.LocationScope;
+                        continue;
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            $"There are only {locationToCounts[apKey]} locations in the offline " +
+                            $"randomizer matching \"{apRegion}: {itemName}\", but there are more " +
+                            "in Archipelago.");
+                    }
                 }
 
-                var itemName = apName.Split(": ")[1];
-                if (itemNameToSlots.TryGetValue(itemName, out var slots) && slots.Count == 1)
+                if (itemNameToSlots.TryGetValue(itemName, out var itemSlots) && itemSlots.Count == 1)
                 {
-                    result[location.Location] = slots.First().LocationScope;
+                    result[location.Location] = itemSlots.First().LocationScope;
                     continue;
                 }
 
                 throw new Exception($"Couldn't find a slot that corresponds to Archipelago location \"{apName}\".");
             }
             return result;
+        }
+
+        /// <summary>
+        /// Parses a full Archipelago location name into its region code and item name.
+        /// </summary>
+        private static (string, string) ParseArchipelagoLocation(string locationName)
+        {
+            var rx = new Regex(@"^([A-Z0-9]+): (.*?)(?: \(.*\))?$", RegexOptions.Compiled);
+            var match = rx.Match(locationName);
+            if (!match.Success)
+            {
+                throw new Exception($"Unknown Archipelago location format \"{locationName}\".");
+            }
+
+            return (match.Groups[1].Value, match.Groups[2].Value);
         }
 
         /// <summary>Sets all weapon stat requirements to 0.</summary>

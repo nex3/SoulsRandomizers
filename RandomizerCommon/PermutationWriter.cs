@@ -1995,7 +1995,7 @@ namespace RandomizerCommon
                 ID = goods.Rows.Count + 3780000 // 3780000 is the highest row in the actual game.
             };
             newRow["iconId"].Value = iconId;
-            newRow["sortId"].Value = uint; // Sort external items last of all
+            newRow["sortId"].Value = sortId; // Sort external items last of all
 
             // An Archipelago ID can be up to 53 bits, so we have to store each one in two different
             // 32-bit parameter fields that aren't relevant to key items.
