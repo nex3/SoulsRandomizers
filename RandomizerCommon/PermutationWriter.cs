@@ -1358,13 +1358,13 @@ namespace RandomizerCommon
                         // event 100001312.
                         AddNewEvent(new string[]
                         {
-                                    "END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 6079)",
-                                    $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
-                                    $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
-                                    "IfConditionGroup(MAIN, PASS, OR_01)",
-                                    "Remove Item From Player (ItemType.Goods, 101312, 1)",
-                                    "Award Gesture Item (29,3,9030)",
-                                    "Set Event Flag (6079,1)",
+                            "END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 6079)",
+                            $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
+                            $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
+                            "IfConditionGroup(MAIN, PASS, OR_01)",
+                            "Remove Item From Player (ItemType.Goods, 101312, 1)",
+                            "Award Gesture Item (29,3,9030)",
+                            "Set Event Flag (6079,1)",
                         });
                     }
 
@@ -1372,9 +1372,9 @@ namespace RandomizerCommon
                     // special IDs that the mod can override to show its own messages.
                     AddNewEvent(new string[]
                     {
-                                    "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
-                                    "Display Message (100001312, 1)",
-                                    "Set Event Flag (100001313, OFF)",
+                        "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
+                        "Display Message (100001312, 1)",
+                        "Set Event Flag (100001313, OFF)",
                     });
                 }
 
@@ -1384,13 +1384,14 @@ namespace RandomizerCommon
                     int mat = (int)row["mtrlId"].Value;
                     if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
                     {
-                        var eventFlag = (int)row["qwcID"].Value;
+                        var eventFlag = nextEventId++;
+                        row["qwcID"].Value = eventFlag;
                         Debug.Assert(soul.Type == ItemType.GOOD);
                         AddNewEvent(new string[]
                         {
-                                    $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {eventFlag})",
-                                    $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
-                                    $"Set Event Flag ({eventFlag}, ON)"
+                            $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {eventFlag})",
+                            $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
+                            $"Set Event Flag ({eventFlag}, ON)"
                         });
                     }
                 }
