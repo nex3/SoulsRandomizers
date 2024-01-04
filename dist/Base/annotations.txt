@@ -4231,7 +4231,7 @@ Slots:
   DebugText:
   - Large Titanite Shard - 3700480[Corpse [o000250_0048] @ irithyll]
   Text: After Pontiff's cathedral, hugging the wall to the right
-  Area: irithyll
+  Area: irithyll_anorlondo
   Tags: late
 - Key: '06,0:53700490::'
   DebugText:
@@ -6453,7 +6453,7 @@ Slots:
   DebugText:
   - Blood Gem - 4500480[Corpse [o000250_0048] @ ariandel]
   Text: On the lower level of the Ariandel Chapel basement, in the middle
-  Area: ariandel
+  Area: ariandel_vilhelm
   Tags: mid outoftheway
 - Key: '11,0:54500490::'
   DebugText:
