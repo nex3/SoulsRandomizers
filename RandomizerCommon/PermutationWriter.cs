@@ -548,8 +548,7 @@ namespace RandomizerCommon
                                 }
                             }
                         }
-                        bool isDragon = alwaysReplacePathOfTheDragon ||
-                            (game.DS3 && item.Equals(new ItemKey(ItemType.GOOD, 9030)));
+                        bool isDragon = game.DS3 && item.Equals(new ItemKey(ItemType.GOOD, 9030));
                         // Don't need to add own item if there is a separate carrier for the event flag
                         if (isDragon && mapping.Value.Count > 1)
                         {
@@ -1253,7 +1252,8 @@ namespace RandomizerCommon
                     foreach (EMEVD.Event ev in emevd.Events)
                     {
                         EventEdits edits = null;
-                        if (ev.ID == 0 && map == "m30_00_00_00" && dragonFlag > 0)
+                        if (ev.ID == 0 && map == "m30_00_00_00" &&
+                            (dragonFlag > 0 || alwaysReplacePathOfTheDragon))
                         {
                             // Remove visual sfx for Path of the Dragon pickup
                             ev.Instructions.RemoveAll(i =>
@@ -1320,19 +1320,19 @@ namespace RandomizerCommon
                 // (74000308) so the actual looting flag (74000309) isn't touched by ESD.
                 AddNewEvent(new string[]
                 {
-                            "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)",
-                            "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)",
-                            "SetEventFlag(74000308, ON)",
-                            "IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)",
-                            "SetEventFlag(74000308, OFF)",
+                    "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)",
+                    "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)",
+                    "SetEventFlag(74000308, ON)",
+                    "IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)",
+                    "SetEventFlag(74000308, OFF)",
                 });
                 // Make Firelink Shrine greyed out by default, without having the Coiled Sword, in combination with param change above
                 // This doesn't always work just on its own, so there is a backup edit above.
                 AddNewEvent(new string[]
                 {
-                            "Set Event Flag (14005108,1)",
-                            "IF Player Has/Doesn't Have Item (0,3,2137,1)",
-                            "Set Event Flag (14005108,0)",
+                    "Set Event Flag (14005108,1)",
+                    "IF Player Has/Doesn't Have Item (0,3,2137,1)",
+                    "Set Event Flag (14005108,0)",
                 }, EMEVD.Event.RestBehaviorType.Restart);
                 if (dragonFlag > 0)
                 {
@@ -1340,11 +1340,11 @@ namespace RandomizerCommon
                     // We can't just use the item all of the time, since it would appear as a double drop.
                     AddNewEvent(new string[]
                     {
-                                    "END IF Event Flag (0,1,0,6079)",
-                                    $"IF Event Flag (0,1,0,{dragonFlag})",
-                                    "Remove Item From Player (3,9030,1)",
-                                    "Award Gesture Item (29,3,9030)",
-                                    "Set Event Flag (6079,1)",
+                        "END IF Event Flag (0,1,0,6079)",
+                        $"IF Event Flag (0,1,0,{dragonFlag})",
+                        "Remove Item From Player (3,9030,1)",
+                        "Award Gesture Item (29,3,9030)",
+                        "Set Event Flag (6079,1)",
                     });
                 }
                 else

@@ -429,7 +429,7 @@ namespace RandomizerCommon
         /// </summary>
         private static (string, string) ParseArchipelagoLocation(string locationName)
         {
-            var rx = new Regex(@"^([A-Z0-9]+): (.*?)(?: \(.*\))?$", RegexOptions.Compiled);
+            var rx = new Regex(@"^([A-Z0-9]+): (.*?)(?: - .*)?$", RegexOptions.Compiled);
             var match = rx.Match(locationName);
             if (!match.Success)
             {
@@ -477,7 +477,7 @@ namespace RandomizerCommon
             }
         }
 
-        private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( #\d+| \(.*\))?$");
+        private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( - .*)?$");
 
         /// <summary>
         /// Gets the name of the default item from an Archipelago location name.
