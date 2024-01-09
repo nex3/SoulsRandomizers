@@ -4857,10 +4857,9 @@ Slots:
 - Key: '07,0:53900440::'
   DebugText:
   - Large Titanite Shard - 3900440[Corpse [o000250_0044] @ dungeon]
-  Text: Seemingly unused treasure
-  Area: dungeon
-  # Seems unreachable?
-  Tags: norandom
+  Text: Under overhang next to second set of stairs leading from Distant Manor bonfire
+  Area: irithyll
+  Tags: mid
 - Key: '07,0:53900450::'
   DebugText:
   - Rusted Coin - 3900450[Corpse [o000250_0045] @ dungeon]
