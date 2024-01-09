@@ -85,7 +85,11 @@ namespace RandomizerCommon
             public Dictionary<int, int> MerchantGiftFlags { get; set; }
         }
 
-        public Result Write(Random random, Permutation permutation, RandomizerOptions opt)
+        /// <param name="alwaysReplacePathOfTheDragon">If this is set, Path of the Dragon is
+        /// *always* replaced by a single ember. Otherwise, it's replaced if and only if the
+        /// Path of the Dragon item is included in the pool.</param>
+        public Result Write(Random random, Permutation permutation, RandomizerOptions opt,
+                bool alwaysReplacePathOfTheDragon = false)
         {
             bool writeSwitch = true;
             if (permutation.Hints.Count > 0)
@@ -544,7 +548,8 @@ namespace RandomizerCommon
                                 }
                             }
                         }
-                        bool isDragon = game.DS3 && item.Equals(new ItemKey(ItemType.GOOD, 9030));
+                        bool isDragon = alwaysReplacePathOfTheDragon ||
+                            (game.DS3 && item.Equals(new ItemKey(ItemType.GOOD, 9030)));
                         // Don't need to add own item if there is a separate carrier for the event flag
                         if (isDragon && mapping.Value.Count > 1)
                         {
@@ -1384,8 +1389,10 @@ namespace RandomizerCommon
                     int mat = (int)row["mtrlId"].Value;
                     if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
                     {
-                        var eventFlag = nextEventId++;
-                        row["qwcID"].Value = eventFlag;
+                        // TODO: I tried to create a new event flag to use for qwcID here so that
+                        // soul items didn't become visible from beating bosses, but the items
+                        // never showed up in Ludleth's shop.
+                        var eventFlag = row["qwcID"].Value;
                         Debug.Assert(soul.Type == ItemType.GOOD);
                         AddNewEvent(new string[]
                         {

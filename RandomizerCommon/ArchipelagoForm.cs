@@ -240,7 +240,7 @@ namespace RandomizerCommon
                 Permutation.RandomSilo.MIXED
             });
 
-            writer.Write(random, permutation, opt);
+            writer.Write(random, permutation, opt, alwaysReplacePathOfTheDragon: true);
 
             if (options["no_weapon_requirements"])
             {
