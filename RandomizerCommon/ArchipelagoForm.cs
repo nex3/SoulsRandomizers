@@ -116,8 +116,9 @@ namespace RandomizerCommon
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
             // The Archipelago API doesn't guarantee that the seed is a number, so we hash it so
-            // that we can use it as a seed for C#'s RNG.
-            var seed = HashStringToInt(session.RoomState.Seed);
+            // that we can use it as a seed for C#'s RNG. Add the current player's slot number so
+            // that multiple DS3 instances in the same multiworld have different local seeds.
+            var seed = HashStringToInt(session.RoomState.Seed) + session.ConnectionInfo.Slot;
             opt.Seed = (uint)seed;
             var random = new Random(seed);
 
