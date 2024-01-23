@@ -182,12 +182,6 @@ namespace RandomizerCommon
                         sortId: 200000 + (uint)info.Player * 10000 + (uint)(info.Item % 10000),
                         archipelagoLocationId: info.Location);
                     AddMulti(items, targetSlotKey, item);
-
-                    // TODO: Handle this in the C++ mod instead.
-                    writer.AddNewEvent(new string[] {
-                        $"IF Player Has/Doesn't Have Item (0, ItemType.Goods, {item.Item.ID}, OwnershipState.Owns)",
-                        $"Remove Item From Player (ItemType.Goods, {item.Item.ID}, 1)",
-                    });
                 }
                 else if (itemName == "Path of the Dragon")
                 {
