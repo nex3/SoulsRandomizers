@@ -46,7 +46,16 @@ namespace RandomizerCommon
                 return;
             }
 
-            var session = ArchipelagoSessionFactory.CreateSession(url.Text);
+            ArchipelagoSession session;
+            try
+            {
+                session = ArchipelagoSessionFactory.CreateSession(url.Text);
+            }
+            catch (System.UriFormatException ex)
+            {
+                ShowFailure(ex.Message);
+                return;
+            }
 
             LoginResult result;
             try
