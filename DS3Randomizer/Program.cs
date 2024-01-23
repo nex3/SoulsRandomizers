@@ -51,7 +51,11 @@ namespace DS3Randomizer
 #endif
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+#if ARCHIPELAGO
+                Application.Run(new ArchipelagoForm());
+#else
                 Application.Run(new MainForm());
+#endif
             }
         }
     }

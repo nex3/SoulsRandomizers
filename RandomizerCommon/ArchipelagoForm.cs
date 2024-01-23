@@ -283,6 +283,8 @@ namespace RandomizerCommon
             status.Text = "Writing game files...";
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
 
+            MessageBox.Show("Archipelago config loaded successfully!");
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }

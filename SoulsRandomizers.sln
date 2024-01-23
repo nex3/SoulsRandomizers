@@ -3,26 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomizerCommon", "RandomizerCommon\RandomizerCommon.csproj", "{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RandomizerCommon", "RandomizerCommon\RandomizerCommon.csproj", "{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{22C664BD-877B-44DF-8ECF-2808522469A8} = {22C664BD-877B-44DF-8ECF-2808522469A8}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "..\SoulsFormats\SoulsFormats\SoulsFormats.csproj", "{22C664BD-877B-44DF-8ECF-2808522469A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoulsIds", "..\SoulsIds\SoulsIds\SoulsIds.csproj", "{C46D537C-54DC-48BF-B824-8A950DD9D4F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsIds", "..\SoulsIds\SoulsIds\SoulsIds.csproj", "{C46D537C-54DC-48BF-B824-8A950DD9D4F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SekiroRandomizer", "SekiroRandomizer\SekiroRandomizer.csproj", "{17F220BA-034B-4BA3-97E2-32763D9F61A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SekiroRandomizer", "SekiroRandomizer\SekiroRandomizer.csproj", "{17F220BA-034B-4BA3-97E2-32763D9F61A8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8} = {C46D537C-54DC-48BF-B824-8A950DD9D4F8}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DS3Randomizer", "DS3Randomizer\DS3Randomizer.csproj", "{5712207B-FC91-4480-A849-565044231885}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C46D537C-54DC-48BF-B824-8A950DD9D4F8} = {C46D537C-54DC-48BF-B824-8A950DD9D4F8}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EldenRingRandomizer", "EldenRingRandomizer\EldenRingRandomizer.csproj", "{03CEEEDB-E665-4DA1-B963-0A584EF1F440}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DS3Randomizer", "DS3Randomizer\DS3Randomizer.csproj", "{5712207B-FC91-4480-A849-565044231885}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8} = {C46D537C-54DC-48BF-B824-8A950DD9D4F8}
 	EndProjectSection
@@ -31,64 +26,108 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrayIris.Utilities", "..\ye
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug (Archipelago)|Any CPU = Debug (Archipelago)|Any CPU
+		Debug (Archipelago)|x64 = Debug (Archipelago)|x64
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
+		Release (Archipelago)|Any CPU = Release (Archipelago)|Any CPU
+		Release (Archipelago)|x64 = Release (Archipelago)|x64
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Debug|x64.Build.0 = Debug|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release|x64.ActiveCfg = Release|Any CPU
 		{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}.Release|x64.Build.0 = Release|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Debug|x64.Build.0 = Debug|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release|x64.ActiveCfg = Release|Any CPU
 		{22C664BD-877B-44DF-8ECF-2808522469A8}.Release|x64.Build.0 = Release|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Debug|x64.Build.0 = Debug|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|x64.ActiveCfg = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|x64.Build.0 = Release|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|x64.Build.0 = Debug|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release|x64.ActiveCfg = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release|x64.Build.0 = Release|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug (Archipelago)|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Debug (Archipelago)|Any CPU.Build.0 = Debug (Archipelago)|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|x64.Build.0 = Debug|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.ActiveCfg = RA|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.Build.0 = RA|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release|x64.ActiveCfg = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release|x64.Build.0 = Release|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Debug|x64.Build.0 = Debug|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Release|x64.ActiveCfg = Release|Any CPU
-		{03CEEEDB-E665-4DA1-B963-0A584EF1F440}.Release|x64.Build.0 = Release|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Debug|x64.Build.0 = Debug|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
+		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{38D57FE6-C75F-4B05-9E4F-D02A48CAA21E}.Release|x64.ActiveCfg = Release|Any CPU
