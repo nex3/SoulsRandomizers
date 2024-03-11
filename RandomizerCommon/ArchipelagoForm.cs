@@ -478,7 +478,24 @@ namespace RandomizerCommon
             {
                 if (key.Type != ItemType.GOOD)
                 {
-                    game.Item(key)["weight"].Value = 0;
+                    var row = game.Item(key);
+                    row["weight"].Value = 0;
+                    if (key.Type == ItemType.WEAPON
+                        // Weapon IDs below 1000000 are arrows and stuff that don't have normal
+                        // infusion paths.
+                        && key.ID >= 1000000
+                        // Weapons that aren't 0 % 10000 are already infused.
+                        && key.ID % 10000 == 0)
+                    {
+                        var weapons = game.Params["EquipParamWeapon"];
+                        if (weapons.Rows.Any(row => row.ID == key.ID + 100))
+                        {
+                            for (var i = 1; i < 16; i++)
+                            {
+                                weapons[key.ID + 100 * i]["weight"].Value = 0;
+                            }
+                        }
+                    }
                 }
             }
         }
