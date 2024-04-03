@@ -108,8 +108,8 @@ Global
 		{5712207B-FC91-4480-A849-565044231885}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Debug|x64.Build.0 = Debug|Any CPU
-		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.ActiveCfg = RA|Any CPU
-		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.Build.0 = RA|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.ActiveCfg = Release (Archipelago)|Any CPU
+		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|Any CPU.Build.0 = Release (Archipelago)|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{5712207B-FC91-4480-A849-565044231885}.Release|Any CPU.ActiveCfg = Release|Any CPU
