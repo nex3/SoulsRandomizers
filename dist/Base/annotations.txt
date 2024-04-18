@@ -1034,7 +1034,7 @@ Slots:
 - Key: '00,0:54000120::'
   DebugText:
   - Ember - 4000120[Corpse [o000250_0012] @ firelink]
-  Text: Above the Firelink Shrine entrance, up stairs/slope from either left or right of the entrance
+  Text: Above the Firelink Shrine entrance, up the stairs/slope from either left or right of the entrance
   Area: firelink
 - Key: '00,0:54000140::'
   DebugText:
@@ -1117,7 +1117,7 @@ Slots:
 - Key: '00,0:54000290::'
   DebugText:
   - Soul of a Crestfallen Knight - 4000290[Corpse [o000250_0029] @ firelink]
-  Text: Above the Firelink Shrine entrance, up stairs/slope from either left or right of the entrance
+  Text: Above the Firelink Shrine entrance, up the stairs/slope from either left or right of the entrance
   Area: untended
   Tags: late
 - Key: '00,0:54000300::'
@@ -6704,7 +6704,7 @@ Slots:
 - Key: '12,0:55000110::'
   DebugText:
   - Murky Longstaff - 5000110[Corpse [o000250_0011] @ dregheap]
-  Text: After exiting the building with the Lothric Knights where the front crumbles, in the third furthest room in the building to the right.
+  Text: After exiting the building with the Lothric Knights where the front crumbles, in the third-furthest room in the building to the right.
   Area: dregheap
 - Key: '12,0:55000120::'
   DebugText:
