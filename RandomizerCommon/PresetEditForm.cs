@@ -286,7 +286,7 @@ namespace RandomizerCommon
 
         // Used by other forms. TODO rename in localized files
         [Localize]
-        internal static readonly Text confirmTitleText = new Text("Confirm", "PresetEditForm_confirmTitle");
+        public static readonly Text confirmTitleText = new Text("Confirm", "PresetEditForm_confirmTitle");
         [Localize]
         internal static readonly Text confirmOverwriteText = new Text("Overwrite existing file?", "PresetEditForm_confirmOverwrite");
         [Localize]
