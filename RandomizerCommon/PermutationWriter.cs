@@ -1361,15 +1361,16 @@ namespace RandomizerCommon
                         // Archipelago handles Path of the Dragon as a synthetic item or
                         // (when getting it from another world) manually triggering the
                         // event 100001312.
+                        var trackingEvent = GetUniqueEventId();
                         AddNewEvent(new string[]
                         {
-                            "END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 6079)",
+                            $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
                             $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
                             $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
                             "IfConditionGroup(MAIN, PASS, OR_01)",
                             "Remove Item From Player (ItemType.Goods, 101312, 1)",
                             "Award Gesture Item (29,3,9030)",
-                            "Set Event Flag (6079,1)",
+                            "Set Event Flag ({trackingEvent},1)",
                         });
                     }
 
@@ -2033,12 +2034,17 @@ namespace RandomizerCommon
             return new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1));
         }
 
+        /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
+        public uint GetUniqueEventId() {
+            return nextEventId++;
+        }
+
         /// <summary>
         /// Adds a new event to the common EMEVD.
         /// </summary>
         public void AddNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
         {
-            var id = nextEventId++;
+            var id = GetUniqueEventId();
             var ev = new EMEVD.Event(id, rest);
             ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
             var emevd = game.Emevds["common"];
