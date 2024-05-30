@@ -90,6 +90,25 @@ namespace RandomizerCommon
                 return;
             }
 
+            try
+            {
+                RandomizeForArchipelago(session);
+            }
+            catch (Exception ex)
+            {
+                ShowFailure(ex.Message);
+                return;
+            }
+
+            MessageBox.Show("Archipelago config loaded successfully!");
+
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void RandomizeForArchipelago(ArchipelagoSession session)
+        {
+
             status.Text = "Downloading item data...";
             var locations = session.Locations.ScoutLocationsAsync(session.Locations.AllLocations.ToArray()).Result;
             var slotData = session.DataStorage.GetSlotData();
@@ -291,11 +310,6 @@ namespace RandomizerCommon
 
             status.Text = "Writing game files...";
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
-
-            MessageBox.Show("Archipelago config loaded successfully!");
-
-            this.DialogResult = DialogResult.OK;
-            this.Close();
         }
 
         /// <summary>
@@ -398,9 +412,19 @@ namespace RandomizerCommon
                     continue;
                 }
 
-                var apName = session.Locations.GetLocationNameFromId(location.Location)
-                    // https://github.com/ArchipelagoMW/Archipelago.MultiClient.Net/issues/83
-                    .Replace("Siegbr��u", "Siegbräu");
+                var apName = session.Locations.GetLocationNameFromId(location.Location);
+                if (apName == null)
+                {
+                    throw new Exception(
+                        $"Can't find a name for location ID {location.Location}. This probably " +
+                        // "At least one non-DS3 game" shouldn't be necessary once we're using v6.0
+                        // of the .NET Archipelago client.
+                        "indicates a server bug. Try regenerating your Multiworld with at least " +
+                        "one non-DS3 game.");
+                }
+
+                // https://github.com/ArchipelagoMW/Archipelago.MultiClient.Net/issues/83
+                apName = apName.Replace("Siegbr��u", "Siegbräu");
                 var apKey = ParseArchipelagoLocation(apName);
                 var (apRegion, itemName) = apKey;
                 if (locationToSlots.TryGetValue(apKey, out var locationSlots))
