@@ -1356,23 +1356,27 @@ namespace RandomizerCommon
                         .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
                         .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
 
+                    // Archipelago handles Path of the Dragon as a synthetic item or (when getting
+                    // it from another world or a /send command) manually triggering the event
+                    // 100001312.
+                    var trackingEvent = GetUniqueEventId();
+                    var commands = new List<string>(new string[]
+                    {
+                        $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
+                        $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
+                    });
                     if (pathOfTheDragon != null)
                     {
-                        // Archipelago handles Path of the Dragon as a synthetic item or
-                        // (when getting it from another world) manually triggering the
-                        // event 100001312.
-                        var trackingEvent = GetUniqueEventId();
-                        AddNewEvent(new string[]
-                        {
-                            $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
-                            $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
-                            $"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)",
-                            "IfConditionGroup(MAIN, PASS, OR_01)",
-                            "Remove Item From Player (ItemType.Goods, 101312, 1)",
-                            "Award Gesture Item (29,3,9030)",
-                            $"Set Event Flag ({trackingEvent},1)",
-                        });
+                        commands.Add($"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)");
                     }
+                    commands.AddRange(new string[]
+                    {
+                        "IfConditionGroup(MAIN, PASS, OR_01)",
+                        "Remove Item From Player (ItemType.Goods, 101312, 1)",
+                        "Award Gesture Item (29,3,9030)",
+                        $"Set Event Flag ({trackingEvent},1)",
+                    });
+                    AddNewEvent(commands);
 
                     // Another Archipelago-specific event that display a message with a
                     // special IDs that the mod can override to show its own messages.
