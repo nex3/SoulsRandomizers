@@ -1370,7 +1370,7 @@ namespace RandomizerCommon
                             "IfConditionGroup(MAIN, PASS, OR_01)",
                             "Remove Item From Player (ItemType.Goods, 101312, 1)",
                             "Award Gesture Item (29,3,9030)",
-                            "Set Event Flag ({trackingEvent},1)",
+                            $"Set Event Flag ({trackingEvent},1)",
                         });
                     }
 
