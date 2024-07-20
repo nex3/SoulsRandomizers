@@ -13,7 +13,7 @@
 /*.json
 *.netbak
 scratch/
-presets/
+/presets/
 
 # User-specific files
 *.rsuser
