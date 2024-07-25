@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 using Newtonsoft.Json.Linq;
 using SoulsIds;
@@ -110,7 +111,11 @@ namespace RandomizerCommon
         {
 
             status.Text = "Downloading item data...";
-            var locations = session.Locations.ScoutLocationsAsync(session.Locations.AllLocations.ToArray()).Result;
+            var locations = session.Locations
+                .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
+                .Result
+                .Values
+                .ToList();
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
@@ -159,9 +164,9 @@ namespace RandomizerCommon
             // they're assigned elsewhere).
             var itemsToRemove = new Dictionary<SlotKey, SlotKey>();
 
-            foreach (var info in locations.Locations)
+            foreach (var info in locations)
             {
-                var targetScope = apLocationsToScopes[info.Location];
+                var targetScope = apLocationsToScopes[info.LocationId];
                 var candidates = data.Location(targetScope);
                 SlotKey targetSlotKey;
                 if (candidates.Count == 1)
@@ -170,7 +175,7 @@ namespace RandomizerCommon
                 }
                 else
                 {
-                    var apLocation = session.Locations.GetLocationNameFromId(info.Location);
+                    var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
                     var defaultItemName = ItemNameForLocation(apLocation);
                     var match = candidates.FirstOrDefault(candidate => game.ItemNames[candidate.Item] == defaultItemName);
                     if (match != null)
@@ -191,7 +196,6 @@ namespace RandomizerCommon
                 }
 
                 var targetSlot = ann.Slots[targetScope];
-                var itemName = session.Items.GetItemName(info.Item);
                 var player = session.Players.Players[session.ConnectionInfo.Team]
                     .First(player => player.Slot == info.Player);
 
@@ -199,26 +203,28 @@ namespace RandomizerCommon
                 {
                     // Create a fake key item for each item from another world.
                     var item = writer.AddSyntheticItem(
-                        $"{player.Alias}'s {itemName}",
-                        $"{IndefiniteArticle(itemName)} from a mysterious world known only as \"{player.Game}\".",
+                        $"{player.Alias}'s {info.ItemName}",
+                        $"{IndefiniteArticle(info.ItemName)} from a mysterious world known only " + 
+                        "as \"{player.Game}\".",
                         // The highest in-game sortId is 133,100, so for foreign items we start
                         // from 200,000 to sort them after in-game key items. From there we add
                         // the player ID as the primary sort, followed by the item ID (mod 10k
                         // because Archipelago puts all item IDs in a single 54-bit numberspace).
                         // This means that in shops, foregin items will be grouped first by player
                         // and then by item.
-                        sortId: 200000 + (uint)info.Player * 10000 + (uint)(info.Item % 10000),
-                        archipelagoLocationId: info.Location);
+                        sortId: 200000 + (uint)info.Player.Slot * 10000 +
+                            (uint)(info.ItemId % 10000),
+                        archipelagoLocationId: info.LocationId);
                     AddMulti(items, targetSlotKey, item);
                 }
-                else if (itemName == "Path of the Dragon")
+                else if (info.ItemName == "Path of the Dragon")
                 {
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"Path of the Dragon",
                         "A gesture of meditation channeling the eternal essence of the ancient dragons",
                         "The path to ascendence can be achieved only by the most resolute of seekers. Proper utilization of this technique can grant deep inner focus.",
                         iconId: 7039,
-                        archipelagoLocationId: info.Location));
+                        archipelagoLocationId: info.LocationId));
                 }
                 else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
                 {
@@ -228,15 +234,15 @@ namespace RandomizerCommon
                     // they're checked. We can't do this with items in shops because we don't have
                     // a good way to replace them on pickup.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
-                        $"[Placeholder] {itemName}",
+                        $"[Placeholder] {info.ItemName}",
                         "If you can see this your Archipelago mod isn't working.",
-                        archipelagoLocationId: info.Location,
-                        replaceWithInArchipelago: new ItemKey(apIdsToItemIds[info.Item]),
-                        replaceWithQuantity: itemCounts.GetValueOrDefault(info.Item, 1U)));
+                        archipelagoLocationId: info.LocationId,
+                        replaceWithInArchipelago: new ItemKey(apIdsToItemIds[info.ItemId]),
+                        replaceWithQuantity: itemCounts.GetValueOrDefault(info.ItemId, 1U)));
                 }
                 else
                 {
-                    var itemKey = new ItemKey(apIdsToItemIds[info.Item]);
+                    var itemKey = new ItemKey(apIdsToItemIds[info.ItemId]);
                     data.AddLocationlessItem(itemKey);
                     AddMulti(
                         items,
@@ -370,7 +376,7 @@ namespace RandomizerCommon
         /// Returns a map from Archipelago location IDs to the corresponding location scopes.
         /// </summary>
         private static Dictionary<long, LocationScope> ArchipelagoLocations(
-            ArchipelagoSession session, AnnotationData ann, LocationInfoPacket locations)
+            ArchipelagoSession session, AnnotationData ann, List<ScoutedItemInfo> locations)
         {
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToKeys = ((JObject)slotData["locationIdsToKeys"])
@@ -404,23 +410,20 @@ namespace RandomizerCommon
                 locationToSlots.ToDictionary(pair => pair.Key, pair => pair.Value.Count);
 
             var result = new Dictionary<long, LocationScope>();
-            foreach (var location in locations.Locations)
+            foreach (var location in locations)
             {
-                if (apIdsToKeys.TryGetValue(location.Location, out var key))
+                if (apIdsToKeys.TryGetValue(location.LocationId, out var key))
                 {
-                    result[location.Location] = ann.SlotsByAnnotationsKey[key].LocationScope;
+                    result[location.LocationId] = ann.SlotsByAnnotationsKey[key].LocationScope;
                     continue;
                 }
 
-                var apName = session.Locations.GetLocationNameFromId(location.Location);
+                var apName = location.LocationName;
                 if (apName == null)
                 {
                     throw new Exception(
-                        $"Can't find a name for location ID {location.Location}. This probably " +
-                        // "At least one non-DS3 game" shouldn't be necessary once we're using v6.0
-                        // of the .NET Archipelago client.
-                        "indicates a server bug. Try regenerating your Multiworld with at least " +
-                        "one non-DS3 game.");
+                        $"Can't find a name for location ID {location.LocationId}. This " +
+                        "probably indicates a server bug. Try regenerating your Multiworld.");
                 }
 
                 // https://github.com/ArchipelagoMW/Archipelago.MultiClient.Net/issues/83
@@ -431,7 +434,7 @@ namespace RandomizerCommon
                 {
                     if (locationSlots.TryDequeue(out var slot))
                     {
-                        result[location.Location] = slot.LocationScope;
+                        result[location.LocationId] = slot.LocationScope;
                         continue;
                     }
                     else
@@ -445,7 +448,7 @@ namespace RandomizerCommon
 
                 if (itemNameToSlots.TryGetValue(itemName, out var itemSlots) && itemSlots.Count == 1)
                 {
-                    result[location.Location] = itemSlots.First().LocationScope;
+                    result[location.LocationId] = itemSlots.First().LocationScope;
                     continue;
                 }
 
@@ -543,7 +546,7 @@ namespace RandomizerCommon
         private void ShowFailure(String message)
         {
             Enabled = true;
-            status.ForeColor = Color.DarkRed;
+            status.ForeColor = System.Drawing.Color.DarkRed;
             status.Text = message;
         }
     }
