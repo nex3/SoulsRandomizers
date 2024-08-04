@@ -2002,40 +2002,104 @@ namespace RandomizerCommon
             long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
             uint replaceWithQuantity = 1)
         {
-            var goods = game.Params["EquipParamGoods"];
-            var newRow = new PARAM.Row(goods[2005]) // Use the Small Doll as the basis for the row
+            // Use the Small Doll as the basis for the row
+            var (key, row) = this.AddSyntheticCopy(new ItemKey(ItemType.GOOD, 2005));
+
+            row["iconId"].Value = iconId;
+            row["sortId"].Value = sortId; // Sort external items last of all
+
+            if (replaceWithInArchipelago != null)
             {
-                ID = goods.Rows.Count + 3780000 // 3780000 is the highest row in the actual game.
+                row["fragmentNum"].Value = replaceWithInArchipelago.FullID;
+                row["sellValue"].Value = replaceWithQuantity;
+            }
+
+            // Get rid of any old small doll text.
+            foreach (var fmgKey in game.ItemFMGs.Keys)
+            {
+                game.ItemFMGs[fmgKey][row.ID] = "[missing text]";
+            }
+            game.ItemFMGs["アイテム名"][row.ID] = name;
+            if (shortDescription != null)
+            {
+                game.ItemFMGs["アイテム説明"][row.ID] = shortDescription;
+                game.ItemFMGs["アイテムうんちく"][row.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
+            }
+
+            return key;
+        }
+
+        /// <summary>
+        /// Creates a new item with all the same metadata as the original.
+        /// </summary>
+        /// <param name="original">The item on which to base the synthetic replica.</param>
+        /// <param name="archipelagoLocationId">The ID of the location the item is found in
+        /// according to Archipelago, for Archipelago runs.</param>
+        /// <param name="archipelagoRemoveOnPickup">If this is true, adds a param that tells
+        /// Archipelago to remove this item as soon as it's picked up. Only supported for
+        /// goods.</param>
+        public (SlotKey, PARAM.Row) AddSyntheticCopy(
+            ItemKey original,
+            long? archipelagoLocationId = null,
+            bool archipelagoRemoveOnPickup = false)
+        {
+            var param = game.Param(original.Type);
+
+            var upgrades = original.Type == ItemType.WEAPON ? original.ID % 100 : 0;
+            var infusion = original.Type == ItemType.WEAPON ? original.ID % 1000 - upgrades: 0;
+            var armorType = original.Type == ItemType.ARMOR ? original.ID % 10000 : 0;
+            var row = new PARAM.Row(param[original.ID - upgrades])
+            {
+                ID = original.Type switch
+                {
+                    // Digits below the 1000s place represent the infusion type and ugprade level
+                    // of the weapon. We have to ensure that the infusion type matches the
+                    // original. Upgrades don't appear in the params at all, JUST the ID, so we
+                    // create the base weapon instead and use the ID alone for the upgrade.
+                    //
+                    // 23010000 is the highest non-debug weapon row in vanilla.
+                    ItemType.WEAPON => param.Rows.Count * 1000 + 23010000 + infusion,
+                    // Armor uses the 1000s digit to represent where on the body it's equipped, so
+                    // that must match the original for the armor to be considered valid. Everything
+                    // below that digit is considered invalid.
+                    //
+                    // 99003000 is the highest non-debug weapon row in vanilla.
+                    ItemType.ARMOR => param.Rows.Count * 10000 + 99003000 + armorType,
+                    // 3780000 is the highest goods or accessory row in vanilla.
+                    _ => param.Rows.Count + 3780000
+                }
             };
-            newRow["iconId"].Value = iconId;
-            newRow["sortId"].Value = sortId; // Sort external items last of all
 
             // An Archipelago ID can be up to 53 bits, so we have to store each one in two different
             // 32-bit parameter fields that aren't relevant to key items.
             if (archipelagoLocationId != null)
             {
-                newRow["VagrantItemLotId"].Value = (int)((ulong)archipelagoLocationId & 0xffffffffUL);
-                newRow["VagrantBonusEneDropItemLotId"].Value = (int)((ulong)archipelagoLocationId >> 32);
+                // The specific capitalization of these rows varies between params.
+                (
+                    row["VagrantItemLotId"] ?? row["vagrantItemLotId"]
+                ).Value = (int)((ulong)archipelagoLocationId & 0xffffffffUL);
+                (
+                    row["VagrantBonusEneDropItemLotId"] ??
+                    row["vagrantBonusEneDropItemLotId"] ??
+                    row["vagrantBonuseneDropItemLotId"]
+                ).Value = (int)((ulong)archipelagoLocationId >> 32);
             }
-            if (replaceWithInArchipelago != null)
+            if (original.Type == ItemType.GOOD)
             {
-                newRow["fragmentNum"].Value = replaceWithInArchipelago.FullID;
-                newRow["sellValue"].Value = replaceWithQuantity;
+                row["disableUseAtColiseum"].Value = archipelagoRemoveOnPickup;
             }
 
-            goods.Rows.Add(newRow);
+            param.Rows.Add(row);
 
-            game.ItemFMGs["アイテム名"][newRow.ID] = name;
-            if (shortDescription != null)
+            foreach (var fmgKey in game.ItemFMGs.Keys)
             {
-                game.ItemFMGs["アイテム説明"][newRow.ID] = shortDescription;
-                game.ItemFMGs["アイテムうんちく"][newRow.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
+                var originalFmg = game.ItemFMGs[fmgKey][original.ID - upgrades];
+                if (original != null) game.ItemFMGs[fmgKey][row.ID] = originalFmg;
             }
 
-            var key = new ItemKey(ItemType.GOOD, newRow.ID);
+            var key = new ItemKey(original.Type, row.ID + upgrades);
             data.AddLocationlessItem(key);
-
-            return new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1));
+            return (new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1)), row);
         }
 
         /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>

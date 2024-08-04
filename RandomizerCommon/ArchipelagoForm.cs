@@ -155,6 +155,14 @@ namespace RandomizerCommon
             opt.Seed = (uint)seed;
             var random = new Random(seed);
 
+            // Randomize starting loadout *before* adding a bunch of synthetic weapons and armor to
+            // the pool that we don't want shoved into shops.
+            if (options["random_starting_loadout"])
+            {
+                var characters = new CharacterWriter(game, data);
+                characters.Write(random, opt);
+            }
+
             // A map from locations in the game where items can appear to the list of items that
             // should appear in those locations.
             var items = new Dictionary<SlotKey, List<SlotKey>>();
@@ -228,7 +236,7 @@ namespace RandomizerCommon
                 else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
                 {
                     // The Archipelago mod can't replace items that appear in shops or are dropped
-                    // by the crow, so we have to put literal items there. Everywhere else, we
+                    // by the crow, so we put more realistic items there. Everywhere else, we
                     // replace with placeholders, so we can notify the Archipelago server when
                     // they're checked. We can't do this with items in shops because we don't have
                     // a good way to replace them on pickup.
@@ -241,12 +249,20 @@ namespace RandomizerCommon
                 }
                 else
                 {
-                    var itemKey = new ItemKey(apIdsToItemIds[info.ItemId]);
-                    data.AddLocationlessItem(itemKey);
-                    AddMulti(
-                        items,
-                        targetSlotKey,
-                        new SlotKey(itemKey, new ItemScope(ItemScope.ScopeType.SPECIAL, -1)));
+                    var original = new ItemKey(apIdsToItemIds[info.ItemId]);
+                    var (copy, _) = writer.AddSyntheticCopy(original, info.LocationId);
+                    AddMulti(items, targetSlotKey, copy);
+
+                    // Because we can't replace items on purchase in the mod the same way we do on
+                    // pickup, we rely on custom events to make the swap for us.
+                    writer.AddNewEvent(new[]
+                    {
+                        $"IfPlayerHasdoesntHaveItem(MAIN, {(int)copy.Item.Type}, {copy.Item.ID}, OwnershipState.Owns)",
+                        $"RemoveItemFromPlayer({(int)copy.Item.Type}, {copy.Item.ID}, 1)",
+                        // The third argument here just needs to be a flag that's always on. 6001
+                        // fits the bill.
+                        $"DirectlyGivePlayerItem({(int)original.Type}, {original.ID}, 6001, 1)"
+                    });
                 }
             }
 
@@ -283,12 +299,6 @@ namespace RandomizerCommon
             if (options["no_equip_load"])
             {
                 RemoveEquipLoad(game, data);
-            }
-
-            if (options["random_starting_loadout"])
-            {
-                var characters = new CharacterWriter(game, data);
-                characters.Write(random, opt);
             }
 
             if (options["randomize_enemies"])

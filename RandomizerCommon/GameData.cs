@@ -328,11 +328,17 @@ namespace RandomizerCommon
             return Params[name];
         }
 
+        public PARAM Param(ItemType type)
+        {
+            if (type == ItemType.EQUIP) return null;
+            return Params[itemParams[(int) type]];
+        }
+
         public PARAM.Row Item(ItemKey key)
         {
             if (!Sekiro) key = NormalizeWeapon(key);
             if (key.Type == ItemType.EQUIP) return null;
-            return Params[itemParams[(int) key.Type]][key.ID];
+            return Param(key.Type)[key.ID];
         }
 
         public PARAM.Row AddRow(string name, int id, int oldId = -1)
