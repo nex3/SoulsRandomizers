@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using YamlDotNet.Core.Tokens;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
@@ -288,7 +289,7 @@ namespace RandomizerCommon
 
             if (options["no_weapon_requirements"])
             {
-                RemoveWeaponRequirements(game, data);
+                RemoveWeaponRequirements(game);
             }
 
             if (options["no_spell_requirements"])
@@ -298,7 +299,7 @@ namespace RandomizerCommon
 
             if (options["no_equip_load"])
             {
-                RemoveEquipLoad(game, data);
+                RemoveEquipLoad(game);
             }
 
             if (options["randomize_enemies"])
@@ -482,13 +483,14 @@ namespace RandomizerCommon
         }
 
         /// <summary>Sets all weapon stat requirements to 0.</summary>
-        private static void RemoveWeaponRequirements(GameData game, LocationData data)
+        private static void RemoveWeaponRequirements(GameData game)
         {
-            foreach (var key in data.Data.Keys)
+            foreach (var type in new ItemType[] {
+                ItemType.WEAPON, ItemType.ARMOR, ItemType.RING, ItemType.GOOD
+            })
             {
-                if (key.Type == ItemType.WEAPON)
+                foreach (var row in game.Param(type).Rows)
                 {
-                    var row = game.Item(key);
                     foreach (var stat in new[] { "Strength", "Agility", "Magic", "Faith" })
                     {
                         row[$"proper{stat}"].Value = 0;
@@ -508,30 +510,15 @@ namespace RandomizerCommon
         }
 
         /// <summary>Sets the equip burden of all items to 0.</summary>
-        private static void RemoveEquipLoad(GameData game, LocationData data)
+        private static void RemoveEquipLoad(GameData game)
         {
-            foreach (var key in data.Data.Keys)
+            foreach (var type in new ItemType[] {
+                ItemType.WEAPON, ItemType.ARMOR, ItemType.RING, ItemType.GOOD
+            })
             {
-                if (key.Type != ItemType.GOOD)
+                foreach (var row in game.Param(type).Rows)
                 {
-                    var row = game.Item(key);
                     row["weight"].Value = 0;
-                    if (key.Type == ItemType.WEAPON
-                        // Weapon IDs below 1000000 are arrows and stuff that don't have normal
-                        // infusion paths.
-                        && key.ID >= 1000000
-                        // Weapons that aren't 0 % 10000 are already infused.
-                        && key.ID % 10000 == 0)
-                    {
-                        var weapons = game.Params["EquipParamWeapon"];
-                        if (weapons.Rows.Any(row => row.ID == key.ID + 100))
-                        {
-                            for (var i = 1; i < 16; i++)
-                            {
-                                weapons[key.ID + 100 * i]["weight"].Value = 0;
-                            }
-                        }
-                    }
                 }
             }
         }
