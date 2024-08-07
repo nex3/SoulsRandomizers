@@ -2003,7 +2003,8 @@ namespace RandomizerCommon
             uint replaceWithQuantity = 1)
         {
             // Use the Small Doll as the basis for the row
-            var (key, row) = this.AddSyntheticCopy(new ItemKey(ItemType.GOOD, 2005));
+            var (key, row) = this.AddSyntheticCopy(
+                new ItemKey(ItemType.GOOD, 2005), archipelagoLocationId);
 
             row["iconId"].Value = iconId;
             row["sortId"].Value = sortId; // Sort external items last of all
