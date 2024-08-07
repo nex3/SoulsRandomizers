@@ -1,20 +1,17 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
-using Archipelago.MultiClient.Net.Packets;
 using Newtonsoft.Json.Linq;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using YamlDotNet.Core.Tokens;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
@@ -485,16 +482,11 @@ namespace RandomizerCommon
         /// <summary>Sets all weapon stat requirements to 0.</summary>
         private static void RemoveWeaponRequirements(GameData game)
         {
-            foreach (var type in new ItemType[] {
-                ItemType.WEAPON, ItemType.ARMOR, ItemType.RING, ItemType.GOOD
-            })
+            foreach (var row in game.Params["EquipParamWeapon"].Rows)
             {
-                foreach (var row in game.Param(type).Rows)
+                foreach (var stat in new[] { "Strength", "Agility", "Magic", "Faith" })
                 {
-                    foreach (var stat in new[] { "Strength", "Agility", "Magic", "Faith" })
-                    {
-                        row[$"proper{stat}"].Value = 0;
-                    }
+                    row[$"proper{stat}"].Value = 0;
                 }
             }
         }
