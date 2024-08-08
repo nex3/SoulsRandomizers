@@ -1375,6 +1375,7 @@ namespace RandomizerCommon
                         "Remove Item From Player (ItemType.Goods, 101312, 1)",
                         "Award Gesture Item (29,3,9030)",
                         $"Set Event Flag ({trackingEvent},1)",
+                        $"Set Event Flag (100001312,0)",
                     });
                     AddNewEvent(commands);
 
