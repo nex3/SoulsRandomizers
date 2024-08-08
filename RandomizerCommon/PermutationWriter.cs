@@ -2093,6 +2093,17 @@ namespace RandomizerCommon
 
             param.Rows.Add(row);
 
+            // If a spell gets duplicated, duplicate its corresponding Magic entry as well so that
+            // it has proper stat requirements and so on.
+            if (original.Type == ItemType.GOOD)
+            {
+                var magic = game.Params["Magic"][original.ID];
+                if (magic != null)
+                {
+                    game.Params["Magic"].Rows.Add(new PARAM.Row(magic) { ID = row.ID });
+                }
+            }
+
             foreach (var fmgKey in game.ItemFMGs.Keys)
             {
                 var originalFmg = game.ItemFMGs[fmgKey][original.ID - upgrades];
