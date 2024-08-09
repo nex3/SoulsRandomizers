@@ -2005,7 +2005,10 @@ namespace RandomizerCommon
         {
             // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
-                new ItemKey(ItemType.GOOD, 2005), archipelagoLocationId);
+                new ItemKey(ItemType.GOOD, 2005),
+                archipelagoLocationId,
+                archipelagoRemoveOnPickup: true
+            );
 
             row["iconId"].Value = iconId;
             row["sortId"].Value = sortId; // Sort external items last of all
