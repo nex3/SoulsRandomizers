@@ -1371,7 +1371,6 @@ namespace RandomizerCommon
                     commands.AddRange(new string[]
                     {
                         "IfConditionGroup(MAIN, PASS, OR_01)",
-                        "Remove Item From Player (ItemType.Goods, 101312, 1)",
                         "Award Gesture Item (29,3,9030)",
                         $"Set Event Flag ({trackingEvent},1)",
                         $"Set Event Flag (100001312,0)",
@@ -1991,22 +1990,24 @@ namespace RandomizerCommon
         /// beginning of the long description.</param>
         /// <param name="archipelagoLocationId">The ID of the location the item is found in
         /// according to Archipelago, for Archipelago runs.</param>
-        /// <param name="replaceWithInArchipelago">The item the Archipelago mod should replace this with when
-        /// it's picked up. Used so that Archipelago can notify the server that a specific location
-        /// has been checked even if it contains a non-unique item.</param>
+        /// <param name="replaceWithInArchipelago">The item the Archipelago mod should replace this
+        /// with when it's picked up. Used so that Archipelago can notify the server that a
+        /// specific location has been checked even if it contains a non-unique item.</param>
         /// <param name="replaceWithQuantity">If replaceWith is set, this is the number of items it
         /// should be replaced with.</param>
+        /// <param name="archipelagoRemoveOnPickup">Whether to tell the Archipelago client to 
+        /// automatically remove this from the player's inventory when it's picked up.</param>
         /// <returns>The SlotKey to use for the new item.</returns>
         public SlotKey AddSyntheticItem(string name, string shortDescription = null,
             string longDescription = null, uint? iconId = 42, uint? sortId = int.MaxValue,
             long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
-            uint replaceWithQuantity = 1)
+            uint replaceWithQuantity = 1, bool archipelagoRemoveOnPickup = true)
         {
             // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
                 new ItemKey(ItemType.GOOD, 2005),
                 archipelagoLocationId,
-                archipelagoRemoveOnPickup: true
+                archipelagoRemoveOnPickup: archipelagoRemoveOnPickup
             );
 
             row["iconId"].Value = iconId;
