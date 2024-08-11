@@ -1,7 +1,6 @@
 NewEvents:
 # Common events. Immortality has its own custom logic because it depends on each source's end condition.
-- ID: 20005805
-  Name: scale
+- Name: scale
   Comment: Applying the scaling speffect when a character is backread. X0 = entity id, X4 = speffect1
   Commands:
   - IF Character Backread Status (0,X0_4,1,4,1)
@@ -9,8 +8,7 @@ NewEvents:
   - IF Character Backread Status (0,X0_4,0,4,1)
   - WAIT Fixed Time (Seconds) (1)
   - END Unconditionally (1)
-- ID: 20005806
-  Name: realdivinedragon
+- Name: realdivinedragon
   Comment: In absence of tree collision, make hitting divine dragon a non-viable option. X0 = entity id
   Commands:
   - IF Entity In/Outside Radius Of Entity (0,1,10000,X0_4,15,1)
@@ -18,19 +16,16 @@ NewEvents:
   - IF Entity In/Outside Radius Of Entity (0,0,10000,X0_4,15,1)
   - Set Character Invincibility (X0_4,0)
   - END Unconditionally (1)
-- ID: 20005807
-  Name: fakedivinedragon
+- Name: fakedivinedragon
   Comment: Allow hitting divine dragon to death. X0 = entity id
   Commands:
   - IF Character HP Value (0,X0_4,5,1,0,1)
   - Force Character Death (X0_4,1)
-- ID: 20005808
-  Name: teamtype
+- Name: teamtype
   Comment: Set a team type according to the target's original type. X0 = entity id, X4 = team type
   Commands:
   - Set Character Team Type (X0_4,X4_1)
-- ID: 20005809
-  Name: immortal
+- Name: immortal
   Comment: Make an entity immortal. Forcing their character death still has to be done manually, because it depends on source end cond. X0 = entity id
   Commands:
   - Set Character Immortality (X0_4,1)

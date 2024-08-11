@@ -7093,11 +7093,12 @@ namespace RandomizerCommon
             }
 
             // Add common functions
-            Dictionary<string, int> eventsByName = new Dictionary<string, int>();
+            Dictionary<string, uint> eventsByName = new Dictionary<string, uint>();
             foreach (NewEvent e in eventConfig.NewEvents ?? new List<NewEvent>())
             {
-                List<EMEVD.Parameter> ps = new List<EMEVD.Parameter>();
-                EMEVD.Event ev = new EMEVD.Event(e.ID, EMEVD.Event.RestBehaviorType.Default);
+                var id = game.GetUniqueEventId();
+                List <EMEVD.Parameter> ps = new List<EMEVD.Parameter>();
+                EMEVD.Event ev = new EMEVD.Event(id, EMEVD.Event.RestBehaviorType.Default);
                 List<string> commands = events.Decomment(e.Commands);
                 for (int i = 0; i < commands.Count; i++)
                 {
@@ -7106,10 +7107,10 @@ namespace RandomizerCommon
                     ev.Parameters.AddRange(newPs);
                 }
 
-                if (e.Name != null) eventsByName[e.Name] = e.ID;
+                if (e.Name != null) eventsByName[e.Name] = id;
                 EMEVD.Instruction init = e.Map == "common_func"
                     ? null
-                    : new(2000, 0, new List<object> { 0, (uint)ev.ID, (uint)0 });
+                    : new(2000, 0, new List<object> { 0, id, (uint)0 });
                 AddMulti(newInitializations, e.Map, (init, ev));
             }
 

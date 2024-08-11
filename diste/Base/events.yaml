@@ -1,37 +1,31 @@
 NewEvents:
-- ID: 9005890
-  Name: scale
+- Name: scale
   Commands:
   - c4_7(0, X0_4, 1, 1065353216)
   - c2004_8(X0_4, X4_4)
   - c4_7(0, X0_4, 0, 1065353216)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
-- ID: 9005891
-  Name: scale2
+- Name: scale2
   Commands:
   - c2004_8(X0_4, X4_4)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
-- ID: 9005892
-  Name: teamtype
+- Name: teamtype
   Commands:
   - c2004_2(X0_4, X4_1)
-- ID: 9005893
-  Name: musicflag
+- Name: musicflag
   Commands:
   - c4_2(0, X0_4, 5, 1058642330, 0, 1065353216)
   - SetEventFlag(0, X4_4, 1)
-- ID: 9005894
-  Name: enemydrop
+- Name: enemydrop
   Commands:
   - c1003_14(256)
   - IfEventFlag(1, 1, 0, X8_4)
   - c1000_2(65792)
   - IfCharacterDeadalive(0, X0_4, 1, 0, 1)
   - c2003_36(X4_4)
-- ID: 9005895
-  Name: sentry
+- Name: sentry
   Commands:
   - c2000_2(0)
   - IfCharacterHasSpEffect(1, 20000, 416, 1, 0, 1)
@@ -40,8 +34,7 @@ NewEvents:
   - c2004_8(20000, 14508)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
-- ID: 9005899
-  Name: test
+- Name: test
   Commands:
   - ForceCharacterDeath(X0_4, 0)
 DefaultSegments:

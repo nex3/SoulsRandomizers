@@ -43,12 +43,6 @@ namespace RandomizerCommon
         // Reversed GameData.ItemLotTypes
         // private readonly Dictionary<ItemType, uint> lotValues;
 
-        /// <summary>
-        /// The event ID to use for the next synthetic event. We start with an ID that's larger
-        /// than any in-game IDs to ensure that we don't overlap with real events.
-        /// </summary>
-        private uint nextEventId = 80000000;
-
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
         [Localize]
@@ -1358,7 +1352,7 @@ namespace RandomizerCommon
                     // Archipelago handles Path of the Dragon as a synthetic item or (when getting
                     // it from another world or a /send command) manually triggering the event
                     // 100001312.
-                    var trackingEvent = GetUniqueEventId();
+                    var trackingEvent = game.GetUniqueEventId();
                     var commands = new List<string>(new string[]
                     {
                         $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
@@ -2118,17 +2112,12 @@ namespace RandomizerCommon
             return (new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1)), row);
         }
 
-        /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
-        public uint GetUniqueEventId() {
-            return nextEventId++;
-        }
-
         /// <summary>
         /// Adds a new event to the common EMEVD.
         /// </summary>
         public void AddNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
         {
-            var id = GetUniqueEventId();
+            var id = game.GetUniqueEventId();
             var ev = new EMEVD.Event(id, rest);
             ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
             var emevd = game.Emevds["common"];

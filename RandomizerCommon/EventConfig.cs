@@ -22,7 +22,7 @@ namespace RandomizerCommon
         /// Existing events to modify, or potentially just to give names so they can be more easily
         /// referenced.
         /// </summary>
-        public Dictionary<int, ExistingEvent> ExistingEvents { get; set; }
+        public Dictionary<uint, ExistingEvent> ExistingEvents { get; set; }
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
         public List<EventSpec> ItemTalks { get; set; }
@@ -33,8 +33,6 @@ namespace RandomizerCommon
         /// <summary>A new event to add to the game.</summary>
         public class NewEvent
         {
-            public int ID { get; set; }
-
             /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
             /// <remarks>
             /// This is typically used for events in the <c>functions.emevd</c> file which are meant

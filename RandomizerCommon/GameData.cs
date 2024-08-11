@@ -159,6 +159,16 @@ namespace RandomizerCommon
             [4] = ItemType.GEM,
         };
 
+        /// <summary>
+        /// The event ID to use for the next event returned by
+        /// <c cref="GetUniqueEventId">GetUniqueEventId</c>.
+        /// </summary>
+        /// <remarks>
+        /// We start with an ID that's larger than any IDs used in any games to ensure that we
+        /// don't overlap with real events.
+        /// </remarks>
+        private uint nextEventId = 80000000;
+
         // Actual data
         private Dictionary<string, PARAM.Layout> Layouts = new Dictionary<string, PARAM.Layout>();
         private Dictionary<string, PARAMDEF> Defs = new Dictionary<string, PARAMDEF>();
@@ -1336,6 +1346,12 @@ namespace RandomizerCommon
                     }
                 }
             }
+        }
+
+        /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
+        public uint GetUniqueEventId()
+        {
+            return nextEventId++;
         }
 
         public void DumpMessages(string dir)
