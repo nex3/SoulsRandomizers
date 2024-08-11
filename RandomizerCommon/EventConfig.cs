@@ -50,8 +50,82 @@ namespace RandomizerCommon
             /// </remarks>
             public string Map { get; set; } = "common_func";
 
+            /// <summary>The names of arguments that can be passed to this event.</summary>
+            /// <remarks>
+            /// Setting these is optional. However, once set, arguments can be referenced by name
+            /// in <c cref="Commands">Commands</c>.
+            /// </remarks>
+            public List<EventArgument> Arguments { get; set; } = new();
+
             /// <summary>The list of EMEVD commands to run for this event.</summary>
-            public List<string> Commands { get; set; }
+            /// <remarks>This can refer to <c cref="Arguments">Arguments</c> by name.</remarks>
+            public List<string> Commands {
+                get
+                {
+                    if (Arguments.Count == 0) return commands;
+
+                    var argReplacements = new List<(Regex, string)>();
+                    var totalBytes = 0;
+                    foreach (var arg in Arguments)
+                    {
+                        if (!arg.Name.All(char.IsLetterOrDigit))
+                        {
+                            throw new Exception(
+                                $"Argument \"{arg.Name}\" of event {Name} must be alphanumeric.");
+                        }
+
+                        var standardName = "X";
+
+                        // A single argument never crosses the 4-aligned boundary. X0_1 can be
+                        // followed by X1_1, but not X1_4; it has to be X4_4 instead.
+                        if (totalBytes % 4 + arg.Width <= 4)
+                        {
+                            standardName += totalBytes;
+                        }
+                        else
+                        {
+                            // Move totalBytes to the next 4-aligned boundary.
+                            totalBytes += 4 - totalBytes % 4;
+                            standardName += totalBytes;
+                        }
+                        totalBytes += arg.Width;
+                        standardName += "_" + arg.Width;
+                        argReplacements.Add(
+                            (new Regex($"\\b{Regex.Escape(arg.Name)}\\b"), standardName));
+                    }
+
+                    var result = commands.Select(command =>
+                    {
+                        foreach (var (regex, standardName) in argReplacements)
+                        {
+                            command = regex.Replace(command, standardName);
+                        }
+                        return command;
+                    }).ToList();
+                    return result;
+                }
+
+                set { commands = value; }
+            }
+            private List<string> commands;
+        }
+
+        /// <summary>An argument passed to an EMEVD event.</summary>
+        public class EventArgument
+        {
+            /// <summary>The argument's human-readable name.</summary>
+            public string Name { get; set; }
+
+            /// <summary>The width (in bytes) of the argument.</summary>
+            /// <remarks>
+            /// EMEVD arguments are typically written `XA_B`, where `X` is a literal character "X",
+            /// `A` is the byte position of the argument, and `B` is the byte width of the argument.
+            /// Most arguments are 4 bytes wide, but in some cases an argument will be smaller (for
+            /// example, booleans are often 1 byte wide).
+            /// </remarks>
+            public int Width { get; set; } = 4;
+
+            public static explicit operator EventArgument(string s) => new() { Name = s };
         }
 
         public class ExistingEvent

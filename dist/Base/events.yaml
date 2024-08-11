@@ -1,28 +1,30 @@
 NewEvents:
 # Common events.
 - Name: scale
-  Comment: Applying a speffect when a character is backread. X0 = entity id, X4 = speffect1. This might not work with generators
+  Comment: Applying a speffect when a character is backread. This might not work with generators
+  Arguments: [entity, spEffect]
   Commands:
-  - IfCharacterBackreadStatus(MAIN, X0_4, true, ComparisonType.Equal, 1)
-  - SetSpEffect(X0_4, X4_4)
-  - IfCharacterBackreadStatus(MAIN, X0_4, false, ComparisonType.Equal, 1)
-  #- IfCharacterBackreadStatus(OR_01, X0_4, false, ComparisonType.Equal, 1)
-  #- IfCharacterDeadalive(OR_01, X0_4, DeathState.Dead, ComparisonType.Equal, 1)
+  - IfCharacterBackreadStatus(MAIN, entity, true, ComparisonType.Equal, 1)
+  - SetSpEffect(entity, spEffect)
+  - IfCharacterBackreadStatus(MAIN, entity, false, ComparisonType.Equal, 1)
+  #- IfCharacterBackreadStatus(OR_01, entity, false, ComparisonType.Equal, 1)
+  #- IfCharacterDeadalive(OR_01, entity, DeathState.Dead, ComparisonType.Equal, 1)
   #- IfConditionGroup(MAIN, PASS, OR_01)
-  #- SkipIfComparison(1, ComparisonType.NotEqual, X0_4, blah)
+  #- SkipIfComparison(1, ComparisonType.NotEqual, entity, blah)
   #- DisplayBanner(TextBannerType.DutyFulfilled)
   - WaitFixedTimeSeconds(1)
   - EndUnconditionally(EventEndType.Restart)
 - Name: teamtype
-  Comment: Set a team type according to the target's original type. X0 = entity id, X4 = team type
-  Commands:
-  - SetCharacterTeamType(X0_4, X4_1)
+  Comment: Set a team type according to the target's original type.
+  Arguments: [entity, {Name: teamType, Width: 1}]
+  Commands: [SetCharacterTeamType(entity, teamType)]
 - Name: greatwoodfall
-  Comment: Gives an enemy fall damage cancel in Greatwood Arena, based on 13105813. X0 = entity id
+  Comment: Gives an enemy fall damage cancel in Greatwood Arena, based on 13105813.
+  Arguments: [entity]
   Commands:
-  - IfInoutsideArea(MAIN, InsideOutsideState.Inside, X0_4, 3102802, 1)
-  - SetSpEffect(X0_4, 4070)
-  - SetSpEffect(X0_4, 4050)
+  - IfInoutsideArea(MAIN, InsideOutsideState.Inside, entity, 3102802, 1)
+  - SetSpEffect(entity, 4070)
+  - SetSpEffect(entity, 4050)
   - WaitFixedTimeSeconds(3)
   - EndUnconditionally(EventEndType.Restart)
 - Name: yhormruler
@@ -40,10 +42,11 @@ NewEvents:
   - EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, OR_01)
   - AwardItemLot(4600)
 - Name: musicflag
-  Comment: Sets a music flag for a generic health condition. X0 = entity, X4 = set flag.
+  Comment: Sets a music flag for a generic health condition.
+  Arguments: [entity, outputEvent]
   Commands:
-  - IfCharacterHPRatio(MAIN, X0_4, ComparisonType.LessOrEqual, 0.5, ComparisonType.Equal, 1)
-  - SetEventFlag(X4_4, ON)
+  - IfCharacterHPRatio(MAIN, entity, ComparisonType.LessOrEqual, 0.5, ComparisonType.Equal, 1)
+  - SetEventFlag(outputEvent, ON)
 
 ExistingEvents:
   20005350:
