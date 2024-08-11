@@ -50,12 +50,15 @@ NewEvents:
   Commands:
   - IfCharacterHPRatio(MAIN, X0_4, ComparisonType.LessOrEqual, 0.5, ComparisonType.Equal, 1)
   - SetEventFlag(X4_4, ON)
-- ID: 20005350
-  Name: enemydrop
-  Comment: Existing event to drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
-- ID: 20000343
-  Name: showmimic
-  Comment: Existing event to enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
+
+ExistingEvents:
+  20005350:
+    Name: enemydrop
+    Comment: Drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
+  20000343:
+    Name: showmimic
+    Comment: Enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
+
 DefaultSegments:
 - Type: disable
   Commands:

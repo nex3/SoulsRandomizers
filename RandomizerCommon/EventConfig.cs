@@ -16,7 +16,13 @@ namespace RandomizerCommon
 {
     public class EventConfig
     {
+        /// <summary>New events to add to the game.</summary>
         public List<NewEvent> NewEvents { get; set; }
+        /// <summary>
+        /// Existing events to modify, or potentially just to give names so they can be more easily
+        /// referenced.
+        /// </summary>
+        public Dictionary<int, ExistingEvent> ExistingEvents { get; set; }
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
         public List<EventSpec> ItemTalks { get; set; }
@@ -24,12 +30,36 @@ namespace RandomizerCommon
         public List<EventSpec> EnemyEvents { get; set; }
         public List<InstructionValueSpec> ValueTypes { get; set; }
 
+        /// <summary>A new event to add to the game.</summary>
         public class NewEvent
         {
             public int ID { get; set; }
+
+            /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
+            /// <remarks>
+            /// This is typically used for events in the <c>functions.emevd</c> file which are meant
+            /// to be initialized in various other files to provide re-usable behavior.
+            /// </remarks>
             public string Name { get; set; }
+
+            /// <summary>Documentation for this event.</summary>
             public string Comment { get; set; }
+
+            /// <summary>The list of EMEVD commands to run for this event.</summary>
             public List<string> Commands { get; set; }
+        }
+
+        public class ExistingEvent
+        {
+            /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
+            /// <remarks>
+            /// This is typically used for events in the <c>functions.emevd</c> file which are meant
+            /// to be initialized in various other files to provide re-usable behavior.
+            /// </remarks>
+            public string Name { get; set; }
+
+            /// <summary>Documentation for this event.</summary>
+            public string Comment { get; set; }
         }
 
         public class EventSpec : AbstractEventSpec

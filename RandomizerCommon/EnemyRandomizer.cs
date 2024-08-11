@@ -7093,16 +7093,9 @@ namespace RandomizerCommon
             }
 
             // Add common functions
-            Dictionary<string, NewEvent> newEvents = new Dictionary<string, NewEvent>();
+            Dictionary<string, int> eventsByName = new Dictionary<string, int>();
             foreach (NewEvent e in eventConfig.NewEvents ?? new List<NewEvent>())
             {
-                if (e.Commands == null)
-                {
-                    EMEVD.Event common = game.Emevds["common_func"].Events.Find(c => c.ID == c.ID);
-                    if (common == null) throw new Exception($"Error: event {e.Name} #{e.ID} missing from common_func");
-                    newEvents[e.Name] = e;
-                    continue;
-                }
                 List<EMEVD.Parameter> ps = new List<EMEVD.Parameter>();
                 EMEVD.Event ev = new EMEVD.Event(e.ID, EMEVD.Event.RestBehaviorType.Default);
                 List<string> commands = events.Decomment(e.Commands);
@@ -7119,8 +7112,18 @@ namespace RandomizerCommon
                 }
                 else
                 {
-                    newEvents[e.Name] = e;
+                    eventsByName[e.Name] = e.ID;
                     AddMulti(newInitializations, "common_func", ((EMEVD.Instruction)null, ev));
+                }
+            }
+
+            foreach (var (id, e) in eventConfig.ExistingEvents ?? new())
+            {
+                if (e.Name != null)
+                {
+                    EMEVD.Event common = game.Emevds["common_func"].Events.Find(c => c.ID == c.ID)
+                        ?? throw new Exception($"Error: event {e.Name} #{id} missing from common_func");
+                    eventsByName[e.Name] = id;
                 }
             }
 
@@ -7128,7 +7131,7 @@ namespace RandomizerCommon
             {
                 List<object> startArgs = new List<object>();
                 if (game.EldenRing) startArgs.Add(0);
-                startArgs.Add(newEvents[name].ID);
+                startArgs.Add(eventsByName[name]);
                 EMEVD.Instruction init = new EMEVD.Instruction(2000, 6, startArgs.Concat(args));
                 AddMulti(newInitializations, ownerMap[target], (init, (EMEVD.Event)null));
             }
