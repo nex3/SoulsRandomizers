@@ -7093,44 +7093,26 @@ namespace RandomizerCommon
             }
 
             // Add common functions
-            Dictionary<string, uint> eventsByName = new Dictionary<string, uint>();
-            foreach (NewEvent e in eventConfig.NewEvents ?? new List<NewEvent>())
+            var eventsByName = new Dictionary<string, long>();
+            foreach (NewEvent e in eventConfig.NewEvents)
             {
-                var id = game.GetUniqueEventId();
-                List <EMEVD.Parameter> ps = new List<EMEVD.Parameter>();
-                EMEVD.Event ev = new EMEVD.Event(id, EMEVD.Event.RestBehaviorType.Default);
-                List<string> commands = events.Decomment(e.Commands);
-                for (int i = 0; i < commands.Count; i++)
+                var ev = game.AddEvent(events, e);
+                if (e.Name != null) eventsByName[e.Name] = ev.ID;
+            }
+
+            foreach (var (id, e) in eventConfig.ExistingEvents)
+            {
+                if (!game.Emevds["common_func"].Events.Any(ev => ev.ID == id))
                 {
-                    (EMEVD.Instruction instr, List<EMEVD.Parameter> newPs) = events.ParseAddArg(commands[i], i);
-                    ev.Instructions.Add(instr);
-                    ev.Parameters.AddRange(newPs);
+                    throw new Exception($"Error: event {e.Name} #{id} missing from common_func");
                 }
 
                 if (e.Name != null) eventsByName[e.Name] = id;
-                EMEVD.Instruction init = e.Map == "common_func"
-                    ? null
-                    : new(2000, 0, new List<object> { 0, id, (uint)0 });
-                AddMulti(newInitializations, e.Map, (init, ev));
-            }
-
-            foreach (var (id, e) in eventConfig.ExistingEvents ?? new())
-            {
-                if (e.Name != null)
-                {
-                    EMEVD.Event common = game.Emevds["common_func"].Events.Find(c => c.ID == c.ID)
-                        ?? throw new Exception($"Error: event {e.Name} #{id} missing from common_func");
-                    eventsByName[e.Name] = id;
-                }
             }
 
             void addCommonFuncInit(string name, int target, List<object> args)
             {
-                List<object> startArgs = new List<object>();
-                if (game.EldenRing) startArgs.Add(0);
-                startArgs.Add(eventsByName[name]);
-                EMEVD.Instruction init = new EMEVD.Instruction(2000, 6, startArgs.Concat(args));
-                AddMulti(newInitializations, ownerMap[target], (init, (EMEVD.Event)null));
+                game.AddInitializer(ownerMap[target], eventsByName[name], args, commonEvent: true);
             }
             Dictionary<int, int> targetSourceNPCs = new Dictionary<int, int>();
             foreach (KeyValuePair<int, int> transfer in revMapping)
@@ -7428,7 +7410,6 @@ namespace RandomizerCommon
             {
                 if (disableEvents) break;
 
-                List<(EMEVD.Instruction, EMEVD.Event)> addEvents = newInitializations[entry.Key];
                 EMEVD emevd = entry.Value;
                 // Remove unused events.
                 // For events with remove, these are removed always (based only on template definition)
@@ -7446,20 +7427,11 @@ namespace RandomizerCommon
                     });
                     if (emevd.Events.Count != eventCount) game.WriteEmevds.Add(entry.Key);
                 }
-                if (addEvents.Count > 0) game.WriteEmevds.Add(entry.Key);
-                emevd.Events.AddRange(addEvents.Select(n => n.Item2).Where(e => e != null));
-                // Always add inits to the first event. Some maps don't have primary constructors like m60_52_52_00,
-                // others like m60_45_35_00 don't have constructors of any type whatsoever. Just add one in that case.
-                if (addEvents.Count > 0)
+
+                foreach (var (init, ev) in newInitializations[entry.Key])
                 {
-                    if (emevd.Events.Count == 0 || emevd.Events[0].ID != 0)
-                    {
-                        emevd.Events.Insert(0, new EMEVD.Event(0, EMEVD.Event.RestBehaviorType.Default));
-                    }
-                    foreach (EMEVD.Instruction newEvent in addEvents.Select(n => n.Item1).Where(i => i != null))
-                    {
-                        emevd.Events[0].Instructions.Add(newEvent);
-                    }
+                    if (init != null) game.AddInitializer(entry.Key, init);
+                    if (ev != null) game.AddEvent(entry.Key, ev);
                 }
                 foreach (EMEVD.Event e in emevd.Events)
                 {

@@ -17,12 +17,12 @@ namespace RandomizerCommon
     public class EventConfig
     {
         /// <summary>New events to add to the game.</summary>
-        public List<NewEvent> NewEvents { get; set; }
+        public List<NewEvent> NewEvents { get; set; } = new();
         /// <summary>
         /// Existing events to modify, or potentially just to give names so they can be more easily
         /// referenced.
         /// </summary>
-        public Dictionary<uint, ExistingEvent> ExistingEvents { get; set; }
+        public Dictionary<long, ExistingEvent> ExistingEvents { get; set; } = new();
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
         public List<EventSpec> ItemTalks { get; set; }

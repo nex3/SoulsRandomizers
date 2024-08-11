@@ -167,9 +167,9 @@ namespace RandomizerCommon
         /// We start with an ID that's larger than any IDs used in any games to ensure that we
         /// don't overlap with real events.
         /// </remarks>
-        private uint nextEventId = 80000000;
+        private long nextEventId = 80000000;
 
-        // Actual data
+        // Game data
         private Dictionary<string, PARAM.Layout> Layouts = new Dictionary<string, PARAM.Layout>();
         private Dictionary<string, PARAMDEF> Defs = new Dictionary<string, PARAMDEF>();
         public ParamDictionary Params = new ParamDictionary();
@@ -692,6 +692,115 @@ namespace RandomizerCommon
             }
             File.Move(bakPath, dest);
         }
+
+        /// <summary>
+        /// Adds <paramref name="ev"/> as an event to the given <paramref name="map"/>.
+        /// </summary>
+        public void AddEvent(string map, EMEVD.Event ev)
+        {
+            var emevd = GetEmevdOrWarn(map);
+            if (emevd == null) return;
+            WriteEmevds.Add(map);
+            emevd.Events.Add(ev);
+        }
+
+        /// <summary>
+        /// Adds <paramref name="newEvent"/> to the map it specifies, and adds an initializer for it
+        /// as well if it's not a shared function.
+        /// </summary>
+        /// <param name="events">Used to decode <paramref name="newEvent"/>.</param>
+        /// <returns>The newly-constructed event object.</returns>
+        public EMEVD.Event AddEvent(Events events, EventConfig.NewEvent newEvent)
+        {
+            var id = GetUniqueEventId();
+            var ev = new EMEVD.Event(id, EMEVD.Event.RestBehaviorType.Default);
+
+            var commands = events.Decomment(newEvent.Commands);
+            for (int i = 0; i < commands.Count; i++)
+            {
+                var (instr, newPs) = events.ParseAddArg(commands[i], i);
+                ev.Instructions.Add(instr);
+                ev.Parameters.AddRange(newPs);
+            }
+
+            AddEvent(newEvent.Map, ev);
+            if (newEvent.Map != "common_func") AddInitializer(newEvent.Map, ev);
+            return ev;
+        }
+
+        /// <summary>
+        /// Adds an initializer to <paramref name="map"/> that calls <paramref name="ev"/> and
+        /// passes it <paramref name="args"/>.
+        /// </summary>
+        /// <param name="commonEvent">
+        /// Whether <paramref name="commonEvent"/> refers to a shared event defined in the
+        /// <c>"common_func"</c> map, as opposed to an event in <paramref name="map"/>.
+        /// </param>
+        public void AddInitializer(
+            string map,
+            EMEVD.Event ev,
+            List<object> args = null,
+            bool commonEvent = false
+        )
+        {
+            AddInitializer(map, ev.ID, args, commonEvent: commonEvent);
+        }
+
+        /// <summary>
+        /// Adds an initializer to <paramref name="map"/> that calls event the event with the given
+        /// <paramref name="eventID"/> and passes it <paramref name="args"/>.
+        /// </summary>
+        /// <param name="commonEvent">
+        /// Whether <paramref name="commonEvent"/> refers to a shared event defined in the
+        /// <c>"common_func"</c> map, as opposed to an event in <paramref name="map"/>.
+        /// </param>
+        public void AddInitializer(
+            string map,
+            long eventID,
+            List<object> args = null,
+            bool commonEvent = false
+        )
+        {
+            var startArgs = new List<object>();
+            if (!commonEvent || EldenRing) startArgs.Add(0);
+            startArgs.Add(checked((uint)eventID));
+            if (args != null) startArgs.AddRange(args);
+            AddInitializer(map, new EMEVD.Instruction(2000, commonEvent ? 6 : 0, startArgs));
+        }
+
+        /// <summary>
+        /// Adds <paramref name="instruction"/> to event 0 for <paramref name="map"/>, ensuring that
+        /// it's run as soon as the map is loaded.
+        /// </summary>
+        public void AddInitializer(string map, EMEVD.Instruction instruction)
+        {
+            var emevd = GetEmevdOrWarn(map);
+            if (emevd == null) return;
+
+            WriteEmevds.Add(map);
+            // Always add inits to the first event. Some maps don't have primary constructors like m60_52_52_00,
+            // others like m60_45_35_00 don't have constructors of any type whatsoever. Just add one in that case.
+            if (emevd.Events.Count == 0 || emevd.Events[0].ID != 0)
+            {
+                emevd.Events.Insert(0, new EMEVD.Event(0, EMEVD.Event.RestBehaviorType.Default));
+            }
+            emevd.Events[0].Instructions.Add(instruction);
+        }
+
+        /// <summary>
+        /// Returns the EMEVD for <paramref name="map"/>, or null if it can't be found.
+        /// </summary>
+        /// <remarks>Prints a warning the first time a map can't be found.</remarks>
+        private EMEVD GetEmevdOrWarn(string map)
+        {
+            if (Emevds.TryGetValue(map, out var emevd)) return emevd;
+            if (warningsEmittedForMissingMaps.Add(map))
+            {
+                Console.WriteLine($"Unknown event map target {map}, enemy scripting and scaling will not apply there");
+            }
+            return null;
+        }
+        private readonly HashSet<string> warningsEmittedForMissingMaps = new();
 
         public HashSet<string> WriteEmevds = new HashSet<string>();
         public HashSet<string> WriteESDs = new HashSet<string>();
@@ -1349,7 +1458,7 @@ namespace RandomizerCommon
         }
 
         /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
-        public uint GetUniqueEventId()
+        public long GetUniqueEventId()
         {
             return nextEventId++;
         }

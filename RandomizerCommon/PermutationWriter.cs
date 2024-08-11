@@ -2120,9 +2120,8 @@ namespace RandomizerCommon
             var id = game.GetUniqueEventId();
             var ev = new EMEVD.Event(id, rest);
             ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
-            var emevd = game.Emevds["common"];
-            emevd.Events.Add(ev);
-            emevd.Events[0].Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)id, (uint)0 }));
+            game.AddEvent("common", ev);
+            game.AddInitializer("common", ev);
         }
 
         private static readonly Regex phraseRe = new Regex(@"\s*;\s*");
