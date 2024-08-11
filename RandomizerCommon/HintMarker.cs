@@ -61,9 +61,9 @@ namespace RandomizerCommon
             // Currently this must exist in PlaceName FMG already.
             public string DisplayName { get; set; }
             // Event name for the area boss, or entity id otherwise.
-            // This should match the one in itemlocations.txt and it should be associated with a boss or altboss event.
+            // This should match the one in itemlocations.yaml and it should be associated with a boss or altboss event.
             public string Boss { get; set; }
-            // Defeat flag. Normally filled in from itemlocations.txt, but should be specified otherwise
+            // Defeat flag. Normally filled in from itemlocations.yaml, but should be specified otherwise
             public int BossFlag { get; set; }
             // The bonfire name used for the boss location. We can just use the entity id for now?
             // public string BossBonfire { get; set; }
@@ -297,7 +297,7 @@ namespace RandomizerCommon
             }
 
             IDeserializer deserializer = new DeserializerBuilder().Build();
-            string path = $@"{game.Dir}\Base\hintmarks.txt";
+            string path = $@"{game.Dir}\Base\hintmarks.yaml";
             HintMarkerConfig config;
             using (var reader = File.OpenText(path))
             {

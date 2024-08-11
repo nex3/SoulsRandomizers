@@ -16,7 +16,7 @@ At least at the moment, contributions are not accepted. Do not distribute the ra
 
 Here is some documentation for how randomization works.
 
-There are two points of interest for the randomizer. The first is in Program.cs, which calls into Randomizer.cs, which executes each phase of the randomizer. The second is in dist(s)/Base/annotations.txt, which
+There are two points of interest for the randomizer. The first is in Program.cs, which calls into Randomizer.cs, which executes each phase of the randomizer. The second is in dist(s)/Base/annotations.yaml, which
 has nearly all configuration for specific items and locations.
 
 The core algorithm for the randomizer is:

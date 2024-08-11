@@ -28,10 +28,10 @@ namespace RandomizerCommon
         public readonly Dictionary<LocationScope, SlotAnnotation> Slots = new Dictionary<LocationScope, SlotAnnotation>();
 
         /// <summary>
-        /// A map from keys exactly as they appear in annotations.txt to the slots associated with
+        /// A map from keys exactly as they appear in annotations.yaml to the slots associated with
         /// them.
         /// </summary>
-        /// <remarks>This is guaranteed to be in the same order as in annotations.txt.</remarks>
+        /// <remarks>This is guaranteed to be in the same order as in annotations.yaml.</remarks>
         public readonly Dictionary<string, SlotAnnotation> SlotsByAnnotationsKey = new();
 
         // All areas
@@ -104,12 +104,12 @@ namespace RandomizerCommon
         {
             Annotations ann;
             IDeserializer deserializer = new DeserializerBuilder().Build();
-            string annPath = $@"{game.Dir}\Base\annotations.txt";
+            string annPath = $@"{game.Dir}\Base\annotations.yaml";
             using (var reader = File.OpenText(annPath))
             {
                 ann = deserializer.Deserialize<Annotations>(reader);
             }
-            string slotPath = $@"{game.Dir}\Base\itemslots.txt";
+            string slotPath = $@"{game.Dir}\Base\itemslots.yaml";
             if (File.Exists(slotPath))
             {
                 if (ann.Slots.Count > 0) throw new Exception($"Internal error: Item slots defined in {annPath}:");

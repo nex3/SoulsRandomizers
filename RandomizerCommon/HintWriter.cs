@@ -77,7 +77,7 @@ namespace RandomizerCommon
                 {
                     createHint(id, null, eventText[id]);
                 }
-                using (var writer = File.CreateText("hints.txt"))
+                using (var writer = File.CreateText("hints.yaml"))
                 {
                     GameData.Serializer.Serialize(writer, write);
                 }
@@ -86,7 +86,7 @@ namespace RandomizerCommon
 
             IDeserializer deserializer = new DeserializerBuilder().Build();
             HintData hints;
-            using (var reader = File.OpenText("dists/Base/hints.txt"))
+            using (var reader = File.OpenText("dists/Base/hints.yaml"))
             {
                 hints = deserializer.Deserialize<HintData>(reader);
             }

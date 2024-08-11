@@ -31,7 +31,7 @@ namespace RandomizerCommon
             try
             {
                 IDeserializer deserializer = new DeserializerBuilder().Build();
-                using (var reader = File.OpenText($"{dir}/Base/enemy.txt"))
+                using (var reader = File.OpenText($"{dir}/Base/enemy.yaml"))
                 {
                     ann = deserializer.Deserialize<EnemyAnnotations>(reader);
                 }

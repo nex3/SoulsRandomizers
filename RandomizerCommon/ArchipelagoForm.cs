@@ -307,7 +307,7 @@ namespace RandomizerCommon
             if (options["randomize_enemies"])
             {
                 EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
                 {
                     var deserializer = new DeserializerBuilder().Build();
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);

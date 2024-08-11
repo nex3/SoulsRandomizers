@@ -164,11 +164,11 @@ namespace RandomizerCommon
             // Start processing config
             IDeserializer deserializer = new DeserializerBuilder().Build();
             EnemyAnnotations ann;
-            string enemyConfigPath = $"{game.Dir}/Base/enemy.txt";
+            string enemyConfigPath = $"{game.Dir}/Base/enemy.yaml";
 #if DEV
             if (game.EldenRing && (opt["full"] || opt["dumpyenemylist"]))
             {
-                enemyConfigPath = "configs/diste/enemy.txt";
+                enemyConfigPath = "configs/diste/enemy.yaml";
             }
 #endif
             using (var reader = File.OpenText(enemyConfigPath))

@@ -1305,7 +1305,7 @@ Enemies:
   Old Dragon 2500825: any
 
 # Simple feature for key item placements.
-# Right now, allows placing items in logical areas or events, which are listed near the top of the item randomizer config (dists\Base\annotations.txt).
+# Right now, allows placing items in logical areas or events, which are listed near the top of the item randomizer config (dists\Base\annotations.yaml).
 # Examples of these are areas like ashinacastle_invasion1 or fountainhead_surface.
 # This can easily produce an unsolvable seed with the wrong settings or an impossible dependency, so do be careful.
 # The randomizer should at least fail if it can't solve the seed.

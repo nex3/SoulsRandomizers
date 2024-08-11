@@ -163,7 +163,7 @@ namespace RandomizerCommon
             {
                 Events events = new Events($@"{game.Dir}\Base\sekiro-common.emedf.json");
                 EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
                 {
                     IDeserializer deserializer = new DeserializerBuilder().Build();
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);
@@ -224,7 +224,7 @@ namespace RandomizerCommon
             {
                 Events events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
                 EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
                 {
                     IDeserializer deserializer = new DeserializerBuilder().Build();
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);
@@ -288,7 +288,7 @@ namespace RandomizerCommon
                 {
                     notify?.Invoke(messages.Get(itemPhase));
                     EventConfig itemEventConfig;
-                    using (var reader = File.OpenText($@"{game.Dir}\Base\itemevents.txt"))
+                    using (var reader = File.OpenText($@"{game.Dir}\Base\itemevents.yaml"))
                     {
                         IDeserializer deserializer = new DeserializerBuilder().Build();
                         itemEventConfig = deserializer.Deserialize<EventConfig>(reader);
@@ -357,12 +357,12 @@ namespace RandomizerCommon
 
                     EventConfig enemyConfig;
                     string emedfPath = null;
-                    string path = $@"{game.Dir}\Base\events.txt";
+                    string path = $@"{game.Dir}\Base\events.yaml";
 #if DEV
                     if (opt["full"] || opt["configgen"])
                     {
                         emedfPath = @"configs\diste\er-common.emedf.json";
-                        path = @"configs\diste\events.txt";
+                        path = @"configs\diste\events.yaml";
                     }
 #endif
                     using (var reader = File.OpenText(path))

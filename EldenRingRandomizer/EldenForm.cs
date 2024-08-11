@@ -896,7 +896,7 @@ namespace RandomizerCommon
             try
             {
                 IDeserializer deserializer = new DeserializerBuilder().Build();
-                string enemyConfigPath = $"diste/Base/enemy.txt";
+                string enemyConfigPath = $"diste/Base/enemy.yaml";
                 using (var reader = File.OpenText(enemyConfigPath))
                 {
                     enemyAnn = deserializer.Deserialize<EnemyAnnotations>(reader);

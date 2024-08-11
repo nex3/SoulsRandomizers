@@ -659,7 +659,7 @@ namespace RandomizerCommon
             Dictionary<int, int> flagEntities = new Dictionary<int, int>();
             Dictionary<int, int> displayEntities = new Dictionary<int, int>();
             IDeserializer deserializer = new DeserializerBuilder().Build();
-            using (var reader = System.IO.File.OpenText($@"{game.Dir}\Base\itemlocations.txt"))
+            using (var reader = System.IO.File.OpenText($@"{game.Dir}\Base\itemlocations.yaml"))
             {
                 ItemLocationConfig locConfig = deserializer.Deserialize<ItemLocationConfig>(reader);
                 if (locConfig.EsdShops != null)

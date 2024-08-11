@@ -21,7 +21,7 @@ To select a specific enemy, use its unique id, or use a name describing it follo
 Names you can use are listed below.
 
 Item randomization support is currently rudimentary, but it allows you to place key items
-in specific areas (not yet specific locations) as defined in the item config in annotations.txt.
+in specific areas (not yet specific locations) as defined in the item config in annotations.yaml.
 Item assignments may be better documented and supported in the future.
 
 Enemy categories:
