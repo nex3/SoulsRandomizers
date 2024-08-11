@@ -7105,16 +7105,12 @@ namespace RandomizerCommon
                     ev.Instructions.Add(instr);
                     ev.Parameters.AddRange(newPs);
                 }
-                if (e.Name == null)
-                {
-                    EMEVD.Instruction init = new EMEVD.Instruction(2000, 0, new List<object> { 0, (uint)ev.ID, (uint)0 });
-                    AddMulti(newInitializations, "common", (init, ev));
-                }
-                else
-                {
-                    eventsByName[e.Name] = e.ID;
-                    AddMulti(newInitializations, "common_func", ((EMEVD.Instruction)null, ev));
-                }
+
+                if (e.Name != null) eventsByName[e.Name] = e.ID;
+                EMEVD.Instruction init = e.Map == "common_func"
+                    ? null
+                    : new(2000, 0, new List<object> { 0, (uint)ev.ID, (uint)0 });
+                AddMulti(newInitializations, e.Map, (init, ev));
             }
 
             foreach (var (id, e) in eventConfig.ExistingEvents ?? new())

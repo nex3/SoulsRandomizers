@@ -45,6 +45,13 @@ namespace RandomizerCommon
             /// <summary>Documentation for this event.</summary>
             public string Comment { get; set; }
 
+            /// <summary>The map that this event should apply to.</summary>
+            /// <remarks>
+            /// This defaults to <c>"common_func"</c>. For any other value, the event will be added
+            /// to that map's initializer automatically.
+            /// </remarks>
+            public string Map { get; set; } = "common_func";
+
             /// <summary>The list of EMEVD commands to run for this event.</summary>
             public List<string> Commands { get; set; }
         }
