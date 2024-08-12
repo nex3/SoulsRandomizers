@@ -89,15 +89,20 @@ namespace RandomizerCommon
                 return;
             }
 
+#if !DEBUG
             try
             {
-                RandomizeForArchipelago(session);
+#endif
+            RandomizeForArchipelago(session);
+#if !DEBUG
+
             }
             catch (Exception ex)
             {
                 ShowFailure(ex.Message);
                 return;
             }
+#endif
 
             MessageBox.Show("Archipelago config loaded successfully!");
 
