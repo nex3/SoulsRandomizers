@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using static SoulsIds.GameSpec;
+using static RandomizerCommon.Util;
 
 namespace RandomizerCommon
 {
@@ -44,12 +41,7 @@ namespace RandomizerCommon
 
         public static RandomizerOptionsFile Load(string path)
         {
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            RandomizerOptionsFile ret;
-            using (var reader = File.OpenText(path))
-            {
-                ret = deserializer.Deserialize<RandomizerOptionsFile>(reader);
-            }
+            RandomizerOptionsFile ret = ParseYaml<RandomizerOptionsFile>(path);
             if (ret.Options == null || ret.Game == null || ret.Version == null)
             {
                 throw new Exception($"Error: missing required field in options file");

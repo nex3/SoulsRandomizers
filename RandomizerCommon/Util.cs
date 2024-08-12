@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using YamlDotNet.Serialization;
 
 namespace RandomizerCommon
 {
@@ -358,6 +360,15 @@ namespace RandomizerCommon
             Console.WriteLine($"If behavior observed, use {start},{values[mid1]}");
             Console.WriteLine($"If not, use {values[mid2]},{end}");
             return new HashSet<int>(discardVal);
+        }
+
+        /// <summary>Parses <paramref name="path"/> as YAML.</summary>
+        /// <typeparam name="T">The type as which to deserialize the YAML file.</typeparam>
+        /// <param name="path">The path to load.</param>
+        public static T ParseYaml<T>(string path)
+        {
+            using var reader = File.OpenText(path);
+            return new DeserializerBuilder().Build().Deserialize<T>(reader);
         }
     }
 }

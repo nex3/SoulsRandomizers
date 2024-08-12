@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using SoulsFormats;
 using SoulsIds;
 using YamlDotNet.Serialization;
-using static SoulsFormats.EMEVD.Instruction;
 using static RandomizerCommon.AnnotationData;
 using static RandomizerCommon.LocationData;
-using static RandomizerCommon.LocationData.LocationKey;
-using static RandomizerCommon.LocationData.ItemScope;
 using static RandomizerCommon.Messages;
 using static RandomizerCommon.Util;
 
@@ -296,13 +292,7 @@ namespace RandomizerCommon
                 }
             }
 
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            string path = $@"{game.Dir}\Base\hintmarks.yaml";
-            HintMarkerConfig config;
-            using (var reader = File.OpenText(path))
-            {
-                config = deserializer.Deserialize<HintMarkerConfig>(reader);
-            }
+            var config = game.ParseYaml<HintMarkerConfig>("hintmarks.yaml");
 
             // Process config first
             Dictionary<string, HintItem> items = new Dictionary<string, HintItem>();

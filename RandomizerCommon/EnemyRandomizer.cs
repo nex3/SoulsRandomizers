@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using SoulsFormats;
 using SoulsIds;
-using YamlDotNet.Serialization;
 using static SoulsIds.Events;
 using static RandomizerCommon.EnemyAnnotations;
 using static RandomizerCommon.EventConfig;
@@ -162,20 +161,18 @@ namespace RandomizerCommon
             }
 
             // Start processing config
-            IDeserializer deserializer = new DeserializerBuilder().Build();
             EnemyAnnotations ann;
-            string enemyConfigPath = $"{game.Dir}/Base/enemy.yaml";
 #if DEV
             if (game.EldenRing && (opt["full"] || opt["dumpyenemylist"]))
             {
-                enemyConfigPath = "configs/diste/enemy.yaml";
+                ann = ParseYaml<EnemyAnnotations>("configs/diste/enemy.yaml");
             }
-#endif
-            using (var reader = File.OpenText(enemyConfigPath))
+            else
             {
-                ann = deserializer.Deserialize<EnemyAnnotations>(reader);
-            }
+#endif
+            ann = game.ParseYaml<EnemyAnnotations>("enemy.yaml");
 #if DEV
+            }
             if (opt["dumpenemy"])
             {
                 new EnemyConfigGen(game, events, eventConfig).WriteEldenEnemyCategories(ann); return null;

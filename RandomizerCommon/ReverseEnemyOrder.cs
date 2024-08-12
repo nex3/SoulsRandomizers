@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using SoulsFormats;
@@ -1077,10 +1076,7 @@ namespace RandomizerCommon
             // Iteration order is not reliable, but anyway, rely on it
             List<string> fogOrder = fogToItemArea.Select(e => e.Key).ToList();
 
-            FogLocations locs = new FogLocations();
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            using (var reader = File.OpenText("locations.txt")) locs = deserializer.Deserialize<FogLocations>(reader);
-
+            var locs = ParseYaml<FogLocations>("locations.txt");
             bool addItems = locs.Items.Count == 0;
             Dictionary<string, KeyItemLoc> storedItems = locs.Items.ToDictionary(l => l.Key, l => l);
             Dictionary<EntityId, KeyItemLoc> entityFogAreas = new Dictionary<EntityId, KeyItemLoc>();

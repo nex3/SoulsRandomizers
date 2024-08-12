@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamlDotNet.Serialization;
 using static RandomizerCommon.EnemyAnnotations;
 using static RandomizerCommon.Preset;
+using static RandomizerCommon.Util;
 
 namespace RandomizerCommon
 {
@@ -30,11 +26,7 @@ namespace RandomizerCommon
             defaultText = desc.Text;
             try
             {
-                IDeserializer deserializer = new DeserializerBuilder().Build();
-                using (var reader = File.OpenText($"{dir}/Base/enemy.yaml"))
-                {
-                    ann = deserializer.Deserialize<EnemyAnnotations>(reader);
-                }
+                ann = ParseYaml<EnemyAnnotations>($"{dir}/Base/enemy.yaml");
             }
             catch (Exception e)
             {

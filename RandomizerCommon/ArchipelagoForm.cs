@@ -12,7 +12,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
@@ -306,12 +305,7 @@ namespace RandomizerCommon
 
             if (options["randomize_enemies"])
             {
-                EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
-                {
-                    var deserializer = new DeserializerBuilder().Build();
-                    eventConfig = deserializer.Deserialize<EventConfig>(reader);
-                }
+                var eventConfig = game.ParseYaml<EventConfig>("events.yaml");
 
                 // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
                 // any way to deserialize from an object graph

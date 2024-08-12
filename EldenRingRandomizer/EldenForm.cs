@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using RandomizerCommon.Properties;
-using YamlDotNet.Serialization;
 using static RandomizerCommon.Messages;
+using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
@@ -895,12 +895,7 @@ namespace RandomizerCommon
             if (enemyAnn != null) return true;
             try
             {
-                IDeserializer deserializer = new DeserializerBuilder().Build();
-                string enemyConfigPath = $"diste/Base/enemy.yaml";
-                using (var reader = File.OpenText(enemyConfigPath))
-                {
-                    enemyAnn = deserializer.Deserialize<EnemyAnnotations>(reader);
-                }
+                enemyAnn = ParseYaml<EnemyAnnotations>(@"diste\Base\enemy.yaml");
                 return true;
             }
             catch (Exception ex)

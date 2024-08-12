@@ -102,23 +102,16 @@ namespace RandomizerCommon
 
         public void Load(RandomizerOptions options)
         {
-            Annotations ann;
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            string annPath = $@"{game.Dir}\Base\annotations.yaml";
-            using (var reader = File.OpenText(annPath))
+            var ann = game.ParseYaml<Annotations>("annotations.yaml");
+            try
             {
-                ann = deserializer.Deserialize<Annotations>(reader);
-            }
-            string slotPath = $@"{game.Dir}\Base\itemslots.yaml";
-            if (File.Exists(slotPath))
-            {
-                if (ann.Slots.Count > 0) throw new Exception($"Internal error: Item slots defined in {annPath}:");
-                Annotations slotAnn;
-                using (var reader = File.OpenText(slotPath))
-                {
-                    slotAnn = deserializer.Deserialize<Annotations>(reader);
-                }
+                var slotAnn = game.ParseYaml<Annotations>("itemslots.yaml");
+                if (ann.Slots.Count > 0) throw new Exception($"Internal error: Item slots defined in annotations.yaml");
                 ann.Slots = slotAnn.Slots;
+            }
+            catch (FileNotFoundException)
+            {
+                // A separate slot annotation file isn't required.
             }
 
             // Config vars

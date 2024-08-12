@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 using SoulsIds;
-using YamlDotNet.Serialization;
 using static SoulsIds.GameSpec;
 using static RandomizerCommon.Messages;
+using static RandomizerCommon.Util;
 
 namespace RandomizerCommon
 {
@@ -162,12 +162,7 @@ namespace RandomizerCommon
             if (game.Sekiro)
             {
                 Events events = new Events($@"{game.Dir}\Base\sekiro-common.emedf.json");
-                EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
-                {
-                    IDeserializer deserializer = new DeserializerBuilder().Build();
-                    eventConfig = deserializer.Deserialize<EventConfig>(reader);
-                }
+                var eventConfig = game.ParseYaml<EventConfig>("events.yaml");
 
                 EnemyLocations locations = null;
                 if (opt["enemy"])
@@ -223,12 +218,7 @@ namespace RandomizerCommon
             else if (game.DS3)
             {
                 Events events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
-                EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.yaml"))
-                {
-                    IDeserializer deserializer = new DeserializerBuilder().Build();
-                    eventConfig = deserializer.Deserialize<EventConfig>(reader);
-                }
+                var eventConfig = game.ParseYaml<EventConfig>("events.yaml");
 
                 LocationDataScraper scraper = new LocationDataScraper(logUnused: false);
                 LocationData data = scraper.FindItems(game);
@@ -287,12 +277,7 @@ namespace RandomizerCommon
                 if (opt["item"])
                 {
                     notify?.Invoke(messages.Get(itemPhase));
-                    EventConfig itemEventConfig;
-                    using (var reader = File.OpenText($@"{game.Dir}\Base\itemevents.yaml"))
-                    {
-                        IDeserializer deserializer = new DeserializerBuilder().Build();
-                        itemEventConfig = deserializer.Deserialize<EventConfig>(reader);
-                    }
+                    var itemEventConfig = game.ParseYaml<EventConfig>("itemevents.yaml");
 
                     EldenCoordinator coord = new EldenCoordinator(game, opt["debugcoords"]);
                     if (opt["dumpcoords"])
@@ -355,21 +340,22 @@ namespace RandomizerCommon
                 {
                     notify?.Invoke(messages.Get(enemyPhase));
 
-                    EventConfig enemyConfig;
                     string emedfPath = null;
+                    EventConfig enemyConfig;
                     string path = $@"{game.Dir}\Base\events.yaml";
 #if DEV
                     if (opt["full"] || opt["configgen"])
                     {
                         emedfPath = @"configs\diste\er-common.emedf.json";
-                        path = @"configs\diste\events.yaml";
+                        enemyConfig = ParseYaml<EventConfig>(@"configs\diste\events.yaml");
+                    }
+                    else
+                    {
+#endif
+                    enemyConfig = game.ParseYaml<EventConfig>("events.yaml");
+#if DEV
                     }
 #endif
-                    using (var reader = File.OpenText(path))
-                    {
-                        IDeserializer deserializer = new DeserializerBuilder().Build();
-                        enemyConfig = deserializer.Deserialize<EventConfig>(reader);
-                    }
                     Events events = new Events(
                         emedfPath,
                         darkScriptMode: true,

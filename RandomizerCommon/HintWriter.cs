@@ -84,12 +84,7 @@ namespace RandomizerCommon
                 return;
             }
 
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            HintData hints;
-            using (var reader = File.OpenText("dists/Base/hints.yaml"))
-            {
-                hints = deserializer.Deserialize<HintData>(reader);
-            }
+            var hints = game.ParseYaml<HintData>("hints.yaml");
 
             // Preprocess some items
             Dictionary<HintType, TypeHint> typeNames = hints.Types.ToDictionary(e => e.Name, e => e);

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using SoulsFormats;
-using SoulsIds;
-using YamlDotNet.Serialization;
 using static SoulsFormats.EMEVD.Instruction;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.LocationData.LocationKey;
@@ -658,47 +656,44 @@ namespace RandomizerCommon
             Dictionary<int, int> eventPositions = new Dictionary<int, int>();
             Dictionary<int, int> flagEntities = new Dictionary<int, int>();
             Dictionary<int, int> displayEntities = new Dictionary<int, int>();
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            using (var reader = System.IO.File.OpenText($@"{game.Dir}\Base\itemlocations.yaml"))
+            var locConfig = game.ParseYaml<ItemLocationConfig>("itemlocations.yaml");
+            if (locConfig.EsdShops != null)
             {
-                ItemLocationConfig locConfig = deserializer.Deserialize<ItemLocationConfig>(reader);
-                if (locConfig.EsdShops != null)
+                foreach (KeyValuePair<int, string> entry in locConfig.EsdShops)
                 {
-                    foreach (KeyValuePair<int, string> entry in locConfig.EsdShops)
-                    {
-                        string[] range = entry.Value.Split(' ');
-                        parameterizedEsdShops[entry.Key] = (int.Parse(range[0]), int.Parse(range[1]));
-                    }
+                    string[] range = entry.Value.Split(' ');
+                    parameterizedEsdShops[entry.Key] = (int.Parse(range[0]), int.Parse(range[1]));
                 }
-                if (locConfig.EventEntities != null)
+            }
+            if (locConfig.EventEntities != null)
+            {
+                foreach (KeyValuePair<int, string> entry in locConfig.EventEntities)
                 {
-                    foreach (KeyValuePair<int, string> entry in locConfig.EventEntities)
+                    if (entry.Value.StartsWith("X") && int.TryParse(entry.Value.Substring(1), out int pos))
                     {
-                        if (entry.Value.StartsWith("X") && int.TryParse(entry.Value.Substring(1), out int pos))
-                        {
-                            eventPositions[entry.Key] = pos / 4;
-                        }
-                        else
-                        {
-                            eventEntities[entry.Key] = int.Parse(entry.Value);
-                        }
+                        eventPositions[entry.Key] = pos / 4;
                     }
-                }
-                if (locConfig.FlagEntities != null)
-                {
-                    foreach (KeyValuePair<int, string> entry in locConfig.FlagEntities)
+                    else
                     {
-                        flagEntities[entry.Key] = int.Parse(entry.Value);
-                    }
-                }
-                if (locConfig.DisplayEntities != null)
-                {
-                    foreach (KeyValuePair<int, int> entry in locConfig.DisplayEntities)
-                    {
-                        displayEntities[entry.Key] = entry.Value;
+                        eventEntities[entry.Key] = int.Parse(entry.Value);
                     }
                 }
             }
+            if (locConfig.FlagEntities != null)
+            {
+                foreach (KeyValuePair<int, string> entry in locConfig.FlagEntities)
+                {
+                    flagEntities[entry.Key] = int.Parse(entry.Value);
+                }
+            }
+            if (locConfig.DisplayEntities != null)
+            {
+                foreach (KeyValuePair<int, int> entry in locConfig.DisplayEntities)
+                {
+                    displayEntities[entry.Key] = entry.Value;
+                }
+            }
+
             foreach (KeyValuePair<int, int> entry in flagEntities)
             {
                 ret.BossFlags[entry.Value] = entry.Key;

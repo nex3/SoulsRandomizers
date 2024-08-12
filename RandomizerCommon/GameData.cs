@@ -693,6 +693,20 @@ namespace RandomizerCommon
             File.Move(bakPath, dest);
         }
 
+        /// <summary>Parses <paramref name="pathInBase"/> as YAML.</summary>
+        /// <typeparam name="T">The type as which to deserialize the YAML file.</typeparam>
+        /// <param name="pathInBase">
+        /// The path to load, within the current game's Base directory.
+        /// </param>
+        public T ParseYaml<T>(string pathInBase)
+        {
+            return Util.ParseYaml<T>($@"{Dir}\Base\{pathInBase}");
+        }
+
+        /// <summary>Parses <paramref name="path"/> as YAML.</summary>
+        /// <typeparam name="T">The type as which to deserialize the YAML file.</typeparam>
+        /// <param name="path">The path to load.</param>
+
         /// <summary>
         /// Adds <paramref name="ev"/> as an event to the given <paramref name="map"/>.
         /// </summary>

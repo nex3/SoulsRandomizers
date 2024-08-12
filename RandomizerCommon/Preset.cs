@@ -4,7 +4,6 @@ using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
 using YamlDotNet.Serialization;
-using static RandomizerCommon.AnnotationData;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Messages;
 using static RandomizerCommon.EnemyAnnotations;
@@ -475,12 +474,7 @@ namespace RandomizerCommon
             }
             string path = $@"{checkDir ?? "presets"}\{loadName}.txt";
 
-            Preset preset;
-            IDeserializer deserializer = new DeserializerBuilder().Build();
-            using (var reader = File.OpenText(path))
-            {
-                preset = deserializer.Deserialize<Preset>(reader);
-            }
+            var preset = ParseYaml<Preset>(path);
             preset.Name = name;
             if (name != loadName)
             {
