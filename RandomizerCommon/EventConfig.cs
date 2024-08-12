@@ -45,8 +45,8 @@ namespace RandomizerCommon
 
             /// <summary>The map that this event should apply to.</summary>
             /// <remarks>
-            /// This defaults to <c>"common_func"</c>. For any other value, the event will be added
-            /// to that map's initializer automatically.
+            /// This defaults to <c>"common_func"</c>. For other maps, the event will be added to
+            /// that map's initializer automatically unless it has <c>Arguments</c> set.
             /// </remarks>
             public string Map { get; set; } = "common_func";
 
@@ -139,6 +139,10 @@ namespace RandomizerCommon
             /// to be initialized in various other files to provide re-usable behavior.
             /// </remarks>
             public string Name { get; set; }
+
+            /// <summary>The map that this event is defined in.</summary>
+            /// <remarks>This defaults to <c>"common_func"</c>.</remarks>
+            public string Map { get; set; } = "common_func";
 
             /// <summary>Documentation for this event.</summary>
             public string Comment { get; set; }

@@ -830,6 +830,10 @@ namespace RandomizerCommon
 
             // Events
             eventConfig?.NewEvents.ForEach(e => game.AddEvent(events, e));
+            foreach (var (id, e) in eventConfig.ExistingEvents)
+            {
+                if (e.Name != null) game.NameEvent(e.Map, id, e.Name);
+            }
 
             if (game.Sekiro)
             {
@@ -1375,12 +1379,8 @@ namespace RandomizerCommon
                         // never showed up in Ludleth's shop.
                         var eventFlag = row["qwcID"].Value;
                         Debug.Assert(soul.Type == ItemType.GOOD);
-                        AddNewEvent(new string[]
-                        {
-                            $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {eventFlag})",
-                            $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
-                            $"Set Event Flag ({eventFlag}, ON)"
-                        });
+                        game.AddInitializer(
+                            "common", "showLudlethItems", new[] { eventFlag, soul.ID });
                     }
                 }
             }

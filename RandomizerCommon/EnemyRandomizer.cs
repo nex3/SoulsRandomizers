@@ -7090,26 +7090,15 @@ namespace RandomizerCommon
             }
 
             // Add common functions
-            var eventsByName = new Dictionary<string, long>();
-            foreach (NewEvent e in eventConfig.NewEvents)
-            {
-                var ev = game.AddEvent(events, e);
-                if (e.Name != null) eventsByName[e.Name] = ev.ID;
-            }
-
+            eventConfig?.NewEvents.ForEach(e => game.AddEvent(events, e));
             foreach (var (id, e) in eventConfig.ExistingEvents)
             {
-                if (!game.Emevds["common_func"].Events.Any(ev => ev.ID == id))
-                {
-                    throw new Exception($"Error: event {e.Name} #{id} missing from common_func");
-                }
-
-                if (e.Name != null) eventsByName[e.Name] = id;
+                if (e.Name != null) game.NameEvent(e.Map, id, e.Name);
             }
 
             void addCommonFuncInit(string name, int target, List<object> args)
             {
-                game.AddInitializer(ownerMap[target], eventsByName[name], args, commonEvent: true);
+                game.AddInitializer(ownerMap[target], name, args);
             }
             Dictionary<int, int> targetSourceNPCs = new Dictionary<int, int>();
             foreach (KeyValuePair<int, int> transfer in revMapping)

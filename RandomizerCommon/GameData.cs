@@ -180,6 +180,12 @@ namespace RandomizerCommon
         /// </remarks>
         private readonly Dictionary<(string, long), uint> eventInitializerCount = new();
 
+        /// <summary>
+        /// A map from event names registered using <c>AddEvent</c> to the events and the maps
+        /// in which they're defined.
+        /// </summary>
+        private readonly Dictionary<string, (EMEVD.Event, string)> eventsByName = new();
+
         // Game data
         private Dictionary<string, PARAM.Layout> Layouts = new Dictionary<string, PARAM.Layout>();
         private Dictionary<string, PARAMDEF> Defs = new Dictionary<string, PARAMDEF>();
@@ -714,14 +720,29 @@ namespace RandomizerCommon
             return Util.ParseYaml<T>($@"{Dir}\Base\{pathInBase}");
         }
 
-        /// <summary>Parses <paramref name="path"/> as YAML.</summary>
-        /// <typeparam name="T">The type as which to deserialize the YAML file.</typeparam>
-        /// <param name="path">The path to load.</param>
+        /// <summary>
+        /// Registers <paramref name="name"/> as the name for the event with ID
+        /// <paramref name="id"/> in <paramref name="map"/>.
+        /// </summary>
+        /// <remarks>This allows the event to be invoked using <c>AddInitializer</c>.</remarks>
+        public void NameEvent(string map, long id, string name)
+        {
+            var ev = Emevds[map].Events.Find(ev => ev.ID == id);
+            if (ev == null)
+            {
+                throw new Exception($"Error: event {name} #{id} missing from {map}");
+            }
+
+            eventsByName[name] = (ev, map);
+        }
 
         /// <summary>
         /// Adds <paramref name="ev"/> as an event to the given <paramref name="map"/>.
         /// </summary>
-        public void AddEvent(string map, EMEVD.Event ev)
+        /// <param name="name">
+        /// The name opf the event, which can be referenced in <c>AddInitializer</c>.
+        /// </param>
+        public void AddEvent(string map, EMEVD.Event ev, string name = null)
         {
             var emevd = GetEmevdOrWarn(map);
             if (emevd == null) return;
@@ -740,6 +761,7 @@ namespace RandomizerCommon
             }
             WriteEmevds.Add(map);
             emevd.Events.Add(ev);
+            if (name != null) eventsByName[name] = (ev, map);
         }
 
         /// <summary>
@@ -761,9 +783,38 @@ namespace RandomizerCommon
                 ev.Parameters.AddRange(newPs);
             }
 
-            AddEvent(newEvent.Map, ev);
-            if (newEvent.Map != "common_func") AddInitializer(newEvent.Map, ev);
+            AddEvent(newEvent.Map, ev, name: newEvent.Name);
+            if (newEvent.Map != "common_func" && newEvent.Arguments.Count == 0)
+            {
+                AddInitializer(newEvent.Map, ev);
+            }
+
             return ev;
+        }
+
+        /// <summary>
+        /// Adds an initializer to <paramref name="map"/> that calls the event named
+        /// <paramref name="name"/> and passes it <paramref name="args"/>.
+        /// </summary>
+        public void AddInitializer(
+            string map,
+            string name,
+            IEnumerable<object> args = null
+        )
+        {
+            if (!eventsByName.ContainsKey(name))
+            {
+                throw new Exception($"There's no event registered with the name {name}");
+            }
+
+            var (ev, eventMap) = eventsByName[name];
+            if (eventMap != map && eventMap != "common_func")
+            {
+                throw new Exception(
+                    $"Event {name} was defined in map {eventMap} and can't be called from {map}");
+            }
+
+            AddInitializer(map, ev, args, commonEvent: eventMap == "common_func");
         }
 
         /// <summary>
@@ -777,7 +828,7 @@ namespace RandomizerCommon
         public void AddInitializer(
             string map,
             EMEVD.Event ev,
-            List<object> args = null,
+            IEnumerable<object> args = null,
             bool commonEvent = false
         )
         {
@@ -795,7 +846,7 @@ namespace RandomizerCommon
         public void AddInitializer(
             string map,
             long eventID,
-            List<object> args = null,
+            IEnumerable<object> args = null,
             bool commonEvent = false
         )
         {

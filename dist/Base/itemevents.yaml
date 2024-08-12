@@ -20,3 +20,17 @@ NewEvents:
   - Set Event Flag (14005108,1)
   - IF Player Has/Doesn't Have Item (0,3,2137,1)
   - Set Event Flag (14005108,0)
+- Name: showLudlethItems
+  Comment: Make a boss soul trigger the event to show its items in the shop.
+  # Run this everywhere, not just in Firelink, so that items still show up if the player cracks the
+  # soul before visiting Ludleth.
+  Map: common
+  Arguments:
+  # The event flag used in ShopLineupParam to gate whether or not an item is displayed.  
+  - qwcID
+  # The goods ID of the boss soul
+  - itemID
+  Commands:
+  - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, qwcID)
+  - IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, itemID, OwnershipState.Owns)
+  - Set Event Flag (qwcID, ON)
