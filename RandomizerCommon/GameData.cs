@@ -9,6 +9,7 @@ using SoulsIds;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
+using static SoulsFormats.EMEVD.Instruction;
 using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
@@ -168,6 +169,16 @@ namespace RandomizerCommon
         /// don't overlap with real events.
         /// </remarks>
         private long nextEventId = 80000000;
+
+        /// <summary>
+        /// A map from map names and event IDs to the number of distinct initializers generated
+        /// for those events in those maps.
+        /// </summary>
+        /// <remarks>
+        /// This isn't populated for common events for Sekiro and DS3, because in those games
+        /// common events can have multiple initializers without different counters.
+        /// </remarks>
+        private readonly Dictionary<(string, long), uint> eventInitializerCount = new();
 
         // Game data
         private Dictionary<string, PARAM.Layout> Layouts = new Dictionary<string, PARAM.Layout>();
@@ -714,6 +725,19 @@ namespace RandomizerCommon
         {
             var emevd = GetEmevdOrWarn(map);
             if (emevd == null) return;
+
+            if (map == "common_func")
+            {
+                foreach (var otherMap in Emevds.Keys)
+                {
+                    if (otherMap == "common_func") continue;
+                    eventInitializerCount[(otherMap, ev.ID)] = 0;
+                }
+            }
+            else
+            {
+                eventInitializerCount[(map, ev.ID)] = 0;
+            }
             WriteEmevds.Add(map);
             emevd.Events.Add(ev);
         }
@@ -776,7 +800,12 @@ namespace RandomizerCommon
         )
         {
             var startArgs = new List<object>();
-            if (!commonEvent || EldenRing) startArgs.Add(0);
+            if (!commonEvent || EldenRing)
+            {
+                startArgs.Add(CountInitializers(map, eventID));
+                eventInitializerCount[(map, eventID)] += 1;
+            }
+
             startArgs.Add(checked((uint)eventID));
             if (args != null) startArgs.AddRange(args);
             AddInitializer(map, new EMEVD.Instruction(2000, commonEvent ? 6 : 0, startArgs));
@@ -799,6 +828,49 @@ namespace RandomizerCommon
                 emevd.Events.Insert(0, new EMEVD.Event(0, EMEVD.Event.RestBehaviorType.Default));
             }
             emevd.Events[0].Instructions.Add(instruction);
+        }
+
+        /// <returns>
+        /// Returns the number of initializers that exist for <paramref name="eventID"/> in
+        /// <paramref name="map"/>.
+        /// </returns>
+        private uint CountInitializers(string map, long eventID)
+        {
+            if (eventInitializerCount.TryGetValue((map, eventID), out var value)) return value;
+
+            var emevd = GetEmevdOrWarn(map);
+            if (emevd == null) return 0;
+
+            if (emevd.Events.Count == 0 && emevd.Events[0].ID != 0)
+            {
+                eventInitializerCount[(map, eventID)] = 0;
+                return 0;
+            }
+
+            foreach (var inst in emevd.Events[0].Instructions)
+            {
+                if (inst.Bank != 2000) continue;
+                // Instruction 2000[0] initializes events from the current map. Instruction 2000[6]
+                // initializes common events, but before Elden Ring these don't need separate
+                // indices.
+                if (inst.ID != 0 && (!EldenRing || inst.ID == 6)) continue;
+
+                var args = inst.UnpackArgs(new[] { ArgType.UInt32, ArgType.UInt32 });
+                var index = (uint)args[0];
+                var key = (map, (uint)args[1]);
+                if (eventInitializerCount.GetValueOrDefault(key) <= index)
+                {
+                    // Customarily, event indices start at 0 and count up by 1. All that *really*
+                    // matters is that we use a higher value than all the existing ones, and this
+                    // accommodates a potentially weird situation where an index counts up faster
+                    // than we expect.
+                    eventInitializerCount[key] = index + 1;
+                }
+            }
+
+            // Try adding it manually in case the event isn't initialized in this map at all yet.
+            eventInitializerCount.TryAdd((map, eventID), 0);
+            return eventInitializerCount[(map, eventID)];
         }
 
         /// <summary>
