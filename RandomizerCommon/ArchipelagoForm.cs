@@ -146,7 +146,8 @@ namespace RandomizerCommon
             var ann = new AnnotationData(game, data);
             ann.Load(opt);
             var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
-            var writer = new PermutationWriter(game, data, ann, events, null);
+            var writer = new PermutationWriter(
+                game, data, ann, events, game.ParseYaml<EventConfig>("itemevents.yaml"));
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
@@ -305,8 +306,6 @@ namespace RandomizerCommon
 
             if (options["randomize_enemies"])
             {
-                var eventConfig = game.ParseYaml<EventConfig>("events.yaml");
-
                 // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
                 // any way to deserialize from an object graph
                 var preset = Preset.ParsePreset("archipelago", (string)slotData["random_enemy_preset"]);
@@ -315,7 +314,8 @@ namespace RandomizerCommon
                     : preset.RemoveSource + ";Yhorm the Giant";
                 preset.Enemies ??= new Dictionary<string, string>();
                 preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
-                new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
+                new EnemyRandomizer(game, events, game.ParseYaml<EventConfig>("events.yaml"))
+                    .Run(opt, preset);
             }
 
             MiscSetup.DS3CommonPass(game, events, opt);

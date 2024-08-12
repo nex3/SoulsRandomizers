@@ -50,6 +50,9 @@ namespace RandomizerCommon
             /// </remarks>
             public string Map { get; set; } = "common_func";
 
+            /// <summary>This event's beahvior when the player rests at a bonfire.</summary>
+            public EMEVD.Event.RestBehaviorType Rest { get; set; } = EMEVD.Event.RestBehaviorType.Default;
+
             /// <summary>The names of arguments that can be passed to this event.</summary>
             /// <remarks>
             /// Setting these is optional. However, once set, arguments can be referenced by name

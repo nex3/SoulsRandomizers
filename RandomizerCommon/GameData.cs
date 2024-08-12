@@ -727,7 +727,7 @@ namespace RandomizerCommon
         public EMEVD.Event AddEvent(Events events, EventConfig.NewEvent newEvent)
         {
             var id = GetUniqueEventId();
-            var ev = new EMEVD.Event(id, EMEVD.Event.RestBehaviorType.Default);
+            var ev = new EMEVD.Event(id, newEvent.Rest);
 
             var commands = events.Decomment(newEvent.Commands);
             for (int i = 0; i < commands.Count; i++)

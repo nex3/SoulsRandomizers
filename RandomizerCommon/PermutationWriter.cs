@@ -829,6 +829,8 @@ namespace RandomizerCommon
             }
 
             // Events
+            eventConfig?.NewEvents.ForEach(e => game.AddEvent(events, e));
+
             if (game.Sekiro)
             {
                 // Sekiro edits
@@ -1309,25 +1311,6 @@ namespace RandomizerCommon
                     }
                 }
 
-                // Hacky Greirat Lothric Castle softlock fix
-                // If you don't have Grand Archives key yet, mark him as having talked about looting Lothric
-                // (74000308) so the actual looting flag (74000309) isn't touched by ESD.
-                AddNewEvent(new string[]
-                {
-                    "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)",
-                    "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)",
-                    "SetEventFlag(74000308, ON)",
-                    "IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)",
-                    "SetEventFlag(74000308, OFF)",
-                });
-                // Make Firelink Shrine greyed out by default, without having the Coiled Sword, in combination with param change above
-                // This doesn't always work just on its own, so there is a backup edit above.
-                AddNewEvent(new string[]
-                {
-                    "Set Event Flag (14005108,1)",
-                    "IF Player Has/Doesn't Have Item (0,3,2137,1)",
-                    "Set Event Flag (14005108,0)",
-                }, EMEVD.Event.RestBehaviorType.Restart);
                 if (dragonFlag > 0)
                 {
                     // Do the Path of the Dragon swap

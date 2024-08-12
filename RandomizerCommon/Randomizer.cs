@@ -218,7 +218,6 @@ namespace RandomizerCommon
             else if (game.DS3)
             {
                 Events events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
-                var eventConfig = game.ParseYaml<EventConfig>("events.yaml");
 
                 LocationDataScraper scraper = new LocationDataScraper(logUnused: false);
                 LocationData data = scraper.FindItems(game);
@@ -228,7 +227,8 @@ namespace RandomizerCommon
                 if (opt["enemy"])
                 {
                     notify?.Invoke("Randomizing enemies");
-                    new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
+                    var enemyEventConfig = game.ParseYaml<EventConfig>("events.yaml");
+                    new EnemyRandomizer(game, events, enemyEventConfig).Run(opt, preset);
                 }
 
                 if (opt["item"])
@@ -241,7 +241,8 @@ namespace RandomizerCommon
 
                     notify?.Invoke("Editing game files");
                     random = new Random(seed + 1);
-                    PermutationWriter writer = new PermutationWriter(game, data, ann, events, null);
+                    var itemEventConfig = game.ParseYaml<EventConfig>("itemevents.yaml");
+                    PermutationWriter writer = new PermutationWriter(game, data, ann, events, itemEventConfig);
                     writer.Write(random, permutation, opt);
                     random = new Random(seed + 2);
                     // TODO maybe randomize other characters no matter what, only do self for item rando

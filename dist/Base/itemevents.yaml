@@ -1,0 +1,22 @@
+# Events for the item randomizer.
+NewEvents:
+- Comment: |
+    Hacky Greirat Lothric Castle softlock fix. If you don't have Grand Archives key yet, mark him
+    as having talked about looting Lothric (74000308) so the actual looting flag (74000309) isn't
+    touched by ESD.
+  Map: common
+  Commands:
+  - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)
+  - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)
+  - SetEventFlag(74000308, ON)
+  - IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)
+  - SetEventFlag(74000308, OFF)
+- Comment: |
+    Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
+    ActionButtonParam in PermutationWriter.
+  Map: m40_00_00_00
+  Rest: Restart
+  Commands:
+  - Set Event Flag (14005108,1)
+  - IF Player Has/Doesn't Have Item (0,3,2137,1)
+  - Set Event Flag (14005108,0)
