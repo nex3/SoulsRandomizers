@@ -1342,7 +1342,6 @@ namespace RandomizerCommon
                     {
                         "END IF Event Flag (0,1,0,6079)",
                         $"IF Event Flag (0,1,0,{dragonFlag})",
-                        "Remove Item From Player (3,9030,1)",
                         "Award Gesture Item (29,3,9030)",
                         "Set Event Flag (6079,1)",
                     });
