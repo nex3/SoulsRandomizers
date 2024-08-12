@@ -747,7 +747,7 @@ namespace RandomizerCommon
         /// passes it <paramref name="args"/>.
         /// </summary>
         /// <param name="commonEvent">
-        /// Whether <paramref name="commonEvent"/> refers to a shared event defined in the
+        /// Whether <paramref name="eventID"/> refers to a shared event defined in the
         /// <c>"common_func"</c> map, as opposed to an event in <paramref name="map"/>.
         /// </param>
         public void AddInitializer(
@@ -765,7 +765,7 @@ namespace RandomizerCommon
         /// <paramref name="eventID"/> and passes it <paramref name="args"/>.
         /// </summary>
         /// <param name="commonEvent">
-        /// Whether <paramref name="commonEvent"/> refers to a shared event defined in the
+        /// Whether <paramref name="eventID"/> refers to a shared event defined in the
         /// <c>"common_func"</c> map, as opposed to an event in <paramref name="map"/>.
         /// </param>
         public void AddInitializer(
