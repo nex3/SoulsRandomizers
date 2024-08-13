@@ -829,14 +829,7 @@ namespace RandomizerCommon
             }
 
             // Events
-            foreach (var e in eventConfig?.NewEvents ?? new())
-            {
-                if (e.IncludeFor(opt)) game.AddEvent(events, e);
-            }
-            foreach (var (id, e) in eventConfig.ExistingEvents)
-            {
-                if (e.Name != null) game.NameEvent(e.Map, id, e.Name);
-            }
+            if (eventConfig != null) game.UpdateEvents(eventConfig, events, opt);
 
             if (game.Sekiro)
             {

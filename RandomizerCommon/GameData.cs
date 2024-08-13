@@ -721,6 +721,34 @@ namespace RandomizerCommon
         }
 
         /// <summary>
+        /// Adds and updates events according to <paramref name="config"/>.
+        /// </summary>
+        /// <remarks>
+        /// This currently only supports <c>EventConfig.NewEvents</c> and
+        /// <c>EventConfig.ExistingEvents</c>.
+        /// </remarks>
+        /// <param name="events">Used to decode events in <paramref name="config"/>.</param>
+        /// <param name="opt">Used to determine which events to include.</param>
+        public void UpdateEvents(EventConfig config, Events events, RandomizerOptions opt)
+        {
+            foreach (var (map, mapEvents) in config.NewEvents ?? new())
+            {
+                foreach (var e in mapEvents)
+                {
+                    if (e.IncludeFor(opt)) AddEvent(map, e, events);
+                }
+            }
+
+            foreach (var (map, mapEvents) in config.ExistingEvents)
+            {
+                foreach (var (id, e) in mapEvents)
+                {
+                    if (e.Name != null) NameEvent(map, id, e.Name);
+                }
+            }
+        }
+
+        /// <summary>
         /// Registers <paramref name="name"/> as the name for the event with ID
         /// <paramref name="id"/> in <paramref name="map"/>.
         /// </summary>
@@ -765,12 +793,12 @@ namespace RandomizerCommon
         }
 
         /// <summary>
-        /// Adds <paramref name="newEvent"/> to the map it specifies, and adds an initializer for it
-        /// as well if it's not a shared function.
+        /// Adds <paramref name="newEvent"/> to <paramref name="map"/>, and adds an initializer for
+        /// it as well if it's not a shared function.
         /// </summary>
         /// <param name="events">Used to decode <paramref name="newEvent"/>.</param>
         /// <returns>The newly-constructed event object.</returns>
-        public EMEVD.Event AddEvent(Events events, EventConfig.NewEvent newEvent)
+        public EMEVD.Event AddEvent(string map, EventConfig.NewEvent newEvent, Events events)
         {
             var id = GetUniqueEventId();
             var ev = new EMEVD.Event(id, newEvent.Rest);
@@ -783,11 +811,8 @@ namespace RandomizerCommon
                 ev.Parameters.AddRange(newPs);
             }
 
-            AddEvent(newEvent.Map, ev, name: newEvent.Name);
-            if (newEvent.Map != "common_func" && newEvent.Arguments.Count == 0)
-            {
-                AddInitializer(newEvent.Map, ev);
-            }
+            AddEvent(map, ev, name: newEvent.Name);
+            if (map != "common_func" && newEvent.Arguments.Count == 0) AddInitializer(map, ev);
 
             return ev;
         }
@@ -796,11 +821,7 @@ namespace RandomizerCommon
         /// Adds an initializer that calls the event named <paramref name="name"/> in the map in
         /// which it's defined and passes it <paramref name="args"/>.
         /// </summary>
-        public void AddInitializer(
-            string name,
-            IEnumerable<object> args = null
-        )
-        {
+        public void AddInitializer(string name, IEnumerable<object> args = null) {
             if (!eventsByName.ContainsKey(name))
             {
                 throw new Exception($"There's no event registered with the name {name}");

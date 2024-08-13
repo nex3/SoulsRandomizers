@@ -17,13 +17,18 @@ namespace RandomizerCommon
 {
     public class EventConfig
     {
-        /// <summary>New events to add to the game.</summary>
-        public List<NewEvent> NewEvents { get; set; } = new();
+        /// <summary>A map from map names to events events to add to those maps.</summary>
+        public Dictionary<string, List<NewEvent>> NewEvents { get; set; } = new();
+
         /// <summary>
-        /// Existing events to modify, or potentially just to give names so they can be more easily
+        /// A map from map names and event IDs to Existing events to modify, or potentially just to give names so they can be more easily
         /// referenced.
         /// </summary>
-        public Dictionary<long, ExistingEvent> ExistingEvents { get; set; } = new();
+        public Dictionary<string, Dictionary<long, ExistingEvent>> ExistingEvents {
+            get;
+            set;
+        } = new();
+
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
         public List<EventSpec> ItemTalks { get; set; }
@@ -57,13 +62,6 @@ namespace RandomizerCommon
             /// <para>This can be checked using <c>IncludeFor</c>.</para>
             /// </remarks>
             public string If { get; set; }
-
-            /// <summary>The map that this event is defined in.</summary>
-            /// <remarks>
-            /// This defaults to <c>"common_func"</c>. For other maps, a <c>NewEvent</c> will be
-            /// initialized in that map automatically unless it has <c>Arguments</c> set.
-            /// </remarks>
-            public string Map { get; set; } = "common_func";
 
             /// <returns>
             /// Whether this event should be included given the selected randomizer options.

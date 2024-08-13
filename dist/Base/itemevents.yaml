@@ -1,77 +1,78 @@
 # Events for the item randomizer.
 NewEvents:
-- Comment: |
-    Hacky Greirat Lothric Castle softlock fix. If you don't have Grand Archives key yet, mark him
-    as having talked about looting Lothric (74000308) so the actual looting flag (74000309) isn't
-    touched by ESD.
-  Map: common
-  Commands:
-  - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)
-  - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)
-  - SetEventFlag(74000308, ON)
-  - IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)
-  - SetEventFlag(74000308, OFF)
-- Comment: |
-    Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
-    ActionButtonParam in PermutationWriter.
-  Map: m40_00_00_00
-  Rest: Restart
-  Commands:
-  - Set Event Flag (14005108,1)
-  - IF Player Has/Doesn't Have Item (0,3,2137,1)
-  - Set Event Flag (14005108,0)
-- Name: showLudlethItems
-  Comment: Make a boss soul trigger the event to show its items in the shop.
-  # Run this everywhere, not just in Firelink, so that items still show up if the player cracks the
-  # soul before visiting Ludleth.
-  Map: common
-  Arguments:
-  # The event flag used in ShopLineupParam to gate whether or not an item is displayed.  
-  - qwcID
-  # The goods ID of the boss soul
-  - itemID
-  Commands:
-  - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, qwcID)
-  - IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, itemID, OwnershipState.Owns)
-  - Set Event Flag (qwcID, ON)
-- Name: pathOfTheDragon
-  Comment: |
-    Do the Path of the Dragon swap.
-    We can't just use the item all of the time, since it would appear as a double drop.
-  If: "!archipelago"
-  Map: common
-  Arguments: [dragonFlag]
-  Commands:
-  - END IF Event Flag (0,1,0,6079)
-  - IF Event Flag (0,1,0,dragonFlag)
-  - Award Gesture Item (29,3,9030)
-  - Set Event Flag (6079,1)
-- Name: pathOfTheDragonArchi
-  Comment: |
-    Archipelago handles Path of the Dragon as a synthetic item or (when getting it from another
-    world or a /send command) manually triggering the event 100001312.
-  If: archipelago
-  Map: common
-  Arguments:
-  # The unique event ID we use to track whether the gesture has been granted.  
-  - trackingEvent
-  # The ID of the local Path of the Dragon item, or -1 if it's foreign.
-  - itemID
-  Commands:
-  - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, trackingEvent)
-  - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)
-  - SKIP IF Comparison (1, ComparisonType.Equal, itemID, -1)
-  - IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, itemID, OwnershipState.Owns)
-  - IfConditionGroup(MAIN, PASS, OR_01)
-  - Award Gesture Item (29,3,9030)
-  - Set Event Flag (trackingEvent, 1)
-  - Set Event Flag (100001312,0)
-- Comment: |
-    Another Archipelago-specific event that display a message with a special IDs that the mod can
-    override to show its own messages.
-  If: archipelago
-  Map: common
-  Commands:
-  - IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)
-  - Display Message (100001312, 1)
-  - Set Event Flag (100001313, OFF)
+  common:
+  - Comment: |
+      Hacky Greirat Lothric Castle softlock fix. If you don't have Grand Archives key yet, mark him
+      as having talked about looting Lothric (74000308) so the actual looting flag (74000309) isn't
+      touched by ESD.
+    Commands:
+    - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)
+    - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)
+    - SetEventFlag(74000308, ON)
+    - IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)
+    - SetEventFlag(74000308, OFF)
+
+  - Name: showLudlethItems
+    Comment: Make a boss soul trigger the event to show its items in the shop.
+    # Run this everywhere, not just in Firelink, so that items still show up if the player cracks the
+    # soul before visiting Ludleth.
+    Arguments:
+    # The event flag used in ShopLineupParam to gate whether or not an item is displayed.  
+    - qwcID
+    # The goods ID of the boss soul
+    - itemID
+    Commands:
+    - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, qwcID)
+    - IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, itemID, OwnershipState.Owns)
+    - Set Event Flag (qwcID, ON)
+
+  - Name: pathOfTheDragon
+    Comment: |
+      Do the Path of the Dragon swap.
+      We can't just use the item all of the time, since it would appear as a double drop.
+    If: "!archipelago"
+    Arguments: [dragonFlag]
+    Commands:
+    - END IF Event Flag (0,1,0,6079)
+    - IF Event Flag (0,1,0,dragonFlag)
+    - Award Gesture Item (29,3,9030)
+    - Set Event Flag (6079,1)
+
+  - Name: pathOfTheDragonArchi
+    Comment: |
+      Archipelago handles Path of the Dragon as a synthetic item or (when getting it from another
+      world or a /send command) manually triggering the event 100001312.
+    If: archipelago
+    Arguments:
+    # The unique event ID we use to track whether the gesture has been granted.  
+    - trackingEvent
+    # The ID of the local Path of the Dragon item, or -1 if it's foreign.
+    - itemID
+    Commands:
+    - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, trackingEvent)
+    - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)
+    - SKIP IF Comparison (1, ComparisonType.Equal, itemID, -1)
+    - IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, itemID, OwnershipState.Owns)
+    - IfConditionGroup(MAIN, PASS, OR_01)
+    - Award Gesture Item (29,3,9030)
+    - Set Event Flag (trackingEvent, 1)
+    - Set Event Flag (100001312,0)
+
+  - Comment: |
+      Another Archipelago-specific event that display a message with a special IDs that the mod can
+      override to show its own messages.
+    If: archipelago
+    Commands:
+    - IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)
+    - Display Message (100001312, 1)
+    - Set Event Flag (100001313, OFF)
+
+  m40_00_00_00: # Firelink
+  - Comment: |
+      Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
+      ActionButtonParam in PermutationWriter.
+    Rest: Restart
+    Commands:
+    - Set Event Flag (14005108,1)
+    - IF Player Has/Doesn't Have Item (0,3,2137,1)
+    - Set Event Flag (14005108,0)
