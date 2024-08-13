@@ -1258,19 +1258,6 @@ namespace RandomizerCommon
                                 return instr.Init && instr.Callee == 13000901;
                             });
                         }
-                        else if (ev.ID == 0 && map == "m30_01_00_00")
-                        {
-                            // Fix Lothric Castle Crystal Lizard so one doesn't despawn when the other one gets killed (use new event flag)
-                            foreach (EMEVD.Instruction i in ev.Instructions)
-                            {
-                                Instr instr = events.Parse(i);
-                                if (instr.Init && instr.Callee == 20005341 && (int)instr[instr.Offset + 1] == 3010311)
-                                {
-                                    instr[instr.Offset] = 13010594;
-                                    instr.Save();
-                                }
-                            }
-                        }
                         else if (ev.ID == 0 && map == "m31_00_00_00")
                         {
                             // Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable

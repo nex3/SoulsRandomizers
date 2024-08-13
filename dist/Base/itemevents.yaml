@@ -76,3 +76,11 @@ NewEvents:
     - Set Event Flag (14005108,1)
     - IF Player Has/Doesn't Have Item (0,3,2137,1)
     - Set Event Flag (14005108,0)
+
+ExistingEvents:
+  m30_01_00_00:
+    0:
+      Edits:
+      # Fix Lothric Castle Crystal Lizard so one doesn't despawn when the other one gets killed (use new event flag)
+      - Match: {Init: {Callee: 20005341, Arguments: [null, 3010311]}}
+        Set: {Param: {InitArg: 0}, Value: 13010594}

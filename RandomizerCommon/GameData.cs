@@ -743,25 +743,18 @@ namespace RandomizerCommon
             {
                 foreach (var (id, e) in mapEvents)
                 {
-                    if (e.Name != null) NameEvent(map, id, e.Name);
+                    var ev = Emevds[map].Events.Find(ev => ev.ID == id)
+                        ?? throw new Exception($"Error: event {e.Name} #{id} missing from {map}");
+
+                    if (e.Name != null) eventsByName[e.Name] = (ev, map);
+                    var instructions = ev.Instructions.Select(i => events.Parse(i)).ToList();
+
+                    foreach (var edit in e.Edits)
+                    {
+                        instructions.ForEach(edit.Edit);
+                    }
                 }
             }
-        }
-
-        /// <summary>
-        /// Registers <paramref name="name"/> as the name for the event with ID
-        /// <paramref name="id"/> in <paramref name="map"/>.
-        /// </summary>
-        /// <remarks>This allows the event to be invoked using <c>AddInitializer</c>.</remarks>
-        public void NameEvent(string map, long id, string name)
-        {
-            var ev = Emevds[map].Events.Find(ev => ev.ID == id);
-            if (ev == null)
-            {
-                throw new Exception($"Error: event {name} #{id} missing from {map}");
-            }
-
-            eventsByName[name] = (ev, map);
         }
 
         /// <summary>

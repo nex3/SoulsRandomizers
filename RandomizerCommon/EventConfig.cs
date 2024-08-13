@@ -159,8 +159,163 @@ namespace RandomizerCommon
             public static explicit operator EventArgument(string s) => new() { Name = s };
         }
 
+        /// <summary>An event that already exists in the game.</summary>
+        /// <remarks>
+        /// This can just provide a name to a function we might want to call, or it can make more
+        /// detailed <c>Edits</c> to change the behavior of an existing event.
+        /// </remarks>
         public class ExistingEvent : BaseEvent
         {
+            /// <summary>A list of edits to make to this event.</summary>
+            public List<EventEdit> Edits { get; set; } = new();
+        }
+
+        /// <summary>The interface for edits that change specific instructions.</summary>
+        public interface IEventEdit
+        {
+            /// <summary>Performs the chosen edit on <paramref name="instr"/>.</summary>
+            public void Edit(Instr instr);
+        }
+
+        /// <summary>A single edit to apply to an existing event.</summary>
+        /// <remarks>
+        /// An edit has two critical components: the <c>Matcher</c> which determines which
+        /// instruction(s) in the event to change, and the other properties which indicate which
+        /// change(s) to make. These changes are made in an arbitrary order, so it's recommended
+        /// that each edit only makes a single change.
+        /// </remarks>
+        public class EventEdit : IEventEdit
+        {
+            /// <summary>The matcher which indicates which instruction to choose.</summary>
+            /// <remarks>If this matches multiple events, all of them will be modified.</remarks>
+            public InstructionMatcher Match { get; set; }
+
+            /// <summary>Sets a parameter of a matched instruction.</summary>
+            public SetEdit Set { get; set; }
+
+            /// <remarks>Performs the edit if <c>Match</c> matches.</remarks>
+            public void Edit(Instr instr)
+            {
+                if (!Match.Match(instr)) return;
+                Set?.Edit(instr);
+            }
+        }
+
+        /// <summary>
+        /// The interface for matchers that select particular event instructions.
+        /// </summary>
+        public interface IInstructionMatcher
+        {
+            /// <returns>Whether this matches a given instruction.</returns>
+            public bool Match(Instr instr);
+        }
+
+        /// <summary>
+        /// A matcher which indicates which instruction to choose for an <c>EventEdit</c>.
+        /// </summary>
+        /// <remarks>
+        /// This can include multiple matcher conditions, in which case all of them must match in
+        /// order for the matcher to match.
+        /// </remarks>
+        public class InstructionMatcher : IInstructionMatcher
+        {
+            /// <summary>A matcher for initializer instructions found in event 0s.</summary>
+            public InitMatcher Init { get; set; }
+
+            public bool Match(Instr instr)
+            {
+                return Init?.Match(instr) ?? true;
+            }
+        }
+
+        /// <summary>
+        /// A matcher that matches an instruction (typically in event 0) that initializes a
+        /// specific event.
+        /// </summary>
+        public class InitMatcher : IInstructionMatcher
+        {
+            /// <summary>
+            /// The initializer index (that is, the first argument to the initializer).
+            /// </summary>
+            public int? Index {  get; set; }
+
+            /// <summary>The ID of the event being initialized by this instruction.</summary>
+            public int? Callee { get; set; }
+
+            /// <summary>Specific arguments to match. Null arguments match any value.</summary>
+            /// <remarks>
+            /// Neither the initializer index nor the callee are considered arguemnts. An
+            /// initializer fewer args than listed here will not match, but an initializer with more
+            /// will.
+            /// </remarks>
+            public List<int?> Arguments { get; set; } = new();
+
+            /// <summary>Shorthand constructor so YAML can just write <c>Init: 1234</c></summary>
+            public static explicit operator InitMatcher(int? callee) => new() { Callee = callee };
+
+            public bool Match(Instr instr)
+            {
+                if (!instr.Init) return false;
+                if (Index != null && (int)instr[0] != Index) return false;
+                if (Callee != null && instr.Callee != Callee) return false;
+                for (var i = 0; i < Arguments.Count; i++)
+                {
+                    var expected = Arguments[i];
+                    if (expected == null) continue;
+                    if ((int)instr[instr.Offset + i] != expected) return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>Sets the value of a specific parameter of a matched instruction.</summary>
+        public class SetEdit : IEventEdit
+        {
+            /// <summary>The parameter to set.</summary>
+            public InstructionParameter Param { get; set; }
+
+            /// <summary>The new value for the parameter.</summary>
+            public uint Value { get; set; }
+
+            public void Edit(Instr instr)
+            {
+                instr[Param.Offset(instr)] = Value;
+                instr.Save();
+            }
+        }
+
+        /// <summary>A means of determining a specific parameter in an EMEVD instruction.</summary>
+        /// <remarks>
+        /// It's an error to set multiple different means of finding the parameter.
+        /// </remarks>
+        public class InstructionParameter
+        {
+            /// <summary>A simple 0-based index into the parameter list.</summary>
+            public int? Index { get; set; }
+
+            /// <summary>The argument passed to the event invoked by an initializer.</summary>
+            /// <remarks>This requires that the instruction is an initialization.</remarks>
+            public int? InitArg { get; set; }
+
+            /// <summary>Shorthand constructor so YAML can just write <c>Param: 0</c></summary>
+            public static explicit operator InstructionParameter(int? index) =>
+                new() { Index = index };
+
+            /// <returns>
+            /// The offset into <c>instr</c>'s arguments that this parameter indicates.
+            /// </returns>
+            public int Offset(Instr instr)
+            {
+                if (Index != null && InitArg != null)
+                {
+                    throw new Exception("Can't set multiple parameter types at once");
+                }
+
+                if (Index is int index) return index;
+                if (InitArg is int initArg) return initArg;
+
+                throw new Exception("No parameter provided");
+            }
         }
 
         public class EventSpec : AbstractEventSpec
