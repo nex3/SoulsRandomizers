@@ -183,7 +183,7 @@ namespace RandomizerCommon
             {
                 /// <summary>The default: do not remove matching instructions.</summary>
                 None,
-                /// <summary>Remove the first matching instruction.</summary>
+                /// <summary>Remove the first matching region.</summary>
                 First,
                 /// <summary>Remove all matching instructions.</summary>
                 All,
@@ -191,16 +191,36 @@ namespace RandomizerCommon
 
             /// <summary>The matcher which indicates which instruction to choose.</summary>
             /// <remarks>
+            /// <para>
             /// If this matches multiple events, only the first will be modified. If it doesn't
             /// match any, it will throw an error.
+            /// </para>
+            /// 
+            /// <para>
+            /// An empty matcher is considered to match the whole event as a region.
+            /// </para>
             /// </remarks>
+            /// <seealso cref="MatchLength"/>
             public InstructionMatcher Match { get; set; }
+
+            /// <summary>The length of the match. Defaults to 1.</summary>
+            /// <remarks>
+            /// When multiple lines are matched, this is referred to as the "region". Only certain
+            /// actions care about the region; others will throw an error if MatchLength isn't 1.
+            /// </remarks>
+            public int MatchLength { get; set; } = 1;
 
             /// <summary>Sets a parameter of a matched instruction.</summary>
             public SetEdit Set { get; set; }
 
             /// <summary>If true, removes matching instructions entirely.</summary>
             public RemoveType Remove { get; set; } = RemoveType.None;
+
+            /// <summary>A list of commands to insert before the matching region.</summary>
+            public List<string> AddBefore { get; set; } = new();
+
+            /// <summary>A list of commands to insert after the matching region.</summary>
+            public List<string> AddAfter { get; set; } = new();
 
             /// <summary>Performs the chosen edit on <paramref name="ev"/>.</summary>
             /// <param name="ev">The event being edited.</param>
@@ -210,7 +230,7 @@ namespace RandomizerCommon
             /// <remarks>Throws an exception if no instruction matches <c>Match</c>.</remarks>
             public void Edit(EMEVD.Event ev, Events events)
             {
-                if (Match == null) throw new Exception("EventEdit must have a Match field");
+                var matchLength = Match == null ? ev.Instructions.Count : MatchLength;
 
                 if (Set != null && Remove != RemoveType.None)
                 {
@@ -226,6 +246,7 @@ namespace RandomizerCommon
                 var pre = OldParams.Preprocess(ev);
                 if (Remove == RemoveType.All)
                 {
+                    AssertNoRegion("Remove: All");
                     var removed = ev.Instructions
                         .RemoveAll(inst => Match.Match(events.Parse(inst, pre), events));
                     pre.Postprocess();
@@ -235,17 +256,61 @@ namespace RandomizerCommon
 
                 for (var i = 0; i < ev.Instructions.Count; i++)
                 {
-                    var instr = events.Parse(ev.Instructions[i], pre);
-                    if (!Match.Match(instr, events)) continue;
-                    Set?.Edit(instr);
-                    if (Remove == RemoveType.First) ev.Instructions.RemoveAt(i);
+                    var instr = events.Parse(ev.Instructions[i]);
+                    if (Match != null && !Match.Match(instr, events)) continue;
 
-                    instr.Save(pre);
+                    if (Set != null)
+                    {
+                        AssertNoRegion("Set");
+                        Set.Edit(instr);
+                        instr.Save(pre);
+                    }
+                    else if (Remove == RemoveType.First)
+                    {
+                        ev.Instructions.RemoveRange(i, matchLength);
+                    }
+                    else if (AddBefore != null)
+                    {
+                        ev.Instructions.InsertRange(i, ParseInstructions(AddBefore, events, pre));
+                    }
+                    else if (AddAfter != null)
+                    {
+                        ev.Instructions.InsertRange(
+                            i + matchLength, ParseInstructions(AddAfter, events, pre));
+                    }
+
                     pre.Postprocess();
                     return;
                 }
 
                 throw new Exception("Expected Remove: All EditEvent to match an instruction");
+            }
+
+            /// <summary>
+            /// Throws an error if this edit applies to a region, as opposed to a single
+            /// instruction.
+            /// </summary>
+            private void AssertNoRegion(string action)
+            {
+                if (Match == null || MatchLength != 1)
+                {
+                    throw new Exception($"Edit action {action} doesn't apply to a region.");
+                }
+            }
+
+            /// <summary>Parses a list of text instructions to add to the event.</summary>
+            private static List<EMEVD.Instruction> ParseInstructions(
+                IEnumerable<string> instructions,
+                Events events,
+                OldParams pre
+            )
+            {
+                return instructions.Select(text =>
+                {
+                    var (inst, ps) = events.ParseAddArg(text);
+                    pre.AddParameters(inst, ps);
+                    return inst;
+                }).ToList();
             }
         }
 

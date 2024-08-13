@@ -741,11 +741,15 @@ namespace RandomizerCommon
 
             foreach (var (map, mapEvents) in config.ExistingEvents)
             {
+                var emevd = GetEmevdOrWarn(map);
+                if (emevd == null) continue;
+
                 foreach (var (id, e) in mapEvents)
                 {
-                    var ev = Emevds[map].Events.Find(ev => ev.ID == id)
+                    var ev = emevd.Events.Find(ev => ev.ID == id)
                         ?? throw new Exception($"Error: event {e.Name} #{id} missing from {map}");
 
+                    if (!e.IncludeFor(opt)) continue;
                     if (e.Name != null) eventsByName[e.Name] = (ev, map);
                     foreach (var edit in e.Edits) edit.Edit(ev, events);
                 }

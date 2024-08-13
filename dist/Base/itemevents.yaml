@@ -78,6 +78,12 @@ NewEvents:
     - Set Event Flag (14005108,0)
 
 ExistingEvents:
+  common_func:
+    # Disable the event that hides treasures outside of NG+
+    20005523:
+      If: ngplusrings
+      Edits: [AddBefore: ["GOTO Unconditionally (0)"]]
+    
   common:
     # Grand Archives Key softlock fix
     710:

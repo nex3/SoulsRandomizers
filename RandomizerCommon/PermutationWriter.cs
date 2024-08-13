@@ -1258,14 +1258,6 @@ namespace RandomizerCommon
                                 return instr.Init && instr.Callee == 13000901;
                             });
                         }
-                        else if (ev.ID == 20005523)
-                        {
-                            if (opt["ngplusrings"])
-                            {
-                                edits = new EventEdits();
-                                events.AddMacro(edits, EditType.AddBefore, "GOTO Unconditionally (0)");
-                            }
-                        }
                         else if (ev.ID == 13905870)
                         {
                             // Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
