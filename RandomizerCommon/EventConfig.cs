@@ -217,20 +217,31 @@ namespace RandomizerCommon
                     throw new Exception("Each EventEdit may only contain one edit");
                 }
 
+                // EMEVD handles parameters unusually. Rather than using any kind of variable or
+                // register, it begins events with special instructions that rewrite all the
+                // parameter bytes in the rest of the event with their values. This means that in
+                // order to safely make edits that add or remove instructions, we have to update the
+                // parameter references as well. Fortunately, OldParams handles that for us as long
+                // as we tell it which new instructions we're adding.
+                var pre = OldParams.Preprocess(ev);
                 if (Remove == RemoveType.All)
                 {
                     var removed = ev.Instructions
-                        .RemoveAll(inst => Match.Match(events.Parse(inst), events));
+                        .RemoveAll(inst => Match.Match(events.Parse(inst, pre), events));
+                    pre.Postprocess();
                     if (removed > 0) return;
                     throw new Exception("Expected Remove: All EditEvent to match an instruction");
                 }
 
                 for (var i = 0; i < ev.Instructions.Count; i++)
                 {
-                    var instr = events.Parse(ev.Instructions[i]);
+                    var instr = events.Parse(ev.Instructions[i], pre);
                     if (!Match.Match(instr, events)) continue;
                     Set?.Edit(instr);
                     if (Remove == RemoveType.First) ev.Instructions.RemoveAt(i);
+
+                    instr.Save(pre);
+                    pre.Postprocess();
                     return;
                 }
 
@@ -266,8 +277,11 @@ namespace RandomizerCommon
             /// <summary>
             /// Parses a literal string as an instruction, which is matched exactly.
             /// </summary>
-            public static explicit operator InstructionMatcher(string instruction)
-                => new() { Instruction = instruction };
+            public static explicit operator InstructionMatcher(string instruction) =>
+                // Parameters are replaced with 0s when parsed. We can't distinguish between actual
+                // params and literal 0s because parameters are actually substituted in-place just
+                // before an event is run.
+                new() { Instruction = Regex.Replace(instruction, "\\bX[0-9]+_[0-9]+\\b", "0") };
 
             public bool Match(Instr instr, Events events)
             {
@@ -279,7 +293,7 @@ namespace RandomizerCommon
             private bool MatchInstruction(Instr instr, Events events)
             {
                 if (Instruction == null) return true;
-                var expected = events.ParseAddArg(Instruction).Item1;
+                var expected = events.ParseAdd(Instruction);
                 return expected.Bank == instr.Val.Bank &&
                     expected.ID == instr.Val.ID &&
                     Enumerable.SequenceEqual(expected.ArgData, instr.Val.ArgData);
@@ -337,7 +351,6 @@ namespace RandomizerCommon
             public void Edit(Instr instr)
             {
                 instr[Param.Offset(instr)] = Value;
-                instr.Save();
             }
         }
 
