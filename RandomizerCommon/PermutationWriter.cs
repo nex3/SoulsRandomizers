@@ -1235,44 +1235,16 @@ namespace RandomizerCommon
                 // Make it appear as a key item in shops
                 game.Params["EquipParamGoods"][9030]["goodsType"].Value = (byte)1;
 
-                Dictionary<string, EMEVD> emevds = game.Emevds;
-
-                // Do this all manually for the moment, rather than from config
-                // Can revisit this later if it needs to scale up
-                List<string> toEdit = new List<string> { "common", "common_func", "m30_00_00_00", "m30_01_00_00", "m31_00_00_00", "m40_00_00_00" };
-                foreach (KeyValuePair<string, EMEVD> entry in emevds)
+                if (dragonFlag > 0 || alwaysReplacePathOfTheDragon)
                 {
-                    if (!toEdit.Contains(entry.Key)) continue;
-                    string map = entry.Key;
-                    EMEVD emevd = entry.Value;
-                    foreach (EMEVD.Event ev in emevd.Events)
+                    var ev = game.Emevds["m30_00_00_00"].Events[0];
+                    Debug.Assert(ev.ID == 0);
+                    // Remove visual sfx for Path of the Dragon pickup
+                    ev.Instructions.RemoveAll(i =>
                     {
-                        EventEdits edits = null;
-                        if (ev.ID == 0 && map == "m30_00_00_00" &&
-                            (dragonFlag > 0 || alwaysReplacePathOfTheDragon))
-                        {
-                            // Remove visual sfx for Path of the Dragon pickup
-                            ev.Instructions.RemoveAll(i =>
-                            {
-                                Instr instr = events.Parse(i);
-                                return instr.Init && instr.Callee == 13000901;
-                            });
-                        }
-                        else if (ev.ID == 13905870)
-                        {
-                            // Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
-                            edits = new EventEdits();
-                            events.AddMacro(edits, EditType.AddAfter, "EndUnconditionally(EventEndType.End)", "SetObjectTreasureState");
-                        }
-                        if (edits != null)
-                        {
-                            events.ApplyAllEdits(ev, edits);
-                            if (edits.PendingEdits.Count != 0)
-                            {
-                                throw new Exception($"{ev.ID} has unapplied edits: {string.Join("; ", edits.PendingEdits)}");
-                            }
-                        }
-                    }
+                        Instr instr = events.Parse(i);
+                        return instr.Init && instr.Callee == 13000901;
+                    });
                 }
 
                 if (!opt["archipelago"])

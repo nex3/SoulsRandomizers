@@ -104,3 +104,10 @@ ExistingEvents:
       # Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable.
       - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
         Remove: First
+
+  m39_00_00_00: # Profane Capitol
+    # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
+    13905870:
+      Edits:
+      - Match: "SetObjectTreasureState(X0_4, Disabled)"
+        AddAfter: ["EndUnconditionally(EventEndType.End)"]
