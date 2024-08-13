@@ -747,12 +747,7 @@ namespace RandomizerCommon
                         ?? throw new Exception($"Error: event {e.Name} #{id} missing from {map}");
 
                     if (e.Name != null) eventsByName[e.Name] = (ev, map);
-                    var instructions = ev.Instructions.Select(i => events.Parse(i)).ToList();
-
-                    foreach (var edit in e.Edits)
-                    {
-                        instructions.ForEach(edit.Edit);
-                    }
+                    foreach (var edit in e.Edits) edit.Edit(ev, events);
                 }
             }
         }

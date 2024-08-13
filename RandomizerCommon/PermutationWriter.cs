@@ -1258,15 +1258,6 @@ namespace RandomizerCommon
                                 return instr.Init && instr.Callee == 13000901;
                             });
                         }
-                        else if (ev.ID == 0 && map == "m31_00_00_00")
-                        {
-                            // Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable
-                            ev.Instructions.RemoveAll(i =>
-                            {
-                                Instr instr = events.Parse(i);
-                                return instr.Init && instr.Callee == 20005525 && (int)instr[instr.Offset] == 53100660;
-                            });
-                        }
                         else if (ev.ID == 710)
                         {
                             // Grand Archives Key softlock fix

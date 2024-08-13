@@ -170,34 +170,73 @@ namespace RandomizerCommon
             public List<EventEdit> Edits { get; set; } = new();
         }
 
-        /// <summary>The interface for edits that change specific instructions.</summary>
-        public interface IEventEdit
-        {
-            /// <summary>Performs the chosen edit on <paramref name="instr"/>.</summary>
-            public void Edit(Instr instr);
-        }
-
         /// <summary>A single edit to apply to an existing event.</summary>
         /// <remarks>
         /// An edit has two critical components: the <c>Matcher</c> which determines which
         /// instruction(s) in the event to change, and the other properties which indicate which
-        /// change(s) to make. These changes are made in an arbitrary order, so it's recommended
-        /// that each edit only makes a single change.
+        /// change(s) to make. Only one change may be made per edit.
         /// </remarks>
-        public class EventEdit : IEventEdit
+        public class EventEdit
         {
+            /// <summary>Options for which matching instructions to remove.</summary>
+            public enum RemoveType
+            {
+                /// <summary>The default: do not remove matching instructions.</summary>
+                None,
+                /// <summary>Remove the first matching instruction.</summary>
+                First,
+                /// <summary>Remove all matching instructions.</summary>
+                All,
+            }
+
             /// <summary>The matcher which indicates which instruction to choose.</summary>
-            /// <remarks>If this matches multiple events, all of them will be modified.</remarks>
+            /// <remarks>
+            /// If this matches multiple events, only the first will be modified. If it doesn't
+            /// match any, it will throw an error.
+            /// </remarks>
             public InstructionMatcher Match { get; set; }
 
             /// <summary>Sets a parameter of a matched instruction.</summary>
             public SetEdit Set { get; set; }
 
-            /// <remarks>Performs the edit if <c>Match</c> matches.</remarks>
-            public void Edit(Instr instr)
+            /// <summary>If true, removes matching instructions entirely.</summary>
+            public RemoveType Remove { get; set; } = RemoveType.None;
+
+            /// <summary>Performs the chosen edit on <paramref name="ev"/>.</summary>
+            /// <param name="ev">The event being edited.</param>
+            /// <param name="events">
+            /// The event metadata used to decode information about <paramref name="ev"/>.
+            /// </param>
+            /// <remarks>Throws an exception if no instruction matches <c>Match</c>.</remarks>
+            public void Edit(EMEVD.Event ev, Events events)
             {
-                if (!Match.Match(instr)) return;
-                Set?.Edit(instr);
+                if (Match == null) throw new Exception("EventEdit must have a Match field");
+
+                if (Set != null && Remove != RemoveType.None)
+                {
+                    throw new Exception("Each EventEdit may only contain one edit");
+                }
+
+                if (Remove == RemoveType.All)
+                {
+                    if (ev.Instructions.RemoveAll(inst => Match.Match(events.Parse(inst))) == 0)
+                    {
+                        throw new Exception(
+                            "Expected Remove: All EditEvent to match an instruction");
+                    }
+                    return;
+                }
+
+                for (var i = 0; i < ev.Instructions.Count; i++)
+                {
+                    var instr = events.Parse(ev.Instructions[i]);
+                    if (!Match.Match(instr)) continue;
+                    Set?.Edit(instr);
+                    if (Remove == RemoveType.First) ev.Instructions.RemoveAt(i);
+                    return;
+                }
+
+                throw new Exception("Expected Remove: All EditEvent to match an instruction");
             }
         }
 
@@ -250,7 +289,6 @@ namespace RandomizerCommon
             /// </remarks>
             public List<int?> Arguments { get; set; } = new();
 
-            /// <summary>Shorthand constructor so YAML can just write <c>Init: 1234</c></summary>
             public static explicit operator InitMatcher(int? callee) => new() { Callee = callee };
 
             public bool Match(Instr instr)
@@ -269,7 +307,7 @@ namespace RandomizerCommon
         }
 
         /// <summary>Sets the value of a specific parameter of a matched instruction.</summary>
-        public class SetEdit : IEventEdit
+        public class SetEdit
         {
             /// <summary>The parameter to set.</summary>
             public InstructionParameter Param { get; set; }
@@ -293,26 +331,42 @@ namespace RandomizerCommon
             /// <summary>A simple 0-based index into the parameter list.</summary>
             public int? Index { get; set; }
 
+            /// <summary>The camel-case parameter name from EMEDF.</summary>
+            public string Name { get; set; }
+
             /// <summary>The argument passed to the event invoked by an initializer.</summary>
             /// <remarks>This requires that the instruction is an initialization.</remarks>
             public int? InitArg { get; set; }
 
-            /// <summary>Shorthand constructor so YAML can just write <c>Param: 0</c></summary>
-            public static explicit operator InstructionParameter(int? index) =>
+            public static explicit operator InstructionParameter(int index) =>
                 new() { Index = index };
+
+            public static explicit operator InstructionParameter(string name) =>
+                new() { Name = name };
 
             /// <returns>
             /// The offset into <c>instr</c>'s arguments that this parameter indicates.
             /// </returns>
             public int Offset(Instr instr)
             {
-                if (Index != null && InitArg != null)
-                {
-                    throw new Exception("Can't set multiple parameter types at once");
-                }
+                var setTypes = 0;
+                if (Index != null) setTypes++;
+                if (Name != null) setTypes++;
+                if (InitArg != null) setTypes++;
+                if (setTypes > 1) throw new Exception("Can't set multiple parameter types at once");
 
                 if (Index is int index) return index;
-                if (InitArg is int initArg) return initArg;
+                if (Name is string name)
+                {
+                    for (var i = 0; i < instr.Doc.Arguments.Length; i++)
+                    {
+                        if (instr.Doc.Arguments[i].Name == name) return i;
+                    }
+                    throw new Exception(
+                        $"Insruction {instr.Name} has no argument {name}. Arguments: " +
+                        String.Join(", ", instr.Doc.Arguments.Select(doc => doc.Name)));
+                }
+                if (InitArg is int initArg) return instr.Offset + initArg;
 
                 throw new Exception("No parameter provided");
             }
