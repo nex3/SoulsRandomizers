@@ -330,6 +330,7 @@ namespace RandomizerCommon
         private static RandomizerOptions ConvertRandomizerOptions(Dictionary<string, bool> archiOptions)
         {
             var opt = new RandomizerOptions(FromGame.DS3);
+            opt["archipelago"] = true;
             opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
             opt["ngplusrings"] = archiOptions["enable_ngp"];
             opt["nongplusrings"] = !archiOptions["enable_ngp"];

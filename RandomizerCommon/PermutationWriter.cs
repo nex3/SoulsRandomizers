@@ -829,7 +829,10 @@ namespace RandomizerCommon
             }
 
             // Events
-            eventConfig?.NewEvents.ForEach(e => game.AddEvent(events, e));
+            foreach (var e in eventConfig?.NewEvents ?? new())
+            {
+                if (e.IncludeFor(opt)) game.AddEvent(events, e);
+            }
             foreach (var (id, e) in eventConfig.ExistingEvents)
             {
                 if (e.Name != null) game.NameEvent(e.Map, id, e.Name);
@@ -1315,17 +1318,12 @@ namespace RandomizerCommon
                     }
                 }
 
-                if (dragonFlag > 0)
+                if (!opt["archipelago"])
                 {
-                    // Do the Path of the Dragon swap
-                    // We can't just use the item all of the time, since it would appear as a double drop.
-                    AddNewEvent(new string[]
+                    if (dragonFlag > 0)
                     {
-                        "END IF Event Flag (0,1,0,6079)",
-                        $"IF Event Flag (0,1,0,{dragonFlag})",
-                        "Award Gesture Item (29,3,9030)",
-                        "Set Event Flag (6079,1)",
-                    });
+                        game.AddInitializer("pathOfTheDragon", new object[] { dragonFlag });
+                    }
                 }
                 else
                 {
@@ -1336,35 +1334,10 @@ namespace RandomizerCommon
                         .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
                         .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
 
-                    // Archipelago handles Path of the Dragon as a synthetic item or (when getting
-                    // it from another world or a /send command) manually triggering the event
-                    // 100001312.
                     var trackingEvent = game.GetUniqueEventId();
-                    var commands = new List<string>(new string[]
-                    {
-                        $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
-                        $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
-                    });
-                    if (pathOfTheDragon != null)
-                    {
-                        commands.Add($"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)");
-                    }
-                    commands.AddRange(new string[]
-                    {
-                        "IfConditionGroup(MAIN, PASS, OR_01)",
-                        "Award Gesture Item (29,3,9030)",
-                        $"Set Event Flag ({trackingEvent},1)",
-                        $"Set Event Flag (100001312,0)",
-                    });
-                    AddNewEvent(commands);
-
-                    // Another Archipelago-specific event that display a message with a
-                    // special IDs that the mod can override to show its own messages.
-                    AddNewEvent(new string[]
-                    {
-                        "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
-                        "Display Message (100001312, 1)",
-                        "Set Event Flag (100001313, OFF)",
+                    game.AddInitializer("pathOfTheDragonArchi", new object[] {
+                        (uint)trackingEvent,
+                        pathOfTheDragon?.Item.ID ?? -1
                     });
                 }
 

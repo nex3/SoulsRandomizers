@@ -34,3 +34,44 @@ NewEvents:
   - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, qwcID)
   - IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, itemID, OwnershipState.Owns)
   - Set Event Flag (qwcID, ON)
+- Name: pathOfTheDragon
+  Comment: |
+    Do the Path of the Dragon swap.
+    We can't just use the item all of the time, since it would appear as a double drop.
+  If: "!archipelago"
+  Map: common
+  Arguments: [dragonFlag]
+  Commands:
+  - END IF Event Flag (0,1,0,6079)
+  - IF Event Flag (0,1,0,dragonFlag)
+  - Award Gesture Item (29,3,9030)
+  - Set Event Flag (6079,1)
+- Name: pathOfTheDragonArchi
+  Comment: |
+    Archipelago handles Path of the Dragon as a synthetic item or (when getting it from another
+    world or a /send command) manually triggering the event 100001312.
+  If: archipelago
+  Map: common
+  Arguments:
+  # The unique event ID we use to track whether the gesture has been granted.  
+  - trackingEvent
+  # The ID of the local Path of the Dragon item, or -1 if it's foreign.
+  - itemID
+  Commands:
+  - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, trackingEvent)
+  - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)
+  - SKIP IF Comparison (1, ComparisonType.Equal, itemID, -1)
+  - IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, itemID, OwnershipState.Owns)
+  - IfConditionGroup(MAIN, PASS, OR_01)
+  - Award Gesture Item (29,3,9030)
+  - Set Event Flag (trackingEvent, 1)
+  - Set Event Flag (100001312,0)
+- Comment: |
+    Another Archipelago-specific event that display a message with a special IDs that the mod can
+    override to show its own messages.
+  If: archipelago
+  Map: common
+  Commands:
+  - IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)
+  - Display Message (100001312, 1)
+  - Set Event Flag (100001313, OFF)

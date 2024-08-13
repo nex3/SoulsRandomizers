@@ -793,6 +793,31 @@ namespace RandomizerCommon
         }
 
         /// <summary>
+        /// Adds an initializer that calls the event named <paramref name="name"/> in the map in
+        /// which it's defined and passes it <paramref name="args"/>.
+        /// </summary>
+        public void AddInitializer(
+            string name,
+            IEnumerable<object> args = null
+        )
+        {
+            if (!eventsByName.ContainsKey(name))
+            {
+                throw new Exception($"There's no event registered with the name {name}");
+            }
+
+            var (ev, map) = eventsByName[name];
+            if (map == "common_func")
+            {
+                throw new Exception(
+                    $"Event {name} was defined in common_func must be called with an explicit " +
+                    "map");
+            }
+
+            AddInitializer(map, ev, args);
+        }
+
+        /// <summary>
         /// Adds an initializer to <paramref name="map"/> that calls the event named
         /// <paramref name="name"/> and passes it <paramref name="args"/>.
         /// </summary>

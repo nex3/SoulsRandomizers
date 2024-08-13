@@ -11,6 +11,7 @@ using SoulsFormats;
 using SoulsIds;
 using YamlDotNet.Serialization;
 using static SoulsIds.Events;
+using NCalc;
 
 namespace RandomizerCommon
 {
@@ -30,26 +31,58 @@ namespace RandomizerCommon
         public List<EventSpec> EnemyEvents { get; set; }
         public List<InstructionValueSpec> ValueTypes { get; set; }
 
-        /// <summary>A new event to add to the game.</summary>
-        public class NewEvent
+        /// <summary>
+        /// The base class for classes that create or edit events.
+        /// </summary>
+        public abstract class BaseEvent
         {
             /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
             /// <remarks>
-            /// This is typically used for events in the <c>functions.emevd</c> file which are meant
-            /// to be initialized in various other files to provide re-usable behavior.
+            /// This is typically used for events which are initialized multiple times using
+            /// <c>GameData.AddInitializer</c>.
             /// </remarks>
             public string Name { get; set; }
 
             /// <summary>Documentation for this event.</summary>
             public string Comment { get; set; }
 
-            /// <summary>The map that this event should apply to.</summary>
+            /// <summary>
+            /// A boolean expression. This event is only applied if it returns true.
+            /// </summary>
             /// <remarks>
-            /// This defaults to <c>"common_func"</c>. For other maps, the event will be added to
-            /// that map's initializer automatically unless it has <c>Arguments</c> set.
+            /// <para>
+            /// This can access any boolean in <c>RandomizerOptions</c> as an identifier.
+            /// </para>
+            /// 
+            /// <para>This can be checked using <c>IncludeFor</c>.</para>
+            /// </remarks>
+            public string If { get; set; }
+
+            /// <summary>The map that this event is defined in.</summary>
+            /// <remarks>
+            /// This defaults to <c>"common_func"</c>. For other maps, a <c>NewEvent</c> will be
+            /// initialized in that map automatically unless it has <c>Arguments</c> set.
             /// </remarks>
             public string Map { get; set; } = "common_func";
 
+            /// <returns>
+            /// Whether this event should be included given the selected randomizer options.
+            /// </returns>
+            public bool IncludeFor(RandomizerOptions opt)
+            {
+                if (If == null) return true;
+                var expression = new Expression(If);
+                expression.EvaluateParameter += delegate (string name, ParameterArgs args)
+                {
+                    args.Result = opt[name];
+                };
+                return (bool)expression.Evaluate();
+            }
+        }
+
+        /// <summary>A new event to add to the game.</summary>
+        public class NewEvent : BaseEvent
+        {
             /// <summary>This event's beahvior when the player rests at a bonfire.</summary>
             public EMEVD.Event.RestBehaviorType Rest { get; set; } = EMEVD.Event.RestBehaviorType.Default;
 
@@ -114,11 +147,8 @@ namespace RandomizerCommon
         }
 
         /// <summary>An argument passed to an EMEVD event.</summary>
-        public class EventArgument
+        public class EventArgument : BaseEvent
         {
-            /// <summary>The argument's human-readable name.</summary>
-            public string Name { get; set; }
-
             /// <summary>The width (in bytes) of the argument.</summary>
             /// <remarks>
             /// EMEVD arguments are typically written `XA_B`, where `X` is a literal character "X",
@@ -131,21 +161,8 @@ namespace RandomizerCommon
             public static explicit operator EventArgument(string s) => new() { Name = s };
         }
 
-        public class ExistingEvent
+        public class ExistingEvent : BaseEvent
         {
-            /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
-            /// <remarks>
-            /// This is typically used for events in the <c>functions.emevd</c> file which are meant
-            /// to be initialized in various other files to provide re-usable behavior.
-            /// </remarks>
-            public string Name { get; set; }
-
-            /// <summary>The map that this event is defined in.</summary>
-            /// <remarks>This defaults to <c>"common_func"</c>.</remarks>
-            public string Map { get; set; } = "common_func";
-
-            /// <summary>Documentation for this event.</summary>
-            public string Comment { get; set; }
         }
 
         public class EventSpec : AbstractEventSpec
