@@ -1258,12 +1258,6 @@ namespace RandomizerCommon
                                 return instr.Init && instr.Callee == 13000901;
                             });
                         }
-                        else if (ev.ID == 710)
-                        {
-                            // Grand Archives Key softlock fix
-                            edits = new EventEdits();
-                            events.RemoveMacro(edits, "EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, AND_15)");
-                        }
                         else if (ev.ID == 20005523)
                         {
                             if (opt["ngplusrings"])

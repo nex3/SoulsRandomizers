@@ -219,18 +219,16 @@ namespace RandomizerCommon
 
                 if (Remove == RemoveType.All)
                 {
-                    if (ev.Instructions.RemoveAll(inst => Match.Match(events.Parse(inst))) == 0)
-                    {
-                        throw new Exception(
-                            "Expected Remove: All EditEvent to match an instruction");
-                    }
-                    return;
+                    var removed = ev.Instructions
+                        .RemoveAll(inst => Match.Match(events.Parse(inst), events));
+                    if (removed > 0) return;
+                    throw new Exception("Expected Remove: All EditEvent to match an instruction");
                 }
 
                 for (var i = 0; i < ev.Instructions.Count; i++)
                 {
                     var instr = events.Parse(ev.Instructions[i]);
-                    if (!Match.Match(instr)) continue;
+                    if (!Match.Match(instr, events)) continue;
                     Set?.Edit(instr);
                     if (Remove == RemoveType.First) ev.Instructions.RemoveAt(i);
                     return;
@@ -246,7 +244,8 @@ namespace RandomizerCommon
         public interface IInstructionMatcher
         {
             /// <returns>Whether this matches a given instruction.</returns>
-            public bool Match(Instr instr);
+            /// <param name="events">Additional EMEDF metadata for parsing events.</param>
+            public bool Match(Instr instr, Events events);
         }
 
         /// <summary>
@@ -261,9 +260,29 @@ namespace RandomizerCommon
             /// <summary>A matcher for initializer instructions found in event 0s.</summary>
             public InitMatcher Init { get; set; }
 
-            public bool Match(Instr instr)
+            /// <summary>A literal instruction to match.</summary>
+            public string Instruction { get; set; }
+
+            /// <summary>
+            /// Parses a literal string as an instruction, which is matched exactly.
+            /// </summary>
+            public static explicit operator InstructionMatcher(string instruction)
+                => new() { Instruction = instruction };
+
+            public bool Match(Instr instr, Events events)
             {
-                return Init?.Match(instr) ?? true;
+                return Init?.Match(instr, events) ?? true &&
+                    MatchInstruction(instr, events);
+            }
+
+            /// <returns>whether <paramref name="instr"/> matches <c>Instruction</c>.</returns>
+            private bool MatchInstruction(Instr instr, Events events)
+            {
+                if (Instruction == null) return true;
+                var expected = events.ParseAddArg(Instruction).Item1;
+                return expected.Bank == instr.Val.Bank &&
+                    expected.ID == instr.Val.ID &&
+                    Enumerable.SequenceEqual(expected.ArgData, instr.Val.ArgData);
             }
         }
 
@@ -291,7 +310,7 @@ namespace RandomizerCommon
 
             public static explicit operator InitMatcher(int? callee) => new() { Callee = callee };
 
-            public bool Match(Instr instr)
+            public bool Match(Instr instr, Events events)
             {
                 if (!instr.Init) return false;
                 if (Index != null && (int)instr[0] != Index) return false;
