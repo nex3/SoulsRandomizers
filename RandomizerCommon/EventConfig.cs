@@ -232,7 +232,12 @@ namespace RandomizerCommon
             {
                 var matchLength = Match == null ? ev.Instructions.Count : MatchLength;
 
-                if (Set != null && Remove != RemoveType.None)
+                var editTypes = 0;
+                if (Set!= null) editTypes++;
+                if (Remove != RemoveType.None) editTypes++;
+                if (AddBefore.Count > 0) editTypes++;
+                if (AddAfter.Count > 0) editTypes++;
+                if (editTypes > 1)
                 {
                     throw new Exception("Each EventEdit may only contain one edit");
                 }
