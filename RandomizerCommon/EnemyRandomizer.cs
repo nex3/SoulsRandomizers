@@ -7085,6 +7085,7 @@ namespace RandomizerCommon
                             usedEvents.Add(callee);
                         }
                     }  // For each initialization in caller event
+                    e.Instructions.RemoveAll(i => i.Bank == 1014 && i.ID == 69);
                     initOld.Postprocess();
                 }
             }

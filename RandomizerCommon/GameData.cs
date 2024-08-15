@@ -754,6 +754,14 @@ namespace RandomizerCommon
                     foreach (var edit in e.Edits) edit.Edit(ev, events);
                 }
             }
+
+            foreach (var (map, mapInitializers) in config.Initialize)
+            {
+                foreach (var initializer in mapInitializers)
+                {
+                    AddInitializer(map, initializer.Name, initializer.Arguments.Cast<object>());
+                }
+            }
         }
 
         /// <summary>
@@ -896,7 +904,7 @@ namespace RandomizerCommon
             }
 
             startArgs.Add(checked((uint)eventID));
-            if (args != null) startArgs.AddRange(args);
+            startArgs.AddRange(args ?? new object[] { 0 });
             AddInitializer(map, new EMEVD.Instruction(2000, commonEvent ? 6 : 0, startArgs));
         }
 

@@ -1851,6 +1851,8 @@ namespace RandomizerCommon
                 // End Elden Ring edits
             }
 
+
+
             return new Result { ItemEventFlags = itemEventFlags, MerchantGiftFlags = merchantGiftFlags };
         }
 

@@ -67,6 +67,34 @@ NewEvents:
     - Display Message (100001312, 1)
     - Set Event Flag (100001313, OFF)
 
+  - Comment:
+      Trigger Greirat returning from Undead Settlement after beating Crystal Sage or Abyss Watchers.
+    If: safequest
+    Commands:
+    # If Greirat has been sent to the Settlment
+    - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 74000303)
+    # And if Crystal Sage or Abyss Watchers are defeated
+    - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 13300850)
+    - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 13300800)
+    - IfConditionGroup(AND_01, PASS, OR_01)
+    - IfConditionGroup(MAIN, PASS, AND_01)
+    # Return Greirat to Firelink
+    - Set Event Flag (74000316, ON)
+
+  - Comment:
+      Trigger Greirat returning from Irithyll after beating Pontiff or Yhorm.
+    If: safequest
+    Commands:
+    # If Greirat has been sent to Irithyll
+    - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 74000306)
+    # And if Pontiff or Yhorm are defeated
+    - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 13700850)
+    - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 13900800)
+    - IfConditionGroup(AND_01, PASS, OR_01)
+    - IfConditionGroup(MAIN, PASS, AND_01)
+    # Return Greirat to Firelink
+    - Set Event Flag (74000318, ON)
+
   m40_00_00_00: # Firelink
   - Comment: |
       Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
@@ -85,12 +113,43 @@ ExistingEvents:
       Edits: [AddBefore: ["GOTO Unconditionally (0)"]]
     
   common:
+    0:
+      If: safequest
+      Edits:
+      # In vanilla, Greirat  returns from each quest after you defeat any boss. This is hard to
+      # factor into randomizer logic, though, because you may start the quest at a point where
+      # it's difficult to find and defeat another boss. This removes the initializer that triggers
+      # the "return from Settlement" and "return from Irithyll" events after boss defeats, and
+      # above we add different triggers.
+      - Match: {Init: {Callee: 9120, Arguments: [74000303]}}
+        MatchLength: 2
+        Remove: first
+  
     # Grand Archives Key softlock fix
     710:
       Edits:
       - Match: "EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, AND_15)"
         Remove: First
     
+  m30_00_00_00: # High Wall
+    0:
+      If: safequest
+      Edits:
+      # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
+      # invincible, but just in case.
+      - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+        Remove: First
+      - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+        Remove: First
+      - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+        Remove: First
+
+    # Make Greirat invincible
+    13005620:
+      If: safequest
+      Edits:
+      - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+
   m30_01_00_00: # Lothric Castle
     0:
       Edits:
@@ -111,3 +170,28 @@ ExistingEvents:
       Edits:
       - Match: "SetObjectTreasureState(X0_4, Disabled)"
         AddAfter: ["EndUnconditionally(EventEndType.End)"]
+
+  m40_00_00_00: # Firelink
+    0:
+      If: safequest
+      Edits:
+      # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
+      # invincible, but just in case.
+      - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+        Remove: First
+      - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+        Remove: First
+      - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+        Remove: First
+
+    14005700:
+      Comment: The primary driver event for Greirat's quest
+      If: safequest
+      Edits:
+      # Prevent the player from killing Greirat
+      - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+      # Always survive Irithyll
+      # TODO: Consider requiring Siegward to save him, and making that unfailable
+      - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385);"
+        MatchLength: 2
+        Remove: First

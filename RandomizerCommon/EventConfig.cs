@@ -21,13 +21,19 @@ namespace RandomizerCommon
         public Dictionary<string, List<NewEvent>> NewEvents { get; set; } = new();
 
         /// <summary>
-        /// A map from map names and event IDs to Existing events to modify, or potentially just to give names so they can be more easily
-        /// referenced.
+        /// A map from map names and event IDs to Existing events to modify, or potentially just to
+        /// give names so they can be more easily referenced.
         /// </summary>
-        public Dictionary<string, Dictionary<long, ExistingEvent>> ExistingEvents {
+        public Dictionary<string, Dictionary<long, ExistingEvent>> ExistingEvents
+        {
             get;
             set;
         } = new();
+
+        /// <summary>
+        /// A map from map names to new initializers to add to event 0 for those maps.
+        /// </summary>
+        public Dictionary<string, List<AddInitializer>> Initialize { get; set; } = new();
 
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
@@ -274,11 +280,11 @@ namespace RandomizerCommon
                     {
                         ev.Instructions.RemoveRange(i, matchLength);
                     }
-                    else if (AddBefore != null)
+                    else if (AddBefore.Count > 0)
                     {
                         ev.Instructions.InsertRange(i, ParseInstructions(AddBefore, events, pre));
                     }
-                    else if (AddAfter != null)
+                    else if (AddAfter.Count > 0)
                     {
                         ev.Instructions.InsertRange(
                             i + matchLength, ParseInstructions(AddAfter, events, pre));
@@ -472,6 +478,22 @@ namespace RandomizerCommon
 
                 throw new Exception("No parameter provided");
             }
+        }
+
+        /// <summary>A representation of an initializer to add for a given map.</summary>
+        public class AddInitializer
+        {
+            /// <summary>The numeric ID of the event to initialize.</summary>
+            public int? ID { get; set; }
+
+            /// <summary>The name we've provided to the event to initialize.</summary>
+            /// <remarks>
+            /// This is set via <c>ExistingEvent.Name</c> or <c>AddEvent.Name</c>.
+            /// </remarks>
+            public string Name { get; set; }
+
+            /// <summary>The arguments to pass to this initializer.</summary>
+            public List<int> Arguments { get; set; } = new();
         }
 
         public class EventSpec : AbstractEventSpec
