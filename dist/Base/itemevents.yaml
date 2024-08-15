@@ -107,91 +107,91 @@ NewEvents:
 
 ExistingEvents:
   common_func:
-    # Disable the event that hides treasures outside of NG+
-    20005523:
-      If: ngplusrings
-      Edits: [AddBefore: ["GOTO Unconditionally (0)"]]
+  # Disable the event that hides treasures outside of NG+
+  - ID: 20005523
+    If: ngplusrings
+    Edits: [AddBefore: ["GOTO Unconditionally (0)"]]
     
   common:
-    0:
-      If: safequest
-      Edits:
-      # In vanilla, Greirat  returns from each quest after you defeat any boss. This is hard to
-      # factor into randomizer logic, though, because you may start the quest at a point where
-      # it's difficult to find and defeat another boss. This removes the initializer that triggers
-      # the "return from Settlement" and "return from Irithyll" events after boss defeats, and
-      # above we add different triggers.
-      - Match: {Init: {Callee: 9120, Arguments: [74000303]}}
-        MatchLength: 2
-        Remove: first
+  - ID: 0
+    If: safequest
+    Edits:
+    # In vanilla, Greirat  returns from each quest after you defeat any boss. This is hard to
+    # factor into randomizer logic, though, because you may start the quest at a point where
+    # it's difficult to find and defeat another boss. This removes the initializer that triggers
+    # the "return from Settlement" and "return from Irithyll" events after boss defeats, and
+    # above we add different triggers.
+    - Match: {Init: {Callee: 9120, Arguments: [74000303]}}
+      MatchLength: 2
+      Remove: first
   
-    # Grand Archives Key softlock fix
-    710:
-      Edits:
-      - Match: "EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, AND_15)"
-        Remove: First
+  # Grand Archives Key softlock fix
+  - ID: 710
+    Edits:
+    - Match: "EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, AND_15)"
+      Remove: First
     
   m30_00_00_00: # High Wall
-    0:
-      If: safequest
-      Edits:
-      # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
-      # invincible, but just in case.
-      - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
-        Remove: First
-      - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
-        Remove: First
-      - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
-        Remove: First
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
+    # invincible, but just in case.
+    - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+      Remove: First
+    - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+      Remove: First
+    - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+      Remove: First
 
-    # Make Greirat invincible
-    13005620:
-      If: safequest
-      Edits:
-      - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+  # Make Greirat invincible
+  - ID: 13005620
+    If: safequest
+    Edits:
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
 
   m30_01_00_00: # Lothric Castle
-    0:
-      Edits:
-      # Fix Lothric Castle Crystal Lizard so one doesn't despawn when the other one gets killed (use new event flag)
-      - Match: {Init: {Callee: 20005341, Arguments: [null, 3010311]}}
-        Set: {Param: {InitArg: 0}, Value: 13010594}
+  - ID: 0
+    Edits:
+    # Fix Lothric Castle Crystal Lizard so one doesn't despawn when the other one gets killed (use new event flag)
+    - Match: {Init: {Callee: 20005341, Arguments: [null, 3010311]}}
+      Set: {Param: {InitArg: 0}, Value: 13010594}
 
   m31_00_00_00: # Undead Settlement
-    0:
-      Edits:
-      # Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable.
-      - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
-        Remove: First
+  - ID: 0
+    Edits:
+    # Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable.
+    - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
+      Remove: First
 
   m39_00_00_00: # Profane Capitol
-    # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
-    13905870:
-      Edits:
-      - Match: "SetObjectTreasureState(X0_4, Disabled)"
-        AddAfter: ["EndUnconditionally(EventEndType.End)"]
+  # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
+  - ID: 13905870
+    Edits:
+    - Match: "SetObjectTreasureState(X0_4, Disabled)"
+      AddAfter: ["EndUnconditionally(EventEndType.End)"]
 
   m40_00_00_00: # Firelink
-    0:
-      If: safequest
-      Edits:
-      # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
-      # invincible, but just in case.
-      - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
-        Remove: First
-      - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
-        Remove: First
-      - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
-        Remove: First
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
+    # invincible, but just in case.
+    - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+      Remove: First
+    - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+      Remove: First
+    - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+      Remove: First
 
-    14005700:
-      Comment: The primary driver event for Greirat's quest
-      If: safequest
-      Edits:
-      # Prevent the player from killing Greirat
-      - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
-      # Always survive Irithyll
-      # TODO: Consider requiring Siegward to save him, and making that unfailable
-      - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385);"
-        MatchLength: 2
-        Remove: First
+  - ID: 14005700
+    Comment: The primary driver event for Greirat's quest
+    If: safequest
+    Edits:
+    # Prevent the player from killing Greirat
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+    # Always survive Irithyll
+    # TODO: Consider requiring Siegward to save him, and making that unfailable
+    - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385);"
+      MatchLength: 2
+      Remove: First

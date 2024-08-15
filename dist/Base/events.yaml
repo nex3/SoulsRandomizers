@@ -55,12 +55,12 @@ NewEvents:
 
 ExistingEvents:
   common_func:
-    20005350:
-      Name: enemydrop
-      Comment: Drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
-    20000343:
-      Name: showmimic
-      Comment: Enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
+  - ID: 20005350
+    Name: enemydrop
+    Comment: Drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
+  - ID: 20000343
+    Name: showmimic
+    Comment: Enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
 
 DefaultSegments:
 - Type: disable

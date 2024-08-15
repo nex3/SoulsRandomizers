@@ -21,14 +21,10 @@ namespace RandomizerCommon
         public Dictionary<string, List<NewEvent>> NewEvents { get; set; } = new();
 
         /// <summary>
-        /// A map from map names and event IDs to Existing events to modify, or potentially just to
-        /// give names so they can be more easily referenced.
+        /// A map from map names to existing events to modify, or potentially just to give names so
+        /// they can be more easily referenced.
         /// </summary>
-        public Dictionary<string, Dictionary<long, ExistingEvent>> ExistingEvents
-        {
-            get;
-            set;
-        } = new();
+        public Dictionary<string, List<ExistingEvent>> ExistingEvents { get; set; } = new();
 
         /// <summary>
         /// A map from map names to new initializers to add to event 0 for those maps.
@@ -172,6 +168,9 @@ namespace RandomizerCommon
         /// </remarks>
         public class ExistingEvent : BaseEvent
         {
+            /// <summary>The ID of the event in the vanilla game.</summary>
+            public int ID { get; set; }
+
             /// <summary>A list of edits to make to this event.</summary>
             public List<EventEdit> Edits { get; set; } = new();
         }

@@ -744,10 +744,11 @@ namespace RandomizerCommon
                 var emevd = GetEmevdOrWarn(map);
                 if (emevd == null) continue;
 
-                foreach (var (id, e) in mapEvents)
+                foreach (var e in mapEvents)
                 {
-                    var ev = emevd.Events.Find(ev => ev.ID == id)
-                        ?? throw new Exception($"Error: event {e.Name} #{id} missing from {map}");
+                    var ev = emevd.Events.Find(ev => ev.ID == e.ID)
+                        ?? throw new Exception(
+                            $"Error: event {e.Name} #{e.ID} missing from {map}");
 
                     if (!e.IncludeFor(opt)) continue;
                     if (e.Name != null) eventsByName[e.Name] = (ev, map);
