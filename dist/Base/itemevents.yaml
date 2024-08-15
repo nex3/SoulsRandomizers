@@ -137,11 +137,11 @@ ExistingEvents:
     Edits:
     # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
     # invincible, but just in case.
-    - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006002, Arguments: [3000700]}}
       Remove: First
-    - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006000, Arguments: [3000700]}}
       Remove: First
-    - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006001, Arguments: [3000700]}}
       Remove: First
 
   # Make Greirat invincible

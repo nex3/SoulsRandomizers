@@ -261,7 +261,7 @@ namespace RandomizerCommon
                         .RemoveAll(inst => Match.Match(events.Parse(inst, pre), events));
                     pre.Postprocess();
                     if (removed > 0) return;
-                    throw new Exception("Expected Remove: All EditEvent to match an instruction");
+                    throw new Exception("Expected EditEvent to match an instruction");
                 }
 
                 for (var i = 0; i < ev.Instructions.Count; i++)
@@ -293,7 +293,7 @@ namespace RandomizerCommon
                     return;
                 }
 
-                throw new Exception("Expected Remove: All EditEvent to match an instruction");
+                throw new Exception("Expected EditEvent to match an instruction");
             }
 
             /// <summary>
