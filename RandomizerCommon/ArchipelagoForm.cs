@@ -332,6 +332,7 @@ namespace RandomizerCommon
             var opt = new RandomizerOptions(FromGame.DS3);
             opt["archipelago"] = true;
             opt["safequest"] = archiOptions["unmissable_quests"];
+            opt["bosssoulshop"] = archiOptions["unmissable_transpositions"];
             opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
             opt["ngplusrings"] = archiOptions["enable_ngp"];
             opt["nongplusrings"] = !archiOptions["enable_ngp"];

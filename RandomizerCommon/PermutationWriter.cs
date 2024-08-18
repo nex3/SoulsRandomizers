@@ -1271,6 +1271,7 @@ namespace RandomizerCommon
                 }
 
                 // Make every boss soul trigger the event to show it in the shop.
+                var bossSoulFlags = new Dictionary<ItemKey, int>();
                 foreach (PARAM.Row row in shops.Rows)
                 {
                     int mat = (int)row["mtrlId"].Value;
@@ -1279,10 +1280,36 @@ namespace RandomizerCommon
                         // TODO: I tried to create a new event flag to use for qwcID here so that
                         // soul items didn't become visible from beating bosses, but the items
                         // never showed up in Ludleth's shop.
-                        var eventFlag = row["qwcID"].Value;
+                        var eventFlag = (int)row["qwcID"].Value;
                         Debug.Assert(soul.Type == ItemType.GOOD);
                         game.AddInitializer(
-                            "common", "showLudlethItems", new[] { eventFlag, soul.ID });
+                            "common", "showLudlethItems", new object[] { eventFlag, soul.ID });
+                        bossSoulFlags.TryAdd(soul, eventFlag);
+                    }
+                }
+
+                if (opt["bosssoulshop"])
+                {
+                    var nextID = 30252; // First unused Ludleth shop ID
+                    var goods = game.Params["EquipParamGoods"];
+                    foreach (var (soul, flag) in bossSoulFlags)
+                    {
+                        var row = new PARAM.Row(nextID++, null, shops.AppliedParamdef);
+                        row["EquipId"].Value = soul.ID;
+                        row["equipType"].Value = (int)soul.Type;
+                        row["sellQuantity"].Value = -1;
+                        row["qwcID"].Value = flag;
+
+                        // We want to make it feasible to buy a second copy of even very expensive
+                        // boss souls, while also making boss souls undesirable as a means of
+                        // mitigating risk by "banking" souls. This formula is calibrated to so that
+                        // 20k boss souls cost 40k, 3k boss souls cost 10k, and everything scales
+                        // quadratically from there.
+                        var sellValue = (int)goods[soul.ID]["sellValue"].Value / 1000.0;
+                        var buyValue =
+                            -0.078 * Math.Pow(sellValue, 2) + 3.569 * sellValue;
+                        row["value"].Value = (int)Math.Round(buyValue) * 1000;
+                        shops.Rows.Add(row);
                     }
                 }
             }
