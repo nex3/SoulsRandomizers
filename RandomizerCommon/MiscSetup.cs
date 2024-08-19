@@ -12,6 +12,9 @@ using static SoulsIds.Events;
 using static SoulsFormats.EMEVD.Instruction;
 using static RandomizerCommon.Messages;
 using static RandomizerCommon.LocationData;
+using SoulsFormats.Util;
+using Org.BouncyCastle.Math;
+using System.Collections;
 
 namespace RandomizerCommon
 {
@@ -493,6 +496,120 @@ namespace RandomizerCommon
                 sfxCommon.Write($@"{outDir}\sfx\{prefix}sfxbnd_commoneffects{suffix}.ffxbnd.dcx");
             }
             return true;
+        }
+
+        /// <summary>
+        /// If the given game has an <c>Uncompressed</c> directory, copies files in that directory
+        /// into the corresponding locations in compressed archives in the mod directory.
+        /// </summary>
+        /// <remarks>
+        /// <para>The archives are taken from directory names that end in extensions.</para>
+        /// <para>Currently this only supports <c>.tpf.dcx</c> files.</para>
+        /// </remarks>
+        public static void InjectUncompressed(GameData game)
+        {
+            var dir = $@"{game.Dir}\Uncompressed";
+            if (!Directory.Exists(dir)) return;
+
+            foreach (var bdtOverlay in Directory.EnumerateDirectories(dir))
+            {
+                var archives =
+                    Directory.GetDirectories(bdtOverlay, "*.tpf.dcx", SearchOption.AllDirectories);
+                var archivesToOutputs = archives.ToDictionary(
+                    archive => archive,
+                    archive => Path.Join(game.Dir, "..", Path.GetRelativePath(bdtOverlay, archive))
+                );
+
+                // If all the archives are already present in the mod, don't waste time loading the
+                // BHD and BHT.
+                if (archivesToOutputs.Values.All(File.Exists)) continue;
+
+                var originalArchives =
+                    ReadFilesFromBDT(game, Path.GetFileName(bdtOverlay), archives);
+                foreach (var (archive, data) in originalArchives)
+                {
+                    var overrides = Directory.GetFiles(archive).ToDictionary(
+                        archive => Path.GetFileNameWithoutExtension(archive),
+                        archive => File.ReadAllBytes(archive)
+                    );
+
+                    var tpf = TPF.Read(DCX.Decompress(data, out var dcxType));
+                    foreach (var texture in tpf)
+                    {
+                        if (overrides.Remove(texture.Name, out var newBytes))
+                        {
+                            texture.Bytes = newBytes;
+                        }
+                    }
+
+                    var output = archivesToOutputs[archive];
+                    Directory.CreateDirectory(Path.GetDirectoryName(output));
+                    DCX.Compress(tpf.Write(), dcxType, output);
+                }
+            }
+        }
+
+        /// <param name="bdtBaseName">
+        /// The basename of the <c>.bdt</c> file that contains the given paths, without the
+        /// extension.
+        /// </param>
+        /// <param name="paths">
+        /// Paths within the <c>Uncompressed</c> directory of <c>game.Dir</c>.
+        /// </param>
+        /// <returns>
+        /// A map from <paramref name="paths"/> to the contents of those files in the given
+        /// <paramref name="bdtBaseName"/>.
+        /// </returns>
+        private static Dictionary<string, byte[]> ReadFilesFromBDT(
+            GameData game, string bdtBaseName, IEnumerable<string> paths)
+        {
+            var bdtOverlay = $@"{game.Dir}\Uncompressed\{bdtBaseName}";
+            var pathsByHash = paths.ToDictionary(archiveDir =>
+                    HashPath(game, Path.GetRelativePath(bdtOverlay, archiveDir)));
+
+            var results = new Dictionary<string, byte[]>();
+            var basePath = $@"{game.InstallPath}\{bdtBaseName}";
+            var bhd = LoadBHD(game, $"{basePath}.bhd");
+            using var bdtStream = File.OpenRead($"{basePath}.bdt");
+            foreach (var header in bhd.Buckets.SelectMany(bucket => bucket))
+            {
+                var path = pathsByHash.GetValueOrDefault(header.FileNameHash);
+                if (path == null) continue;
+                results[path] = header.ReadFile(bdtStream);
+            }
+
+            return results;
+        }
+
+        /// <returns>The decoded BHD file at <paramref name="path"/>.</returns>
+        private static BHD5 LoadBHD(GameData game, string path)
+        {
+            var bhdGame = game.Type switch
+            {
+                GameSpec.FromGame.DS3 => BHD5.Game.DarkSouls3,
+                GameSpec.FromGame.SDT => BHD5.Game.DarkSouls3,
+                GameSpec.FromGame.ER => BHD5.Game.EldenRing,
+                _ => throw new NotImplementedException()
+            };
+
+            using Stream stream =
+                game.BhdKeys.TryGetValue(Path.GetFileNameWithoutExtension(path), out var key)
+                ? CryptographyUtility.DecryptRsa(path, key)
+                : File.OpenRead(path);
+            return BHD5.Read(stream, bhdGame);
+        }
+
+        /// <param name="path">Must be relative to the game root.</param>
+        /// <returns>
+        /// The same hash code of the <paramref name="path"/> that the game uses in BHD files.
+        /// </returns>
+        private static ulong HashPath(GameData game, string path)
+        {
+            string normalized = "/" + path.Replace('\\', '/').ToLowerInvariant();
+            return game.Type >= GameSpec.FromGame.ER
+                ? normalized.Aggregate(0ul, (accum, ch) => accum * 0x85ul + ch)
+                // This actually relies on uint overflow behavior, so don't make the seed a ulong.
+                : normalized.Aggregate(0u, (accum, ch) => accum * 37 + ch);
         }
 
         public static void DS3CommonPass(GameData game, Events events, RandomizerOptions opt)

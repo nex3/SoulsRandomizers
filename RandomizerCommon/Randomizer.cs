@@ -158,6 +158,8 @@ namespace RandomizerCommon
 #endif
             }
 
+            MiscSetup.InjectUncompressed(game);
+
             // Slightly different high-level algorithm for each game.
             if (game.Sekiro)
             {
