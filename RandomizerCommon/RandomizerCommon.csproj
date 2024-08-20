@@ -19,9 +19,9 @@
 
   <ItemGroup>
     <PackageReference Include="Archipelago.MultiClient.Net" Version="6.2.0" />
-	<PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Pidgin" Version="3.2.0" />
+    <PackageReference Include="SteamPath" Version="1.1.0" />
     <PackageReference Include="YamlDotNet" Version="12.0.2" />
   </ItemGroup>
 

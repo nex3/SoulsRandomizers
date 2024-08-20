@@ -36,7 +36,7 @@ namespace RandomizerCommon
         {
             get
             {
-                var parent = SteamPath.Find(Type switch
+                var parent = SteamPath.SteamPath.Find(Type switch
                 {
                     FromGame.DS3 => "374320",
                     FromGame.SDT => "814380",
