@@ -218,8 +218,13 @@ namespace RandomizerCommon
             /// <summary>Sets a parameter of a matched instruction.</summary>
             public SetEdit Set { get; set; }
 
-            /// <summary>If true, removes matching instructions entirely.</summary>
+            /// <summary>Removes matching instructions entirely.</summary>
             public RemoveType Remove { get; set; } = RemoveType.None;
+
+            /// <summary>
+            /// Removes the matching instructions and replaces them with a list of commands.
+            /// </summary>
+            public List<string> Replace { get; set; } = new();
 
             /// <summary>A list of commands to insert before the matching region.</summary>
             public List<string> AddBefore { get; set; } = new();
@@ -238,8 +243,9 @@ namespace RandomizerCommon
                 var matchLength = Match == null ? ev.Instructions.Count : MatchLength;
 
                 var editTypes = 0;
-                if (Set!= null) editTypes++;
+                if (Set != null) editTypes++;
                 if (Remove != RemoveType.None) editTypes++;
+                if (Replace.Count > 0) editTypes++;
                 if (AddBefore.Count > 0) editTypes++;
                 if (AddAfter.Count > 0) editTypes++;
                 if (editTypes > 1)
@@ -278,6 +284,11 @@ namespace RandomizerCommon
                     else if (Remove == RemoveType.First)
                     {
                         ev.Instructions.RemoveRange(i, matchLength);
+                    }
+                    else if (Replace.Count > 0)
+                    {
+                        ev.Instructions.RemoveRange(i, matchLength);
+                        ev.Instructions.InsertRange(i, ParseInstructions(Replace, events, pre));
                     }
                     else if (AddBefore.Count > 0)
                     {

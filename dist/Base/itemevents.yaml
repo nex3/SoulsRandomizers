@@ -164,6 +164,16 @@ ExistingEvents:
     - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
       Remove: First
 
+  - ID: 13105171
+    If: phantomhunters
+    Edits:
+    # Allow Hodrick to invade after Greatwood has been defeated
+    - Match: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 13100800)
+      Remove: First
+    # Detect the Phantom Hunters covenant instead of ember status
+    - Match: IfCharacterHasSpEffect(AND_01, 10000, 490, true, ComparisonType.Equal, 1)
+      Replace: ["IfPlayersCovenant(AND_01, 10)"]
+
   m37_00_00_00: # Irithyll / Anor Londo
   # Prevent Greirat becoming lost from triggering here. Skip straight ahead to the point where his
   # corpse either does or doesn't spawn. (His quest should never get to the point where he creates

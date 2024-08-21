@@ -255,7 +255,8 @@ namespace RandomizerCommon
                 else
                 {
                     var original = new ItemKey(apIdsToItemIds[info.ItemId]);
-                    var (copy, _) = writer.AddSyntheticCopy(original, info.LocationId);
+                    var (copy, _) = writer.AddSyntheticCopy(
+                        original, archipelagoLocationId: info.LocationId);
                     AddMulti(items, targetSlotKey, copy);
 
                     // Because we can't replace items on purchase in the mod the same way we do on
@@ -335,6 +336,7 @@ namespace RandomizerCommon
             var opt = new RandomizerOptions(FromGame.DS3);
             opt["archipelago"] = true;
             opt["safequest"] = archiOptions["unmissable_quests"];
+            opt["phantomhunters"] = archiOptions["unmissable_invasions"];
             opt["bosssoulshop"] = archiOptions["unmissable_transpositions"];
             opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
             opt["ngplusrings"] = archiOptions["enable_ngp"];
@@ -398,7 +400,7 @@ namespace RandomizerCommon
             // A map from item names to all the slots that correspond to those names.
             var itemNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
 
-            // A map from (Archipelago region abbreviation, item name) pairsto all the slots that
+            // A map from (Archipelago region abbreviation, item name) pairs to all the slots that
             // could correspond to those pairs.
             var locationToSlots = new Dictionary<(string, string), Queue<AnnotationData.SlotAnnotation>>();
             foreach (var slot in ann.SlotsByAnnotationsKey.Values)
@@ -424,6 +426,11 @@ namespace RandomizerCommon
             var result = new Dictionary<long, LocationScope>();
             foreach (var location in locations)
             {
+                if (location.LocationName == "US: Vertebra Shackle - Hodrick drop")
+                {
+                    Console.WriteLine("HERE");
+                }
+
                 if (apIdsToKeys.TryGetValue(location.LocationId, out var key))
                 {
                     result[location.LocationId] = ann.SlotsByAnnotationsKey[key].LocationScope;

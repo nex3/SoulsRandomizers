@@ -1277,6 +1277,25 @@ namespace RandomizerCommon
                     });
                 }
 
+                if (opt["phantomhunters"])
+                {
+                    var (_, row) = AddSyntheticCopy(new ItemKey(ItemType.RING, 10060), id: 10100);
+                    row["sortId"].Value = 10099; // In the covenants, before any others.
+                    row["iconId"].Value = 6021;
+                    row["VowId"].Value = 10;
+                    game.ItemFMGs["アクセサリ名"][row.ID] = "Phantom Hunters";
+                    game.ItemFMGs["アクセサリ説明"][row.ID] =
+                        "Pledge oneself to the Phantom Hunters covenant";
+                    game.ItemFMGs["アクセサリうんちく"][row.ID] =
+                        "A blazing ember to kindle envy in the hearts of invaders.\n" +
+                        "\n" +
+                        "The phantom hunters welcome those who seek their blood from other " +
+                        "worlds, and the riches they bring with them.\n" +
+                        "\n" +
+                        "Equip this covenant in place of the conventional requirements to " +
+                        "summon dark spirits.";
+                }
+
                 // Make every boss soul trigger the event to show it in the shop.
                 var bossSoulFlags = new Dictionary<ItemKey, uint>();
                 foreach (PARAM.Row row in shops.Rows)
@@ -1918,13 +1937,15 @@ namespace RandomizerCommon
         /// automatically remove this from the player's inventory when it's picked up.</param>
         /// <returns>The SlotKey to use for the new item.</returns>
         public SlotKey AddSyntheticItem(string name, string shortDescription = null,
-            string longDescription = null, uint? iconId = 42, uint? sortId = int.MaxValue,
-            long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
-            uint replaceWithQuantity = 1, bool archipelagoRemoveOnPickup = true)
+            string longDescription = null, int? id = null, uint? iconId = 42,
+            uint? sortId = int.MaxValue, long? archipelagoLocationId  = null,
+            ItemKey replaceWithInArchipelago = null, uint replaceWithQuantity = 1,
+            bool archipelagoRemoveOnPickup = true)
         {
             // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
                 new ItemKey(ItemType.GOOD, 2005),
+                id,
                 archipelagoLocationId,
                 archipelagoRemoveOnPickup: archipelagoRemoveOnPickup
             );
@@ -1957,6 +1978,8 @@ namespace RandomizerCommon
         /// Creates a new item with all the same metadata as the original.
         /// </summary>
         /// <param name="original">The item on which to base the synthetic replica.</param>
+        /// <param name="id">The ID of the new item. If an ID isn't supplied, a new one will be
+        /// automatically generated.</param>
         /// <param name="archipelagoLocationId">The ID of the location the item is found in
         /// according to Archipelago, for Archipelago runs.</param>
         /// <param name="archipelagoRemoveOnPickup">If this is true, adds a param that tells
@@ -1964,6 +1987,7 @@ namespace RandomizerCommon
         /// goods.</param>
         public (SlotKey, PARAM.Row) AddSyntheticCopy(
             ItemKey original,
+            int? id = null,
             long? archipelagoLocationId = null,
             bool archipelagoRemoveOnPickup = false)
         {
@@ -1974,7 +1998,7 @@ namespace RandomizerCommon
             var armorType = original.Type == ItemType.ARMOR ? original.ID % 10000 : 0;
             var row = new PARAM.Row(param[original.ID - upgrades])
             {
-                ID = original.Type switch
+                ID = id ?? original.Type switch
                 {
                     // Digits below the 1000s place represent the infusion type and ugprade level
                     // of the weapon. We have to ensure that the infusion type matches the
