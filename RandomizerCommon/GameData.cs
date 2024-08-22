@@ -1869,10 +1869,17 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
         }
 
-        /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
-        public long GetUniqueEventId()
+        /// <param name="width">The number of consecuritve IDs to allocate.</param>
+        /// <returns>
+        /// An event flag ID that's guaranteed not to be used by any other events.
+        /// </returns>
+        /// <returns>Align the event so that it's a multiple of this number.</returns>
+        public uint GetUniqueEventId(uint width = 1, uint align = 1)
         {
-            return nextEventId++;
+            if (nextEventId % align != 0) nextEventId += align - (nextEventId % align);
+            var value = nextEventId;
+            nextEventId += width;
+            return value;
         }
 
         public void DumpMessages(string dir)

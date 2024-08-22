@@ -1265,22 +1265,26 @@ namespace RandomizerCommon
 
                     var trackingEvent = game.GetUniqueEventId();
                     game.AddInitializer("pathOfTheDragonArchi", new object[] {
-                        (uint)trackingEvent,
+                        trackingEvent,
                         pathOfTheDragon?.Item.ID ?? -1
                     });
                 }
 
                 // Make every boss soul trigger the event to show it in the shop.
-                var bossSoulFlags = new Dictionary<ItemKey, int>();
+                var bossSoulFlags = new Dictionary<ItemKey, uint>();
                 foreach (PARAM.Row row in shops.Rows)
                 {
                     int mat = (int)row["mtrlId"].Value;
                     if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
                     {
-                        // TODO: I tried to create a new event flag to use for qwcID here so that
-                        // soul items didn't become visible from beating bosses, but the items
-                        // never showed up in Ludleth's shop.
-                        var eventFlag = (int)row["qwcID"].Value;
+                        var eventFlag = game.GetUniqueEventId();
+                        row["qwcID"].Value = eventFlag;
+                        if ((int)row["EventFlag"].Value == -1)
+                        {
+                            // Match the way the base game structures shop event counters. Unclear
+                            // which parts of this are strictly necessary, though.
+                            row["EventFlag"].Value = game.GetUniqueEventId(width: 10, align: 10);
+                        }
                         Debug.Assert(soul.Type == ItemType.GOOD);
                         game.AddInitializer(
                             "common", "showLudlethItems", new object[] { eventFlag, soul.ID });
