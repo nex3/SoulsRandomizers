@@ -1879,7 +1879,14 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             if (nextEventId % align != 0) nextEventId += align - (nextEventId % align);
             var value = nextEventId;
             nextEventId += width;
-            return value;
+
+            // Per https://soulsmodding.wikidot.com/tutorial:learning-how-to-use-emevd#EventFlags,
+            // flags whose last four digits are in the 5000-9999 (2000-9999 for ER) range have
+            // different behavior. In the future we may want to allow events to opt into this, but
+            // for now we just avoid them.
+            if ((nextEventId - 1) % 10000 < (Type == FromGame.ER ? 2000 : 5000)) return value;
+            nextEventId += 10000 - (value % 10000);
+            return GetUniqueEventId();
         }
 
         public void DumpMessages(string dir)
