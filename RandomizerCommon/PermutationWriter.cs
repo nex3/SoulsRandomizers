@@ -44,10 +44,22 @@ namespace RandomizerCommon
         // private readonly Dictionary<ItemType, uint> lotValues;
 
         /// <summary>
-        /// The event ID to use for the next synthetic event. We start with an ID that's larger
-        /// than any in-game IDs to ensure that we don't overlap with real events.
+        /// The event ID to use for the next synthetic event.
         /// </summary>
-        private uint nextEventId = 80000000;
+        /// <remarks>
+        /// <para>We start with an ID that's larger than any in-game IDs to ensure that we don't
+        /// overlap with real events.</para>
+        /// </para>
+        /// </remarks>
+        // For whatever reason, there are large and not always continuous swaths of event IDs that
+        // will turn themselves off immediately after being turned on, and thus should be avoided
+        // for custom events. After poking around in CheatEngine, I've verified that the range
+        // 790XXXXX seems to be both unused and stable in DS3, so I chose it for the base here.
+        // Note that 79X00000 all seem to be on by default, despite not having any referents that I
+        // (nex3) can find.
+        //
+        // TODO: find/verify unused base IDs for ER and Sekiro+
+        private uint nextEventId = 79000000;
 
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
