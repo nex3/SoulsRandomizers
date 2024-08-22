@@ -381,14 +381,22 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         };
 
         /// <summary>
-        /// The event ID to use for the next event returned by
-        /// <c cref="GetUniqueEventId">GetUniqueEventId</c>.
+        /// The event ID to use for the next event returned by <c>GetUniqueEventId</c>.
         /// </summary>
         /// <remarks>
-        /// We start with an ID that's larger than any IDs used in any games to ensure that we
-        /// don't overlap with real events.
+        /// <para>We start with an ID that's larger than any in-game IDs to ensure that we don't
+        /// overlap with real events.</para>
+        /// </para>
         /// </remarks>
-        private long nextEventId = 80000000;
+        // For whatever reason, there are large and not always continuous swaths of event IDs that
+        // will turn themselves off immediately after being turned on, and thus should be avoided
+        // for custom events. After poking around in CheatEngine, I've verified that the range
+        // 790XXXXX seems to be both unused and stable in DS3, so I chose it for the base here.
+        // Note that 79X00000 all seem to be on by default, despite not having any referents that I
+        // (nex3) can find.
+        //
+        // TODO: find/verify unused base IDs for ER and Sekiro+
+        private uint nextEventId = 79000000;
 
         /// <summary>
         /// A map from map names and event IDs to the number of distinct initializers generated
