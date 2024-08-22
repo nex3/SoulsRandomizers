@@ -2131,7 +2131,15 @@ namespace RandomizerCommon
 
         /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
         public uint GetUniqueEventId() {
-            return nextEventId++;
+            var value = nextEventId++;
+
+            // Per https://soulsmodding.wikidot.com/tutorial:learning-how-to-use-emevd#EventFlags,
+            // flags whose last four digits are in the 5000-9999 range have different behavior. In
+            // the future we may want to allow events to opt into this, but for now we just avoid
+            // them.
+            if (value % 10000 < 5000) return value;
+            nextEventId += 10000 - (value % 10000);
+            return GetUniqueEventId();
         }
 
         /// <summary>
