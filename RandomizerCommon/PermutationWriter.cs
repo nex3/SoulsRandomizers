@@ -54,12 +54,18 @@ namespace RandomizerCommon
         // For whatever reason, there are large and not always continuous swaths of event IDs that
         // will turn themselves off immediately after being turned on, and thus should be avoided
         // for custom events. After poking around in CheatEngine, I've verified that the range
-        // 790XXXXX seems to be both unused and stable in DS3, so I chose it for the base here.
-        // Note that 79X00000 all seem to be on by default, despite not having any referents that I
-        // (nex3) can find.
+        // 7901XXXX seems to be both unused and stable in DS3, so I chose it for the base here.
+        //
+        // Other options I've tried:
+        //
+        // * 8XXXXXXX resets to Off.
+        // * 7001XXXX resets to Off.
+        // * 79X00000 is on by default b ut doesn't seem to be referenced anywhere.
+        // * 7900XXXX seems to be identical to 7000XXXX, in the sense that any change to the upper
+        //   range is reflected in the lower range and vice versa.
         //
         // TODO: find/verify unused base IDs for ER and Sekiro+
-        private uint nextEventId = 79000000;
+        private uint nextEventId = 79010000;
 
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
