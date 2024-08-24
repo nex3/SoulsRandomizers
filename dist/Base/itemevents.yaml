@@ -164,7 +164,15 @@ ExistingEvents:
     - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
       Remove: First
 
-  m39_00_00_00: # Profane Capitol
+  m37_00_00_00: # Irithyll / Anor Londo
+  # Prevent Greirat becoming lost from triggering here. Skip straight ahead to the point where his
+  # corpse either does or doesn't spawn. (His quest should never get to the point where he creates
+  # a corpse in Irithyll, but if it does we do want it to spawn.)
+  - ID: 13705630
+    Edits:
+    - AddBefore: ["GotoUnconditionally(Label.LABEL10)"]
+
+  m39_00_00_00: # Profaned Capitol
   # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
   - ID: 13905870
     Edits:
@@ -192,6 +200,6 @@ ExistingEvents:
     - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
     # Always survive Irithyll
     # TODO: Consider requiring Siegward to save him, and making that unfailable
-    - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385);"
+    - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385)"
       MatchLength: 2
       Remove: First
