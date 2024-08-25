@@ -289,6 +289,21 @@ namespace RandomizerCommon
                 entry.Value.Unique = unique > 0 && item.Type != ItemType.ARMOR;
             }
 
+            if (game.DS3)
+            {
+                // We edit vanilla DS3 a bit to make this item addressable by the randomizer.
+                var vertebraShackle = new ItemKey(ItemType.GOOD, 374);
+                var scope = new ItemScope(ScopeType.EVENT, 50006990);
+                data.AddLocation(
+                    vertebraShackle, scope,
+                    new LocationKey(LocationType.LOT, 4530, "", new(), 1, 1, null)
+                );
+                data.AddLocationScope(
+                    vertebraShackle, scope,
+                    new LocationScope(ScopeType.EVENT, 50006990, new(), new(), false)
+                );
+            }
+
             if (logUnused)
             {
                 foreach (KeyValuePair<ItemKey, string> entry in game.Names())

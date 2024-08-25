@@ -1773,6 +1773,12 @@ Slots:
   Area: settlement
   Tags: missable
   QuestReqs: settlement farronkeep cathedral
+- Key: '02,0:50006990::'
+  DebugText:
+  - Vertebra Shackle - 4530[Holy Knight Hodrick [c0000_0002] @ settlement]
+  Text: Dropped by Hodrick when he invades in Undead Settlement
+  Area: settlement
+  Tags: missable
 - Key: '02,0:50006311::'
   DebugText:
   - Homeward Bone - 53100[Holy Knight Hodrick [c0000_0009] @ settlement], 63110[?EVENT?]

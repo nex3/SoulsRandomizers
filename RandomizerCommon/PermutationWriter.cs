@@ -1226,6 +1226,13 @@ namespace RandomizerCommon
                 // Disable Firelink Shrine bonfire without Coiled Sword, with special event flag
                 game.Params["ActionButtonParam"][9351]["grayoutFlag"].Value = 14005108;
 
+                // This is the Vertebra Shackle dropped by Hodrick. Give it a tracking event (10
+                // more than the highest vanilla invader tracking event) so that we can
+                // track it in annotations.yaml. Although this is the generic covenant reward item
+                // lot, it's safe to add the tracking event because the player isn't going online
+                // anyway.
+                game.Params["ItemLotParam"][4530]["getItemFlagId"].Value = 50006990;
+
                 // Description for path of the dragon so it's not ?GoodsInfo?
                 FMG goodsShort = game.ItemFMGs["アイテム説明"];
                 FMG goodsLong = game.ItemFMGs["アイテムうんちく"];
