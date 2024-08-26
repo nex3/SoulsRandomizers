@@ -456,6 +456,11 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         public FMGDictionary MenuFMGs = new FMGDictionary();
         public Dictionary<string, FMGDictionary> OtherItemFMGs = new Dictionary<string, FMGDictionary>();
         public Dictionary<string, FMGDictionary> OtherMenuFMGs = new Dictionary<string, FMGDictionary>();
+
+        /// <summary>
+        /// A dictionary from map names to talk names to the ESDs for those talk files.
+        /// </summary>
+        /// <example><c>game.Talk["m20_00_00_00"]["t200500"]</example>
         public Dictionary<string, Dictionary<string, ESD>> Talk = new Dictionary<string, Dictionary<string, ESD>>();
 
         // Lazily applies paramdefs
@@ -1384,21 +1389,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 }
             }
 
-            // ESDs
-            foreach (KeyValuePair<string, Dictionary<string, ESD>> entry in Talk)
-            {
-                string path = $@"{outPath}\script\talk\{entry.Key}.talkesdbnd.dcx";
-                bool write = WriteESDs.Contains(entry.Key);
-                AddBackupOrRestoreFile(path, write, uxm);
-                if (!write) continue;
-                string basePath = $@"{Dir}\Vanilla\{entry.Key}.talkesdbnd.dcx";
-                if (ModDir != null)
-                {
-                    string modPath = $@"{ModDir}\script\talk\{entry.Key}.talkesdbnd.dcx";
-                    if (File.Exists(modPath)) basePath = modPath;
-                }
-                Editor.OverrideBndRel(basePath, path, entry.Value, f => f.Write(), dcx: overrideDcx);
-            }
+            SaveESDs(outPath, uxm, dcx: overrideDcx);
 
             // Maps
             int count = 0;
@@ -1432,6 +1423,26 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 }
             }
             if (Maps.Count > 0) notify?.Invoke(1);
+        }
+
+        /// <summary>Save all ESD files that have been modified so far.</summary>
+        private void SaveESDs(string outPath, bool uxm = false, DCX.Type dcx = DCX.Type.Unknown)
+        {
+            foreach (KeyValuePair<string, Dictionary<string, ESD>> entry in Talk)
+            {
+                string path = $@"{outPath}\script\talk\{entry.Key}.talkesdbnd.dcx";
+                bool write = WriteESDs.Contains(entry.Key);
+                AddBackupOrRestoreFile(path, write, uxm);
+                if (!write) continue;
+                string basePath =
+                    Path.Join(Dir, EldenRing ? "Vanilla" : "Base", $"{entry.Key}.talkesdbnd.dcx");
+                if (ModDir != null)
+                {
+                    string modPath = $@"{ModDir}\script\talk\{entry.Key}.talkesdbnd.dcx";
+                    if (File.Exists(modPath)) basePath = modPath;
+                }
+                Editor.OverrideBndRel(basePath, path, entry.Value, f => f.Write(), dcx: dcx);
+            }
         }
 
         private static string Backup(string file)
@@ -1470,6 +1481,8 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         {
             Console.WriteLine("Writing to " + outPath);
             writtenFiles.Clear();
+
+            SaveESDs(outPath);
 
             // Maps
             foreach (KeyValuePair<string, IMsb> entry in Maps)
@@ -1740,15 +1753,12 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         private void LoadTalk()
         {
-            if (!DS3)
+            Talk = Editor.LoadBnds(EldenRing ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
+            MaybeOverrideFromModDir(Talk, name => $@"script\talk\{name}.talkesdbnd.dcx", path => Editor.LoadBnd(path, (data, path2) => ESD.Read(data)));
+            if (Sekiro)
             {
-                Talk = Editor.LoadBnds(EldenRing ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
-                MaybeOverrideFromModDir(Talk, name => $@"script\talk\{name}.talkesdbnd.dcx", path => Editor.LoadBnd(path, (data, path2) => ESD.Read(data)));
-                if (Sekiro)
-                {
-                    List<string> missing = Locations.Keys.Concat(new[] { "m00_00_00_00" }).Except(Talk.Keys).ToList();
-                    if (missing.Count != 0) throw new Exception($@"Missing talkesdbnds in dist\Base: {string.Join(", ", missing)}");
-                }
+                List<string> missing = Locations.Keys.Concat(new[] { "m00_00_00_00" }).Except(Talk.Keys).ToList();
+                if (missing.Count != 0) throw new Exception($@"Missing talkesdbnds in dist\Base: {string.Join(", ", missing)}");
             }
         }
 

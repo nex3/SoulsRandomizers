@@ -105,6 +105,16 @@ NewEvents:
     - IF Player Has/Doesn't Have Item (0,3,2137,1)
     - Set Event Flag (14005108,0)
 
+  - Comment: |
+      Make Irina invincible as long as she doesn't have both light tomes. We do want her killable
+      eventually so the player can get her drop. We don't need to worry about the dark tomes here
+      since we edit the ESD to make her unable to take them.
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(4000725, Enabled)
+    - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000350, 70000351)
+    - SetCharacterInvincibility(4000725, Disabled)
+
 ExistingEvents:
   common_func:
   # Disable the event that hides treasures outside of NG+
@@ -163,6 +173,19 @@ ExistingEvents:
     # Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable.
     - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
       Remove: First
+
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove the event that makes Irina die.
+    - Match: {Init: {Callee: 20006002, Arguments: [3100700]}}
+      Remove: First
+
+  # Make Irina invincible
+  - ID: 13105620
+    If: safequest
+    Edits:
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
 
   - ID: 13105171
     If: phantomhunters
