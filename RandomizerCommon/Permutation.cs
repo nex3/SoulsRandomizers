@@ -33,6 +33,10 @@ namespace RandomizerCommon
         private KeyItemsPermutation.Assignment assign;
         private readonly Dictionary<ItemKey, SlotKey> specialAssign = new Dictionary<ItemKey, SlotKey>();
 
+        /// <summary>Area names for DLCs (across all games).</summary>
+        private static readonly ISet<string> dlcAreas =
+            new HashSet<string>(new[] { "ariandel", "ariandel_vilhelm", "ringedcity", "dregheap" });
+
         [Localize]
         private static readonly Text keyItemError = new Text(
             "Could not place all key items... giving up now. This can happen on some seeds or with some options.",
@@ -276,7 +280,12 @@ namespace RandomizerCommon
                 SlotAnnotation slot = ann.Slot(loc);
                 // dlc1 tag is special hack to disable Captain's Ashes locations
                 // also, hack to avoid Sekiro locations... please remove this...
-                if (slot.GetArea() == "unknown" || assign.IncludedAreas[slot.GetArea()].Count == 0 || (slot.TagList.Contains("dlc1") && !options["dlc1"]))
+                if (
+                    slot.GetArea() == "unknown" ||
+                    assign.IncludedAreas[slot.GetArea()].Count == 0 ||
+                    (slot.TagList.Contains("dlc1") && !options["dlc1"]) ||
+                    (options["omitdlc"] && dlcAreas.Contains(slot.GetArea()))
+                )
                 {
                     unusedLocations.Add(entry.Key);
                     unusedSlots.UnionWith(entry.Value);
