@@ -381,28 +381,54 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         };
 
         /// <summary>
-        /// The event ID to use for the next event returned by <c>GetUniqueEventId</c>.
+        /// The event ID to use for the next event returned by <see cref="GetUniqueEventId"/>.
         /// </summary>
         /// <remarks>
-        /// <para>We start with an ID that's larger than any in-game IDs to ensure that we don't
-        /// overlap with real events.</para>
-        /// </para>
+        /// <para>This is not necessarily always a valid event ID, it's just used to determine one
+        /// later on.</para>
+        /// <seealso cref="eventIdRanges"/>
         /// </remarks>
-        // For whatever reason, there are large and not always continuous swaths of event IDs that
-        // will turn themselves off immediately after being turned on, and thus should be avoided
-        // for custom events. After poking around in CheatEngine, I've verified that the range
-        // 7901XXXX seems to be both unused and stable in DS3, so I chose it for the base here.
+        // Event IDs are generally of the form `TMMMRIII`, where:
         //
-        // Other options I've tried:
+        // * `T` is the "event type". Known types are 1 for miscellaneous EMEVD use, 5 to track
+        //   item acquisition, 6 to track interactions with map objects, and 7 to track NPC
+        //   interactions. 0 and 2 seem to work as well, but other digits are invalid.
         //
-        // * 8XXXXXXX resets to Off.
-        // * 7001XXXX resets to Off.
-        // * 79X00000 is on by default b ut doesn't seem to be referenced anywhere.
-        // * 7900XXXX seems to be identical to 7000XXXX, in the sense that any change to the upper
-        //   range is reflected in the lower range and vice versa.
+        // * `MMM` is the map ID. This is the first, second, and fourth digit in the EMEVD file
+        //   names. For example, Undead Settlement is `m31_00_00_00.emevd` and its map ID is 310;
+        //   Lothric Castle is `m30_01_00_00.emevd.js` and its map ID is 301. Only maps that are
+        //   actually used by the game are valid, with the sole exception of 360 which seems to be
+        //   cut content but remains usable. That's what we use here.
         //
-        // TODO: find/verify unused base IDs for ER and Sekiro+
-        private uint nextEventId = 79010000;
+        // * Any value of `R` is valid, but it has special semantics: if it's less than 5 (or 2 in
+        //   Elden Ring), the event value is permanent. Otherwise, it resets to Off whenever the
+        //   player dies, warps, quits out, or otherwise "resets" the world state.
+        //
+        // * `III` is just an ID, and any value is valid.
+        //
+        // "Invalid" events will do one of two things: either they'll set themselves to Off
+        // shortly after being set to On (which can be useful behavior under some circumstances!)
+        // or they'll mirror a valid event range, which is hard to detect but can wreak havoc on
+        // game logic.
+        //
+        // TODO: find/verify unused ID ranges for ER and Sekiro
+        private int nextEventId = 0;
+
+        /// <summary>The ranges of valid custom event IDs for the randomizer to use.</summary>
+        /// <remarks>
+        /// <seealso cref="nextEventId"/>
+        /// <seealso cref="GetUniqueEventId"/>
+        /// </remarks>
+        // TODO: find/verify unused ID ranges for ER and Sekiro
+        private readonly List<Range> eventIdRanges = new(new[] {
+            // This many ID slots is almost certainly overkill, but better safe than sorry.
+            // These should remain sorted from lowest to highest.
+            03600000..03605000,
+            13600000..13605000,
+            23600000..23605000,
+            53600000..53605000,
+            73600000..73605000
+        });
 
         /// <summary>
         /// A map from map names and event IDs to the number of distinct initializers generated
@@ -1880,19 +1906,22 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         /// An event flag ID that's guaranteed not to be used by any other events.
         /// </returns>
         /// <returns>Align the event so that it's a multiple of this number.</returns>
-        public uint GetUniqueEventId(uint width = 1, uint align = 1)
+        public int GetUniqueEventId(int width = 1, int align = 1)
         {
+            // Assume ranges are sorted from lowest to highest.
+            var range = eventIdRanges.Find(range => nextEventId < range.End.Value);
+            if (range.Equals(default))
+            {
+                throw new Exception("We've run out of known-safe event IDs!");
+            }
+            // Move the event into the next valid range.
+            nextEventId = Math.Max(nextEventId, range.Start.Value);
+
             if (nextEventId % align != 0) nextEventId += align - (nextEventId % align);
             var value = nextEventId;
             nextEventId += width;
 
-            // Per https://soulsmodding.wikidot.com/tutorial:learning-how-to-use-emevd#EventFlags,
-            // flags whose last four digits are in the 5000-9999 (2000-9999 for ER) range have
-            // different behavior. In the future we may want to allow events to opt into this, but
-            // for now we just avoid them.
-            if ((nextEventId - 1) % 10000 < (Type == FromGame.ER ? 2000 : 5000)) return value;
-            nextEventId += 10000 - (value % 10000);
-            return GetUniqueEventId();
+            return range.Contains(nextEventId - 1) ? value : GetUniqueEventId();
         }
 
         public void DumpMessages(string dir)

@@ -8,7 +8,7 @@ using YamlDotNet.Serialization;
 namespace RandomizerCommon
 {
     // No business logic allowed
-    public class Util
+    public static class Util
     {
         public static void Warn(string text)
         {
@@ -360,6 +360,40 @@ namespace RandomizerCommon
             Console.WriteLine($"If behavior observed, use {start},{values[mid1]}");
             Console.WriteLine($"If not, use {values[mid2]},{end}");
             return new HashSet<int>(discardVal);
+        }
+
+        /// <returns>Whether <paramref name="range"/> contains <paramref name="index"/>.</returns>
+        /// <exception cref="ArgumentException">
+        /// If the range can't determine whether it contains the index, such as
+        /// <c>(1..^3).contains(2)</c> or <c>(1..5).contains(^3)</c>.
+        /// </exception>
+        public static bool Contains(this Range range, int index) =>
+            range.Contains(new Index(index));
+
+        /// <returns>Whether <paramref name="range"/> contains <paramref name="index"/>.</returns>
+        /// <exception cref="ArgumentException">
+        /// If the range can't determine whether it contains the index, such as
+        /// <c>(1..^3).contains(2)</c> or <c>(1..5).contains(^3)</c>.
+        /// </exception>
+        public static bool Contains(this Range range, Index index)
+        {
+            if (range.Start.IsFromEnd != range.End.IsFromEnd)
+            {
+                throw new ArgumentException(
+                    $"Can't tell if an index is in mismatched range {range}.");
+            }
+            else if (range.Start.IsFromEnd != index.IsFromEnd)
+            {
+                throw new ArgumentException($"Can't tell if index {index} is in range {range}.");
+            }
+            else if (range.Start.IsFromEnd)
+            {
+                return index.Value <= range.Start.Value && index.Value > range.End.Value;
+            }
+            else
+            {
+                return index.Value >= range.Start.Value && index.Value < range.End.Value;
+            }
         }
 
         /// <summary>Parses <paramref name="path"/> as YAML.</summary>

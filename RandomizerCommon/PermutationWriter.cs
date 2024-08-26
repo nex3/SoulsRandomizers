@@ -1297,7 +1297,7 @@ namespace RandomizerCommon
                 }
 
                 // Make every boss soul trigger the event to show it in the shop.
-                var bossSoulFlags = new Dictionary<ItemKey, uint>();
+                var bossSoulFlags = new Dictionary<ItemKey, int>();
                 foreach (PARAM.Row row in shops.Rows)
                 {
                     int mat = (int)row["mtrlId"].Value;
