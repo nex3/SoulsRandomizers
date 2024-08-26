@@ -456,6 +456,11 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         public FMGDictionary MenuFMGs = new FMGDictionary();
         public Dictionary<string, FMGDictionary> OtherItemFMGs = new Dictionary<string, FMGDictionary>();
         public Dictionary<string, FMGDictionary> OtherMenuFMGs = new Dictionary<string, FMGDictionary>();
+
+        /// <summary>
+        /// A dictionary from map names to talk names to the ESDs for those talk files.
+        /// </summary>
+        /// <example><c>game.Talk["m20_00_00_00"]["t200500"]</example>
         public Dictionary<string, Dictionary<string, ESD>> Talk = new Dictionary<string, Dictionary<string, ESD>>();
 
         // Lazily applies paramdefs
@@ -1740,15 +1745,12 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         private void LoadTalk()
         {
-            if (!DS3)
+            Talk = Editor.LoadBnds(EldenRing ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
+            MaybeOverrideFromModDir(Talk, name => $@"script\talk\{name}.talkesdbnd.dcx", path => Editor.LoadBnd(path, (data, path2) => ESD.Read(data)));
+            if (Sekiro)
             {
-                Talk = Editor.LoadBnds(EldenRing ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
-                MaybeOverrideFromModDir(Talk, name => $@"script\talk\{name}.talkesdbnd.dcx", path => Editor.LoadBnd(path, (data, path2) => ESD.Read(data)));
-                if (Sekiro)
-                {
-                    List<string> missing = Locations.Keys.Concat(new[] { "m00_00_00_00" }).Except(Talk.Keys).ToList();
-                    if (missing.Count != 0) throw new Exception($@"Missing talkesdbnds in dist\Base: {string.Join(", ", missing)}");
-                }
+                List<string> missing = Locations.Keys.Concat(new[] { "m00_00_00_00" }).Except(Talk.Keys).ToList();
+                if (missing.Count != 0) throw new Exception($@"Missing talkesdbnds in dist\Base: {string.Join(", ", missing)}");
             }
         }
 

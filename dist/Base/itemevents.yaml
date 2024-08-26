@@ -164,6 +164,19 @@ ExistingEvents:
     - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
       Remove: First
 
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove the event that makes Irina die.
+    - Match: {Init: {Callee: 20006002, Arguments: [3100700]}}
+      Remove: First
+
+  # Make Irina invincible
+  - ID: 13105620
+    If: safequest
+    Edits:
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+
   - ID: 13105171
     If: phantomhunters
     Edits:
@@ -200,6 +213,9 @@ ExistingEvents:
     - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
       Remove: First
     - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+      Remove: First
+    # Same for Irina
+    - Match: {Init: {Callee: 20006002, Arguments: [4000725]}}
       Remove: First
 
   - ID: 14005700

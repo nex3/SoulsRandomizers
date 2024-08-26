@@ -1315,6 +1315,24 @@ namespace RandomizerCommon
                         "summon dark spirits.";
                 }
 
+                if (opt["safequest"])
+                {
+                    // Doing this manually kinda sucks, but it's not yet clear to me how best to
+                    // generalize it. Once I know a few more types of edits I want to make, I'll
+                    // try putting this in a config file. The in-progress work is in the talk-edit
+                    // branch.
+                    var irinaTalk = game.Talk["m40_00_00_00"]["t400260"];
+                    var state = irinaTalk.StateGroups[0x7FFFFFFF - 7][16];
+                    var args = state.EntryCommands[0].Arguments;
+                    for (var i = 3; i <= 4; i++)
+                    {
+                        var expr = (AST.ConstExpr)AST.DisassembleExpression(args[i]);
+                        expr.Value = 0;
+                        args[i] = AST.AssembleExpression(expr);
+                    }
+                    game.WriteESDs.Add("m40_00_00_00");
+                }
+
                 // Make every boss soul trigger the event to show it in the shop.
                 var bossSoulFlags = new Dictionary<ItemKey, int>();
                 foreach (PARAM.Row row in shops.Rows)
