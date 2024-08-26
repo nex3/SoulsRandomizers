@@ -271,7 +271,7 @@
     <default>False</default>
   </entry>
   <entry>
-    <name>isDrop</name>
+    <name>isDiscard</name>
     <type>b8</type>
     <default>True</default>
   </entry>
@@ -466,7 +466,7 @@
     <default>0</default>
   </entry>
   <entry>
-    <name>drop [ON_OFF]</name>
+    <name>isDrop</name>
     <type>u8</type>
     <default>0</default>
   </entry>

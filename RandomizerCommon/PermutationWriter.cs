@@ -1233,6 +1233,21 @@ namespace RandomizerCommon
                 // anyway.
                 game.Params["ItemLotParam"][4530]["getItemFlagId"].Value = 50006990;
 
+                // Mark these items as not being droppable or discardable, since they're
+                // quest-relevant in a way that the randomizer logic may rely on.
+                var goods= game.Param(ItemType.GOOD);
+                foreach (var id in new int[] {
+                        373 /* Pale Tongue */, 388 /* Twinkling Dragon Torso Stone */,
+                        1355000 /* Chameleon */,
+                    })
+                {
+                    var row = goods[id];
+                    row["isDiscard"].Value = false;
+                    row["isDrop"].Value = false;
+                }
+                // Allow Loretta's Bone to be dropped for crow trades.
+                goods[2118]["isDiscard"].Value = false;
+
                 // Description for path of the dragon so it's not ?GoodsInfo?
                 FMG goodsShort = game.ItemFMGs["アイテム説明"];
                 FMG goodsLong = game.ItemFMGs["アイテムうんちく"];
@@ -1275,6 +1290,10 @@ namespace RandomizerCommon
                         trackingEvent,
                         pathOfTheDragon?.Item.ID ?? -1
                     });
+
+                    // Archipelago doesn't randomize the crow trade for Loretta's Bone, so we make
+                    // it undroppable.
+                    goods[2118]["isDrop"].Value = false;
                 }
 
                 if (opt["phantomhunters"])
@@ -1321,7 +1340,6 @@ namespace RandomizerCommon
                 if (opt["bosssoulshop"])
                 {
                     var nextID = 30252; // First unused Ludleth shop ID
-                    var goods = game.Params["EquipParamGoods"];
                     foreach (var (soul, flag) in bossSoulFlags)
                     {
                         var row = new PARAM.Row(nextID++, null, shops.AppliedParamdef);
