@@ -43,30 +43,6 @@ namespace RandomizerCommon
         // Reversed GameData.ItemLotTypes
         // private readonly Dictionary<ItemType, uint> lotValues;
 
-        /// <summary>
-        /// The event ID to use for the next synthetic event.
-        /// </summary>
-        /// <remarks>
-        /// <para>We start with an ID that's larger than any in-game IDs to ensure that we don't
-        /// overlap with real events.</para>
-        /// </para>
-        /// </remarks>
-        // For whatever reason, there are large and not always continuous swaths of event IDs that
-        // will turn themselves off immediately after being turned on, and thus should be avoided
-        // for custom events. After poking around in CheatEngine, I've verified that the range
-        // 7901XXXX seems to be both unused and stable in DS3, so I chose it for the base here.
-        //
-        // Other options I've tried:
-        //
-        // * 8XXXXXXX resets to Off.
-        // * 7001XXXX resets to Off.
-        // * 79X00000 is on by default b ut doesn't seem to be referenced anywhere.
-        // * 7900XXXX seems to be identical to 7000XXXX, in the sense that any change to the upper
-        //   range is reflected in the lower range and vice versa.
-        //
-        // TODO: find/verify unused base IDs for ER and Sekiro+
-        private uint nextEventId = 79010000;
-
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
         [Localize]
@@ -1376,7 +1352,7 @@ namespace RandomizerCommon
                     // Archipelago handles Path of the Dragon as a synthetic item or (when getting
                     // it from another world or a /send command) manually triggering the event
                     // 100001312.
-                    var trackingEvent = GetUniqueEventId();
+                    var trackingEvent = game.GetUniqueEventId();
                     var commands = new List<string>(new string[]
                     {
                         $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
@@ -2135,25 +2111,12 @@ namespace RandomizerCommon
             return (new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1)), row);
         }
 
-        /// <returns>An event flag ID that's guaranteed not to be used by any other events.</returns>
-        public uint GetUniqueEventId() {
-            var value = nextEventId++;
-
-            // Per https://soulsmodding.wikidot.com/tutorial:learning-how-to-use-emevd#EventFlags,
-            // flags whose last four digits are in the 5000-9999 range have different behavior. In
-            // the future we may want to allow events to opt into this, but for now we just avoid
-            // them.
-            if (value % 10000 < 5000) return value;
-            nextEventId += 10000 - (value % 10000);
-            return GetUniqueEventId();
-        }
-
         /// <summary>
         /// Adds a new event to the common EMEVD.
         /// </summary>
         public void AddNewEvent(IEnumerable<string> instrs, EMEVD.Event.RestBehaviorType rest = EMEVD.Event.RestBehaviorType.Default)
         {
-            var id = GetUniqueEventId();
+            var id = game.GetUniqueEventId();
             var ev = new EMEVD.Event(id, rest);
             ev.Instructions.AddRange(instrs.Select(t => events.ParseAdd(t)));
             var emevd = game.Emevds["common"];
