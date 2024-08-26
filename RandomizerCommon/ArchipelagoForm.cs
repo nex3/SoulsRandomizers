@@ -368,6 +368,10 @@ namespace RandomizerCommon
                 opt["dlc2"] = true;
                 opt["dlc2fromdlc1"] = true;
             }
+            else
+            {
+                opt["omitdlc"] = true;
+            }
 
             // These options aren't actually used, but they're necessary to run the offlien item
             // randomizer for infinite items.
