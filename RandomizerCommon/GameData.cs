@@ -391,7 +391,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         //
         // * `T` is the "event type". Known types are 1 for miscellaneous EMEVD use, 5 to track
         //   item acquisition, 6 to track interactions with map objects, and 7 to track NPC
-        //   interactions. 0 and 2 seem to work as well, but other digits are invalid.
+        //   interactions. 2 seems to work as well, but other digits are invalid.
         //
         // * `MMM` is the map ID. This is the first, second, and fourth digit in the EMEVD file
         //   names. For example, Undead Settlement is `m31_00_00_00.emevd` and its map ID is 310;
@@ -422,7 +422,6 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         private readonly List<Range> eventIdRanges = new(new[] {
             // This many ID slots is almost certainly overkill, but better safe than sorry.
             // These should remain sorted from lowest to highest.
-            03600000..03605000,
             13600000..13605000,
             23600000..23605000,
             53600000..53605000,
