@@ -208,8 +208,13 @@ ExistingEvents:
     Edits:
     # Prevent the player from killing Greirat
     - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
-    # Always survive Irithyll
-    # TODO: Consider requiring Siegward to save him, and making that unfailable
+    # Don't die in Irithyll if Siegward/Patches haven't saved him by making the check condition
+    # always fail.
     - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385)"
-      MatchLength: 2
+      Replace: ["IfComparison(AND_05, ComparisonType.Equal, 0, 1)"]
+    # Don't require either Siegward or Patches to come back from Irithyll by removing those
+    # conditions.
+    # TODO: Consider requiring Siegward to save him, and making that unfailable
+    - Match: "IfEventFlag(OR_01, ON, TargetEventFlagType.EventFlag, 1385)"
+      MatchLength: 3
       Remove: First
