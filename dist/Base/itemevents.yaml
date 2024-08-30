@@ -211,7 +211,7 @@ ExistingEvents:
     # Don't die in Irithyll if Siegward/Patches haven't saved him by making the check condition
     # always fail.
     - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385)"
-      Replace: ["IfComparison(AND_05, ComparisonType.Equal, 0, 1)"]
+      Replace: ["IfParameterComparison(AND_05, ComparisonType.Equal, 0, 1)"]
     # Don't require either Siegward or Patches to come back from Irithyll by removing those
     # conditions.
     # TODO: Consider requiring Siegward to save him, and making that unfailable
