@@ -31,6 +31,13 @@ namespace RandomizerCommon
         /// </summary>
         public Dictionary<string, List<AddInitializer>> Initialize { get; set; } = new();
 
+        /// <summary>A map to existing talk state groups to modify.</summary>
+        /// <remarks>
+        /// The keys are map name, talk ID (including "t"), and state group index.
+        /// </remarks>
+        public Dictionary<string, Dictionary<string, List<ExistingTalkStateGroup>>> ExistingTalks
+        { get; set; } = new();
+
         public List<CommandSegment> DefaultSegments { get; set; }
         // Maybe "item" config should be split up in a different file
         public List<EventSpec> ItemTalks { get; set; }
@@ -39,29 +46,20 @@ namespace RandomizerCommon
         public List<InstructionValueSpec> ValueTypes { get; set; }
 
         /// <summary>
-        /// The base class for classes that create or edit events.
+        /// The base class for serializable objects that are used conditionally based on the
+        /// player's configuration.
         /// </summary>
-        public abstract class BaseEvent
+        public abstract class Conditional
         {
-            /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
-            /// <remarks>
-            /// This is typically used for events which are initialized multiple times using
-            /// <c>GameData.AddInitializer</c>.
-            /// </remarks>
-            public string Name { get; set; }
-
-            /// <summary>Documentation for this event.</summary>
-            public string Comment { get; set; }
-
             /// <summary>
             /// A boolean expression. This event is only applied if it returns true.
             /// </summary>
             /// <remarks>
             /// <para>
-            /// This can access any boolean in <c>RandomizerOptions</c> as an identifier.
+            /// This can access any boolean in <see cref="RandomizerOptions"/> as an identifier.
             /// </para>
             /// 
-            /// <para>This can be checked using <c>IncludeFor</c>.</para>
+            /// <para>This can be checked using <see cref="IncludeFor"/>.</para>
             /// </remarks>
             public string If { get; set; }
 
@@ -78,6 +76,22 @@ namespace RandomizerCommon
                 };
                 return (bool)expression.Evaluate();
             }
+        }
+
+        /// <summary>
+        /// The base class for classes that create or edit events.
+        /// </summary>
+        public abstract class BaseEvent : Conditional
+        {
+            /// <summary>Our name for the event, which we can use to refer to it easily.</summary>
+            /// <remarks>
+            /// This is typically used for events which are initialized multiple times using
+            /// <see cref="GameData.AddInitializer"/>.
+            /// </remarks>
+            public string Name { get; set; }
+
+            /// <summary>Documentation for this event.</summary>
+            public string Comment { get; set; }
         }
 
         /// <summary>A new event to add to the game.</summary>
@@ -164,7 +178,7 @@ namespace RandomizerCommon
         /// <summary>An event that already exists in the game.</summary>
         /// <remarks>
         /// This can just provide a name to a function we might want to call, or it can make more
-        /// detailed <c>Edits</c> to change the behavior of an existing event.
+        /// detailed <see cref="Edits"/> to change the behavior of an existing event.
         /// </remarks>
         public class ExistingEvent : BaseEvent
         {
@@ -177,9 +191,9 @@ namespace RandomizerCommon
 
         /// <summary>A single edit to apply to an existing event.</summary>
         /// <remarks>
-        /// An edit has two critical components: the <c>Matcher</c> which determines which
-        /// instruction(s) in the event to change, and the other properties which indicate which
-        /// change(s) to make. Only one change may be made per edit.
+        /// An edit has two critical components: the <see cref="InstructionMatcher"/> which
+        /// determines which instruction(s) in the event to change, and the other properties
+        /// which indicate which change(s) to make. Only one change may be made per edit.
         /// </remarks>
         public class EventEdit
         {
@@ -237,7 +251,9 @@ namespace RandomizerCommon
             /// <param name="events">
             /// The event metadata used to decode information about <paramref name="ev"/>.
             /// </param>
-            /// <remarks>Throws an exception if no instruction matches <c>Match</c>.</remarks>
+            /// <remarks>
+            /// Throws an exception if no instruction matches <see cref="Match">.
+            /// </remarks>
             public void Edit(EMEVD.Event ev, Events events)
             {
                 var matchLength = Match == null ? ev.Instructions.Count : MatchLength;
@@ -346,7 +362,7 @@ namespace RandomizerCommon
         }
 
         /// <summary>
-        /// A matcher which indicates which instruction to choose for an <c>EventEdit</c>.
+        /// A matcher which indicates which instruction to choose for an <see cref="EventEdit">.
         /// </summary>
         /// <remarks>
         /// This can include multiple matcher conditions, in which case all of them must match in
@@ -375,7 +391,9 @@ namespace RandomizerCommon
                     MatchInstruction(instr, events);
             }
 
-            /// <returns>whether <paramref name="instr"/> matches <c>Instruction</c>.</returns>
+            /// <returns>
+            /// Whether <paramref name="instr"/> matches <paramref name="instr"/>.
+            /// </returns>
             private bool MatchInstruction(Instr instr, Events events)
             {
                 if (Instruction == null) return true;
@@ -395,7 +413,7 @@ namespace RandomizerCommon
             /// <summary>
             /// The initializer index (that is, the first argument to the initializer).
             /// </summary>
-            public int? Index {  get; set; }
+            public int? Index { get; set; }
 
             /// <summary>The ID of the event being initialized by this instruction.</summary>
             public int? Callee { get; set; }
@@ -463,7 +481,7 @@ namespace RandomizerCommon
                 new() { Name = name };
 
             /// <returns>
-            /// The offset into <c>instr</c>'s arguments that this parameter indicates.
+            /// The offset into <paramref name="instr"/>'s arguments that this parameter indicates.
             /// </returns>
             public int Offset(Instr instr)
             {
@@ -498,12 +516,34 @@ namespace RandomizerCommon
 
             /// <summary>The name we've provided to the event to initialize.</summary>
             /// <remarks>
-            /// This is set via <c>ExistingEvent.Name</c> or <c>AddEvent.Name</c>.
+            /// This is set via <see cref="ExistingEvent.Name"/> or <see cref="AddEvent.Name">.
             /// </remarks>
             public string Name { get; set; }
 
             /// <summary>The arguments to pass to this initializer.</summary>
             public List<int> Arguments { get; set; } = new();
+        }
+
+        /// <summary>A talk state group that already exists in the game.</summary>
+        public class ExistingTalkStateGroup : Conditional
+        {
+            /// <summary>
+            /// The (0-indexed) ID of the state group to edit, the same as the number after the
+            /// <c>x</c> in ESDLang.
+            /// </summary>
+            public int ID { get; set; }
+
+            /// <summary>A list of edits to make to this state group.</summary>
+            public List<TalkStateGroupEdit> Edits { get; set; } = new();
+        }
+
+        /// <summary>A single edit to apply to an existing event.</summary>
+        public class TalkStateGroupEdit
+        {
+            /// <summary>
+            /// An edit that replaces 
+            /// </summary>
+            public TalkReplaceExpression ReplaceExpression { get; set; }
         }
 
         public class EventSpec : AbstractEventSpec
