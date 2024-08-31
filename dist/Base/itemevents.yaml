@@ -114,6 +114,15 @@ NewEvents:
     - SetCharacterInvincibility(4000725, Enabled)
     - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000350, 70000351)
     - SetCharacterInvincibility(4000725, Disabled)
+    
+  - Comment: |
+      Make Cornyx invincible as long as he doesn't have all three pyromancy tomes. We do want him
+      killable eventually so the player can get his drops.
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(4000735, Enabled)
+    - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000250, 70000252)
+    - SetCharacterInvincibility(4000735, Disabled)
 
 ExistingEvents:
   common_func:
@@ -131,9 +140,18 @@ ExistingEvents:
     # it's difficult to find and defeat another boss. This removes the initializer that triggers
     # the "return from Settlement" and "return from Irithyll" events after boss defeats, and
     # above we add different triggers.
-    - Match: {Init: {Callee: 9120, Arguments: [74000303]}}
+    - Match: {Init: {Callee: 9120}, Arguments: [74000303]}
       MatchLength: 2
       Remove: first
+
+  # Unconditionally set the event that causes Cornyx and Orbeck to give the Pyromancy Flame and
+  # Young Dragon Ring even if you're a Pyromancer or Sorcerer, respectively. Usually this is only
+  # set in NG+ and beyond.
+  - ID: 700
+    If: safequest
+    Edits:
+    - Match: "EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)"
+      AddAfter: ["SetEventFlag(70000900, ON)"]
   
   # Grand Archives Key softlock fix
   - ID: 710
@@ -147,11 +165,11 @@ ExistingEvents:
     Edits:
     # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
     # invincible, but just in case.
-    - Match: {Init: {Callee: 20006002, Arguments: [3000700]}}
+    - Match: {Init: {Callee: 20006002}, Arguments: [3000700]}
       Remove: First
-    - Match: {Init: {Callee: 20006000, Arguments: [3000700]}}
+    - Match: {Init: {Callee: 20006000}, Arguments: [3000700]}
       Remove: First
-    - Match: {Init: {Callee: 20006001, Arguments: [3000700]}}
+    - Match: {Init: {Callee: 20006001}, Arguments: [3000700]}
       Remove: First
 
   # Make Greirat invincible
@@ -164,25 +182,34 @@ ExistingEvents:
   - ID: 0
     Edits:
     # Fix Lothric Castle Crystal Lizard so one doesn't despawn when the other one gets killed (use new event flag)
-    - Match: {Init: {Callee: 20005341, Arguments: [null, 3010311]}}
+    - Match: {Init: {Callee: 20005341}, Arguments: [null, 3010311]}
       Set: {Param: {InitArg: 0}, Value: 13010594}
 
   m31_00_00_00: # Undead Settlement
   - ID: 0
     Edits:
     # Remove Undead Settlement birch tree, which is a duplicate pickup which makes one unavailable.
-    - Match: {Init: {Callee: 20005525, Arguments: [53100660]}}
+    - Match: {Init: {Callee: 20005525}, Arguments: [53100660]}
       Remove: First
 
   - ID: 0
     If: safequest
     Edits:
     # Remove the event that makes Irina die.
-    - Match: {Init: {Callee: 20006002, Arguments: [3100700]}}
+    - Match: {Init: {Callee: 20006002}, Arguments: [3100700]}
+      Remove: First
+    # Same with Cornyx
+    - Match: {Init: {Callee: 20006002}, Arguments: [3100710]}
       Remove: First
 
   # Make Irina invincible
   - ID: 13105620
+    If: safequest
+    Edits:
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+    
+  # Make Cornyx invincible
+  - ID: 13105640
     If: safequest
     Edits:
     - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
@@ -218,11 +245,11 @@ ExistingEvents:
     Edits:
     # Remove the events that make Greirat die or aggro. These shouldn't trigger because he's
     # invincible, but just in case.
-    - Match: {Init: {Callee: 20006002, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006002}, Arguments: [4000720]}
       Remove: First
-    - Match: {Init: {Callee: 20006000, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006000}, Arguments: [4000720]}
       Remove: First
-    - Match: {Init: {Callee: 20006001, Arguments: [4000720]}}
+    - Match: {Init: {Callee: 20006001}, Arguments: [4000720]}
       Remove: First
 
   - ID: 14005700

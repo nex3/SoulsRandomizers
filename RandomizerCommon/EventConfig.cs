@@ -354,8 +354,41 @@ namespace RandomizerCommon
         /// </remarks>
         public class InstructionMatcher : IInstructionMatcher
         {
+            /// <summary>
+            /// A union type for arguments that can be passed to <see cref="Arguments"/>.
+            /// </summary>
+            public record Argument
+            {
+                /// <summary>A literal number passed as an argument.</summary>
+                public record Literal(int Value): Argument();
+
+                /// <summary>A named EMEVD constant, such as <c>ComparisonType.Equal</c>.</summary>
+                public record Constant(string Name): Argument();
+
+                /// <summary>Allows any argument in this position.</summary>
+                public record Anything(): Argument();
+
+                public static explicit operator Argument(int index) => new Literal(index);
+                public static explicit operator Argument(string name) =>
+                    name == null ? new Anything() : new Constant(name);
+
+                private Argument() { }
+            }
+
             /// <summary>A matcher for initializer instructions found in event 0s.</summary>
             public InitMatcher Init { get; set; }
+
+            /// <summary>A matcher for the instruction name.</summary>
+            public string Name { get; set; }
+
+            /// <summary>Specific arguments to match. Null arguments match any value.</summary>
+            /// <remarks>
+            /// <para>An instruction with fewer args than listed here will not match, but an
+            /// instruction with more will.</para>
+            /// <para>For an initializer instruction, neither the initializer index nor the callee
+            /// are considered arguemnts.</para>
+            /// </remarks>
+            public List<Argument> Arguments { get; set; } = new();
 
             /// <summary>A literal instruction to match.</summary>
             public string Instruction { get; set; }
@@ -372,10 +405,14 @@ namespace RandomizerCommon
             public bool Match(Instr instr, Events events)
             {
                 return Init?.Match(instr, events) ?? true &&
+                    (Name == null || instr.Name == Name) &&
+                    MatchArguments(instr, events) &&
                     MatchInstruction(instr, events);
             }
 
-            /// <returns>whether <paramref name="instr"/> matches <c>Instruction</c>.</returns>
+            /// <returns>
+            /// whether <paramref name="instr"/> matches <see cref="Instruction"/>.
+            /// </returns>
             private bool MatchInstruction(Instr instr, Events events)
             {
                 if (Instruction == null) return true;
@@ -383,6 +420,32 @@ namespace RandomizerCommon
                 return expected.Bank == instr.Val.Bank &&
                     expected.ID == instr.Val.ID &&
                     Enumerable.SequenceEqual(expected.ArgData, instr.Val.ArgData);
+            }
+
+            /// <returns>
+            /// Whether <paramref name="instr"/>'s arguments match <see cref="Arguments"/>.
+            /// </returns>
+            private bool MatchArguments(Instr instr, Events events)
+            {
+                for (var i = 0; i < Arguments.Count; i++)
+                {
+                    dynamic actual = instr[instr.Offset + i];
+                    var match = Arguments[i] switch
+                    {
+                        Argument.Literal arg => actual == (dynamic)arg.Value,
+                        Argument.Constant arg =>
+                            // Events doesn't have a direct way to convert an enum name to its
+                            // value, so we have to parse a fake instruction to get it. We use
+                            // IfConditionGroup() because its first argument is a signed integer,
+                            // and so within range for all actual constants defined by EMEDF.
+                            actual == (dynamic)events.Parse(
+                                events.ParseAdd($"IfConditionGroup({arg.Name}, 0, 0)")
+                            )[0],
+                        _ => true,
+                    };
+                    if (!match) return false;
+                }
+                return true;
             }
         }
 
@@ -400,29 +463,12 @@ namespace RandomizerCommon
             /// <summary>The ID of the event being initialized by this instruction.</summary>
             public int? Callee { get; set; }
 
-            /// <summary>Specific arguments to match. Null arguments match any value.</summary>
-            /// <remarks>
-            /// Neither the initializer index nor the callee are considered arguemnts. An
-            /// initializer fewer args than listed here will not match, but an initializer with more
-            /// will.
-            /// </remarks>
-            public List<int?> Arguments { get; set; } = new();
-
             public static explicit operator InitMatcher(int? callee) => new() { Callee = callee };
 
-            public bool Match(Instr instr, Events events)
-            {
-                if (!instr.Init) return false;
-                if (Index != null && (int)instr[0] != Index) return false;
-                if (Callee != null && instr.Callee != Callee) return false;
-                for (var i = 0; i < Arguments.Count; i++)
-                {
-                    var expected = Arguments[i];
-                    if (expected == null) continue;
-                    if ((int)instr[instr.Offset + i] != expected) return false;
-                }
-                return true;
-            }
+            public bool Match(Instr instr, Events events) =>
+                instr.Init &&
+                (Index == null || (int)instr[0] == Index) &&
+                (Callee == null || instr.Callee == Callee);
         }
 
         /// <summary>Sets the value of a specific parameter of a matched instruction.</summary>
