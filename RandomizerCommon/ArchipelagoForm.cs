@@ -147,7 +147,7 @@ namespace RandomizerCommon
             ann.Load(opt);
             var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
             var writer = new PermutationWriter(
-                game, data, ann, events, game.ParseYaml<EventConfig>("itemevents.yaml"));
+                game, data, ann, events, game.ParseYaml<EventConfig>("itemevents.yaml"), opt);
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
@@ -290,7 +290,7 @@ namespace RandomizerCommon
                 Permutation.RandomSilo.MIXED
             });
 
-            writer.Write(random, permutation, opt, alwaysReplacePathOfTheDragon: true);
+            writer.Write(random, permutation, alwaysReplacePathOfTheDragon: true);
 
             if (options["no_weapon_requirements"])
             {

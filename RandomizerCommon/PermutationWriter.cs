@@ -28,6 +28,7 @@ namespace RandomizerCommon
         private AnnotationData ann;
         private Events events;
         private EventConfig eventConfig;
+        private RandomizerOptions opt;
         private Messages messages;
         private EldenCoordinator coord;
 
@@ -49,18 +50,30 @@ namespace RandomizerCommon
         private static readonly Text receiveBellBearing =
             new Text("Receive Bell Bearing", "GameMenu_receiveBellBearing");
 
-        public PermutationWriter(GameData game, LocationData data, AnnotationData ann, Events events, EventConfig eventConfig, Messages messages = null, EldenCoordinator coord = null)
+        public PermutationWriter(
+            GameData game,
+            LocationData data,
+            AnnotationData ann,
+            Events events,
+            EventConfig eventConfig,
+            RandomizerOptions opt,
+            Messages messages = null,
+            EldenCoordinator coord = null
+        )
         {
             this.game = game;
             this.data = data;
             this.ann = ann;
             this.events = events;
             this.eventConfig = eventConfig;
+            this.opt = opt;
             this.messages = messages;
             this.coord = coord;
             // itemLots = game.Param("ItemLotParam");
             shops = game.Param("ShopLineupParam");
             // lotValues = game.LotItemTypes.ToDictionary(e => e.Value, e => e.Key);
+
+            ApplyInitialEdits();
         }
 
         public enum PriceCategory
@@ -79,10 +92,102 @@ namespace RandomizerCommon
             public Dictionary<int, int> MerchantGiftFlags { get; set; }
         }
 
+        /// <summary>
+        /// Applies edits to the game that aren't based on one specific permutation of items.
+        /// </summary>
+        private void ApplyInitialEdits()
+        {
+            if (game.DS3)
+            {
+                // DS3 edits
+                // Disable Firelink Shrine bonfire without Coiled Sword, with special event flag
+                game.Params["ActionButtonParam"][9351]["grayoutFlag"].Value = 14005108;
+
+                // This is the Vertebra Shackle dropped by Hodrick. Give it a tracking event (10
+                // more than the highest vanilla invader tracking event) so that we can
+                // track it in annotations.yaml. Although this is the generic covenant reward item
+                // lot, it's safe to add the tracking event because the player isn't going online
+                // anyway.
+                game.Params["ItemLotParam"][4530]["getItemFlagId"].Value = 50006990;
+
+                // Mark these items as not being droppable or discardable, since they're
+                // quest-relevant in a way that the randomizer logic may rely on.
+                var goods = game.Param(ItemType.GOOD);
+                foreach (var id in new int[] {
+                        373 /* Pale Tongue */, 388 /* Twinkling Dragon Torso Stone */,
+                        1355000 /* Chameleon */,
+                    })
+                {
+                    var row = goods[id];
+                    row["isDiscard"].Value = false;
+                    row["isDrop"].Value = false;
+                }
+                // Allow Loretta's Bone to be dropped for crow trades.
+                goods[2118]["isDiscard"].Value = false;
+
+                // Description for path of the dragon so it's not ?GoodsInfo?
+                FMG goodsShort = game.ItemFMGs["アイテム説明"];
+                FMG goodsLong = game.ItemFMGs["アイテムうんちく"];
+                string dragonInfo = "A gesture of meditation channeling the eternal essence of the ancient dragons";
+                goodsShort[9030] = dragonInfo;
+                goodsLong[9030] = $"{dragonInfo}.\n\nThe path to ascendence can be achieved only by the most resolute of seekers. Proper utilization of this technique can grant deep inner focus.";
+                // Make it appear as a key item in shops
+                game.Params["EquipParamGoods"][9030]["goodsType"].Value = (byte)1;
+
+                if (opt["archipelago"])
+                {
+                    // Archipelago doesn't randomize the crow trade for Loretta's Bone, so we make
+                    // it undroppable.
+                    goods[2118]["isDrop"].Value = false;
+                }
+
+                if (opt["phantomhunters"])
+                {
+                    var (_, row) = AddSyntheticCopy(new ItemKey(ItemType.RING, 10060), id: 10100);
+                    row["sortId"].Value = 10099; // In the covenants, before any others.
+                    row["iconId"].Value = 6021;
+                    row["VowId"].Value = 10;
+                    game.ItemFMGs["アクセサリ名"][row.ID] = "Phantom Hunters";
+                    game.ItemFMGs["アクセサリ説明"][row.ID] =
+                        "Pledge oneself to the Phantom Hunters covenant";
+                    game.ItemFMGs["アクセサリうんちく"][row.ID] =
+                        "A blazing ember to kindle envy in the hearts of invaders.\n" +
+                        "\n" +
+                        "The phantom hunters welcome those who seek their blood from other " +
+                        "worlds, and the riches they bring with them.\n" +
+                        "\n" +
+                        "Equip this covenant in place of the conventional requirements to " +
+                        "summon dark spirits.";
+                }
+
+                if (opt["safequest"])
+                {
+                    // Replace the references to the dark tomes in Irina's ESD with 0s. There aren't
+                    // any items with ID 0, so she'll never take the tomes or anything in their
+                    // place, and thus never enter dark mode.
+                    //
+                    // Doing this manually kinda sucks, but it's not yet clear to me how best to
+                    // generalize it. Once I know a few more types of edits I want to make, I'll
+                    // try putting this in a config file. The in-progress work is in the talk-edit
+                    // branch.
+                    var irinaTalk = game.Talk["m40_00_00_00"]["t400260"];
+                    var state = irinaTalk.StateGroups[0x7FFFFFFF - 7][16];
+                    var args = state.EntryCommands[0].Arguments;
+                    for (var i = 3; i <= 4; i++)
+                    {
+                        var expr = (AST.ConstExpr)AST.DisassembleExpression(args[i]);
+                        expr.Value = 0;
+                        args[i] = AST.AssembleExpression(expr);
+                    }
+                    game.WriteESDs.Add("m40_00_00_00");
+                }
+            }
+        }
+
         /// <param name="alwaysReplacePathOfTheDragon">If this is set, Path of the Dragon is
         /// *always* replaced by a single ember. Otherwise, it's replaced if and only if the
         /// Path of the Dragon item is included in the pool.</param>
-        public Result Write(Random random, Permutation permutation, RandomizerOptions opt,
+        public Result Write(Random random, Permutation permutation,
                 bool alwaysReplacePathOfTheDragon = false)
         {
             bool writeSwitch = true;
@@ -1222,41 +1327,7 @@ namespace RandomizerCommon
             }
             else if (game.DS3)
             {
-                // DS3 edits
-                // Disable Firelink Shrine bonfire without Coiled Sword, with special event flag
-                game.Params["ActionButtonParam"][9351]["grayoutFlag"].Value = 14005108;
-
-                // This is the Vertebra Shackle dropped by Hodrick. Give it a tracking event (10
-                // more than the highest vanilla invader tracking event) so that we can
-                // track it in annotations.yaml. Although this is the generic covenant reward item
-                // lot, it's safe to add the tracking event because the player isn't going online
-                // anyway.
-                game.Params["ItemLotParam"][4530]["getItemFlagId"].Value = 50006990;
-
-                // Mark these items as not being droppable or discardable, since they're
-                // quest-relevant in a way that the randomizer logic may rely on.
-                var goods= game.Param(ItemType.GOOD);
-                foreach (var id in new int[] {
-                        373 /* Pale Tongue */, 388 /* Twinkling Dragon Torso Stone */,
-                        1355000 /* Chameleon */,
-                    })
-                {
-                    var row = goods[id];
-                    row["isDiscard"].Value = false;
-                    row["isDrop"].Value = false;
-                }
-                // Allow Loretta's Bone to be dropped for crow trades.
-                goods[2118]["isDiscard"].Value = false;
-
-                // Description for path of the dragon so it's not ?GoodsInfo?
-                FMG goodsShort = game.ItemFMGs["アイテム説明"];
-                FMG goodsLong = game.ItemFMGs["アイテムうんちく"];
-                string dragonInfo = "A gesture of meditation channeling the eternal essence of the ancient dragons";
-                goodsShort[9030] = dragonInfo;
-                goodsLong[9030] = $"{dragonInfo}.\n\nThe path to ascendence can be achieved only by the most resolute of seekers. Proper utilization of this technique can grant deep inner focus.";
-                // Make it appear as a key item in shops
-                game.Params["EquipParamGoods"][9030]["goodsType"].Value = (byte)1;
-
+                // DS3 edits that depend on the permutation
                 if (dragonFlag > 0 || alwaysReplacePathOfTheDragon)
                 {
                     var ev = game.Emevds["m30_00_00_00"].Events[0];
@@ -1290,51 +1361,6 @@ namespace RandomizerCommon
                         trackingEvent,
                         pathOfTheDragon?.Item.ID ?? -1
                     });
-
-                    // Archipelago doesn't randomize the crow trade for Loretta's Bone, so we make
-                    // it undroppable.
-                    goods[2118]["isDrop"].Value = false;
-                }
-
-                if (opt["phantomhunters"])
-                {
-                    var (_, row) = AddSyntheticCopy(new ItemKey(ItemType.RING, 10060), id: 10100);
-                    row["sortId"].Value = 10099; // In the covenants, before any others.
-                    row["iconId"].Value = 6021;
-                    row["VowId"].Value = 10;
-                    game.ItemFMGs["アクセサリ名"][row.ID] = "Phantom Hunters";
-                    game.ItemFMGs["アクセサリ説明"][row.ID] =
-                        "Pledge oneself to the Phantom Hunters covenant";
-                    game.ItemFMGs["アクセサリうんちく"][row.ID] =
-                        "A blazing ember to kindle envy in the hearts of invaders.\n" +
-                        "\n" +
-                        "The phantom hunters welcome those who seek their blood from other " +
-                        "worlds, and the riches they bring with them.\n" +
-                        "\n" +
-                        "Equip this covenant in place of the conventional requirements to " +
-                        "summon dark spirits.";
-                }
-
-                if (opt["safequest"])
-                {
-                    // Replace the references to the dark tomes in Irina's ESD with 0s. There aren't
-                    // any items with ID 0, so she'll never take the tomes or anything in their
-                    // place, and thus never enter dark mode.
-                    //
-                    // Doing this manually kinda sucks, but it's not yet clear to me how best to
-                    // generalize it. Once I know a few more types of edits I want to make, I'll
-                    // try putting this in a config file. The in-progress work is in the talk-edit
-                    // branch.
-                    var irinaTalk = game.Talk["m40_00_00_00"]["t400260"];
-                    var state = irinaTalk.StateGroups[0x7FFFFFFF - 7][16];
-                    var args = state.EntryCommands[0].Arguments;
-                    for (var i = 3; i <= 4; i++)
-                    {
-                        var expr = (AST.ConstExpr)AST.DisassembleExpression(args[i]);
-                        expr.Value = 0;
-                        args[i] = AST.AssembleExpression(expr);
-                    }
-                    game.WriteESDs.Add("m40_00_00_00");
                 }
 
                 // Make every boss soul trigger the event to show it in the shop.
@@ -1362,6 +1388,7 @@ namespace RandomizerCommon
                 if (opt["bosssoulshop"])
                 {
                     var nextID = 30252; // First unused Ludleth shop ID
+                    var goods = game.Param(ItemType.GOOD);
                     foreach (var (soul, flag) in bossSoulFlags)
                     {
                         var row = new PARAM.Row(nextID++, null, shops.AppliedParamdef);
