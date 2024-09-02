@@ -2193,7 +2193,9 @@ namespace RandomizerCommon
                 // If finite shop, item is finite
                 // If not in any shops, use lot finiteness
                 bool finiteShop = false, infiniteShop = false, infiniteLot = false;
-                foreach (ItemLocation loc in data.Data[key].Locations.Values)
+                IEnumerable<ItemLocation> locations =
+                    data.Data.GetValueOrDefault(key)?.Locations.Values;
+                foreach (var loc in locations ?? new List<ItemLocation>())
                 {
                     if (loc.Scope.Type == ScopeType.SHOP_INFINITE)
                     {
