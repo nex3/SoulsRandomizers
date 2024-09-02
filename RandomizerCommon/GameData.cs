@@ -11,6 +11,7 @@ using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
 using static SoulsFormats.EMEVD.Instruction;
 using static SoulsIds.GameSpec;
+using System.Diagnostics;
 
 namespace RandomizerCommon
 {

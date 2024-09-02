@@ -232,6 +232,13 @@ namespace RandomizerCommon
             /// <summary>A list of commands to insert after the matching region.</summary>
             public List<string> AddAfter { get; set; } = new();
 
+            /// <summary>
+            /// Replaces a boolean condition (<c>If...()</c>) with a condition that always
+            /// evaluates to <c>true</c> or <c>false</c>.
+            /// </summary>
+            /// <remarks>The matched line must be a condition.</remarks>
+            public bool? Condition { get; set; } = null;
+
             /// <summary>Performs the chosen edit on <paramref name="ev"/>.</summary>
             /// <param name="ev">The event being edited.</param>
             /// <param name="events">
@@ -248,6 +255,7 @@ namespace RandomizerCommon
                 if (Replace.Count > 0) editTypes++;
                 if (AddBefore.Count > 0) editTypes++;
                 if (AddAfter.Count > 0) editTypes++;
+                if (Condition != null) editTypes++;
                 if (editTypes > 1)
                 {
                     throw new Exception("Each EventEdit may only contain one edit");
@@ -298,6 +306,20 @@ namespace RandomizerCommon
                     {
                         ev.Instructions.InsertRange(
                             i + matchLength, ParseInstructions(AddAfter, events, pre));
+                    } else if (Condition is bool condition)
+                    {
+                        if (!instr.Name.StartsWith("If"))
+                        {
+                            throw new Exception($"EMEVD command {instr.Name} isn't conditional");
+                        }
+                        ev.Instructions.RemoveRange(i, matchLength);
+                        ev.Instructions.InsertRange(i, ParseInstructions(new[]
+                        {
+                            // Event 6001 is always on. I tried using IfParameterComparison to
+                            // do 0 != 1, but for some reason that doesn't seem to work.
+                            $"IfEventFlag({instr[0]}, {(condition ? "ON" : "OFF")}, " +
+                                "TargetEventFlagType.EventFlag, 6001)"
+                        }, events, pre));
                     }
 
                     pre.Postprocess();
@@ -368,9 +390,13 @@ namespace RandomizerCommon
                 /// <summary>Allows any argument in this position.</summary>
                 public record Anything(): Argument();
 
-                public static explicit operator Argument(int index) => new Literal(index);
-                public static explicit operator Argument(string name) =>
-                    name == null ? new Anything() : new Constant(name);
+                public static explicit operator Argument(string name)
+                {
+                    if (name == null) return new Anything();
+                    // YamlDotNet treats integers as strings here for some reason.
+                    if (int.TryParse(name, out var value)) return new Literal(value);
+                    return new Constant(name);
+                }
 
                 private Argument() { }
             }
@@ -404,7 +430,7 @@ namespace RandomizerCommon
 
             public bool Match(Instr instr, Events events)
             {
-                return Init?.Match(instr, events) ?? true &&
+                return (Init?.Match(instr, events) ?? true) &&
                     (Name == null || instr.Name == Name) &&
                     MatchArguments(instr, events) &&
                     MatchInstruction(instr, events);

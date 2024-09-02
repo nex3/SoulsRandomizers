@@ -95,6 +95,14 @@ NewEvents:
     # Return Greirat to Firelink
     - Set Event Flag (74000318, ON)
 
+  m33_00_00_00: # Road of Sacrifices / Farron Keep
+  - Comment: Make Anri and Horace invincible
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(3300705, Enabled)
+    - SetCharacterInvincibility(3300710, Enabled)
+    - SetCharacterInvincibility(3300715, Enabled)
+
   m40_00_00_00: # Firelink
   - Comment: |
       Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
@@ -123,6 +131,23 @@ NewEvents:
     - SetCharacterInvincibility(4000735, Enabled)
     - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000250, 70000252)
     - SetCharacterInvincibility(4000735, Disabled)
+
+  - Comment: Make Anri and Horace invincible
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(4000765, Enabled)
+    - SetCharacterInvincibility(4000770, Enabled)
+    - SetCharacterInvincibility(4000775, Enabled)
+
+  - Comment: |
+      Make Yuria invincible until after you've married Anri, at which point you can kill her for her
+      drops. We can't put this in Yuria's main event because it depends on flags set by that event.
+    If: safequest
+    Edits:
+    - AddBefore:
+        - SetCharacterInvincibility(4000750, Enabled)
+        - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
+        - SetCharacterInvincibility(4000750, Disabled)
 
 ExistingEvents:
   common_func:
@@ -198,9 +223,22 @@ ExistingEvents:
     # Remove the event that makes Irina die.
     - Match: {Init: {Callee: 20006002}, Arguments: [3100700]}
       Remove: First
+    # Same with Yoel
+    - Match: {Init: {Callee: 20006002}, Arguments: [3100705]}
+      Remove: First
     # Same with Cornyx
     - Match: {Init: {Callee: 20006002}, Arguments: [3100710]}
       Remove: First
+
+  - ID: 13105600
+    Comment: The driver for Yoel's quest in US
+    If: safequest
+    Edits:
+    # Make Yoel invincible
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+    # Don't let Yoel die if you go to Irithyll before talking to him
+    - Match: IfEventFlag(AND_03, ON, TargetEventFlagType.EventFlag, 138)
+      Condition: false
 
   # Make Irina invincible
   - ID: 13105620
@@ -224,13 +262,166 @@ ExistingEvents:
     - Match: IfCharacterHasSpEffect(AND_01, 10000, 490, true, ComparisonType.Equal, 1)
       Replace: ["IfPlayersCovenant(AND_01, 10)"]
 
+  m33_00_00_00: # Road of Sacrifices / Farron Keep
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove events that make Anri and Horace hostile or dead
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1356]} # Anri attacked
+      Remove: All
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1358]} # Anri dead
+      Remove: All
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1496]} # Horace attacked
+      Remove: First
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1498]} # Horace dead
+      Remove: First
+    - Match: {Init: {Callee: 13300743}} # Anri hostile because Horace is dead
+      Remove: All
+    - Match: {Init: {Callee: 13300745}} # Horace hostile because Anri is dead
+      Remove: All
+    - Match: {Init: {Callee: 13300748}} # Despairing Anri dead
+      Remove: All
+    - Match: {Init: {Callee: 13305741}} # Anri and Horace hostile
+      Remove: All
+
   m37_00_00_00: # Irithyll / Anor Londo
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove events that make Anri or the Pilgrim hostile or dead
+    - Match: {Init: {Callee: 20006000}, Arguments: [null, 1356]} # Anri hostile
+      Remove: All
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1356]} # Anri attacked
+      Remove: All
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1358]} # Anri dead
+      Remove: All
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1578]} # Pilgrim dead
+      Remove: All
+
   # Prevent Greirat becoming lost from triggering here. Skip straight ahead to the point where his
   # corpse either does or doesn't spawn. (His quest should never get to the point where he creates
   # a corpse in Irithyll, but if it does we do want it to spawn.)
   - ID: 13705630
+    If: safequest
     Edits:
     - AddBefore: ["GotoUnconditionally(Label.LABEL10)"]
+  
+  - ID: 13705640
+    Comment: Basic Anri setup logic
+    If: safequest
+    Edits:
+    # Make Anri invulnerable (male and female versions)
+    - AddBefore:
+      - SetCharacterInvincibility(X0_4, Enabled)
+      - SetCharacterInvincibility(X4_4, Enabled)
+
+  - ID: 13705641
+    Comment: Anri and Pilgrim logic at the decision point after Pontiff is defeated
+    If: safequest
+    Edits:
+    # By default, this event runs as soon as Anri is in the church and Pontiff is defeated. Add an
+    # additional condition that checks for Yuria being in any of the states that allows the marriage
+    # to proceed.
+    - Match: IfEventFlag(AND_01, ON, TargetEventFlagType.EventFlag, 9313)
+      AddAfter: ["IfBatchEventFlags(AND_01, LogicalOperationType.NotAllOFF, TargetEventFlagType.EventFlag, 1041, 1043)"]
+    # This shouldn't trigger given the additional check we add above, but just in case, make sure
+    # we don't fail the quest.
+    - Match: IfBatchEventFlags(AND_03, LogicalOperationType.AllOFF, TargetEventFlagType.EventFlag, 1041, 1043)
+      Condition: false
+
+  - ID: 13700643
+    Comment: |
+        Anri and Pilgrim logic that triggers the moment at which Pontiff is defeated. Has a lot of
+        overlap with the previous event.
+    If: safequest
+    # Same edits as above, essentially
+    Edits:
+    - Match: IfEventFlag(AND_01, ON, TargetEventFlagType.EventFlag, 9313);
+      AddAfter: ["IfBatchEventFlags(AND_01, LogicalOperationType.NotAllOFF, TargetEventFlagType.EventFlag, 1041, 1043)"]
+    - Match: IfBatchEventFlags(AND_05, LogicalOperationType.AllOFF, TargetEventFlagType.EventFlag, 1041, 1043)
+      Condition: false
+  
+  - ID: 13705645
+    Comment: Londor Pilgrim logic
+    If: safequest
+    Edits:
+    # Make the pilgrim in the church and the temple, as well as its statue equivalent
+    - AddBefore:
+      - SetCharacterInvincibility(X0_4, Enabled)
+      - SetCharacterInvincibility(X4_4, Enabled)
+      - SetCharacterInvincibility(X8_4, Enabled)
+
+  - ID: 13705650
+    Comment: Yoel and Yuria logic
+    If: safequest
+    Edits:
+    # Don't make Yoel die upon entering Catacombs (interestingly *not* Irithyll here)
+    - Match: "IfEventFlag(AND_14, ON, TargetEventFlagType.EventFlag, 136)"
+      Condition: false
+    - Match: "IfEventFlag(AND_15, ON, TargetEventFlagType.EventFlag, 136)"
+      Condition: false
+    # Disable various events that fail Yuria's quest. These shouldn't be triggerable, but just in
+    # case.
+    - Match: IfPlayerRemainingYoelLevelCount(AND_05, ComparisonType.Greater, 0)
+      Condition: false
+    - Match: IfEventFlag(AND_06, ON, TargetEventFlagType.EventFlag, 1358)
+      Condition: false
+    - Match: IfEventFlag(AND_07, ON, TargetEventFlagType.EventFlag, 1578)
+      Condition: false
+    - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
+      Condition: false
+
+  m38_00_00_00: # Catacombs / Smouldering Lake
+  - ID: 0
+    If: safequest
+    Edits:
+    # Remove events that make Anri hostile or dead
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1356]} # Anri attacked
+      Remove: All
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1358]} # Anri dead
+      Remove: All
+
+  - ID: 13805700
+    Comment: The primary driver for Anri's quest. For some reason there are two of these
+    If: safequest
+    Edits:
+    # Make Anri invincible (male/female, in catacombs/by bridge)
+    - AddBefore:
+      - SetCharacterInvincibility(X0_4, Enabled)
+      - SetCharacterInvincibility(X4_4, Enabled)
+      - SetCharacterInvincibility(X8_4, Enabled)
+      - SetCharacterInvincibility(X12_4, Enabled)
+    # Don't let Anri get killed by Horace
+    - Match: IfEventFlag(AND_04, ON, TargetEventFlagType.EventFlag, 1497)
+      Condition: false
+    # Allow Anri to move to the church even if they know where Horace is
+    - Match: IfEventFlag(AND_06, OFF, TargetEventFlagType.EventFlag, 73800102)
+      Remove: First
+
+  - ID: 13805703
+    Comment: The *second* primary driver for Anri's quest
+    If: safequest
+    Edits:
+    # Same edits as above
+    - Match: IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1498)
+      Condition: false
+    - Match: IfEventFlag(AND_07, OFF, TargetEventFlagType.EventFlag, 73800102)
+      Remove: First
+
+  - ID: 13805707
+    Comment: Yuria logic
+    If: safequest
+    Edits:
+    # Disable various events that fail Yuria's quest. These shouldn't be triggerable, but just in
+    # case.
+    - Match: IfPlayerRemainingYoelLevelCount(AND_05, ComparisonType.Greater, 0)
+      Condition: false
+    - Match: IfEventFlag(AND_06, ON, TargetEventFlagType.EventFlag, 1358)
+      Condition: false
+    - Match: IfEventFlag(AND_07, ON, TargetEventFlagType.EventFlag, 1578)
+      Condition: false
+    - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
+      Condition: false
 
   m39_00_00_00: # Profaned Capitol
   # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
@@ -251,6 +442,53 @@ ExistingEvents:
       Remove: First
     - Match: {Init: {Callee: 20006001}, Arguments: [4000720]}
       Remove: First
+    # Same with Yoel
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1078]}
+      Remove: First
+    # Remove events that make Anri and Horace hostile or dead
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1356]} # Anri attacked
+      Remove: All
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1358]} # Anri dead
+      Remove: All
+    - Match: {Init: {Callee: 20006001}, Arguments: [null, 1496]} # Horace attacked
+      Remove: First
+    - Match: {Init: {Callee: 20006002}, Arguments: [null, 1498]} # Horace dead
+      Remove: First
+    - Match: {Init: {Callee: 14005581}} # Anri and Horace hostile
+      Remove: All
+    - Match: {Init: {Callee: 14000583}} # Anri hostile because Horace is dead
+      Remove: All
+    - Match: {Init: {Callee: 14000585}} # Horace hostile because Anri is dead
+      Remove: All
+    - Match: {Init: {Callee: 14005587}} # Despairing Anri dead
+      Remove: All
+
+  - ID: 14005520
+    Comment: Yuria logic
+    If: safequest
+    Edits:
+    # Disable various events that fail Yuria's quest. These shouldn't be triggerable, but just in
+    # case.
+    - Match: IfPlayerRemainingYoelLevelCount(AND_05, ComparisonType.Greater, 0)
+      Condition: false
+    - Match: IfEventFlag(AND_06, ON, TargetEventFlagType.EventFlag, 1358)
+      Condition: false
+    - Match: IfEventFlag(AND_07, ON, TargetEventFlagType.EventFlag, 1578)
+      Condition: false
+    - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
+      Condition: false
+
+  - ID: 14005740
+    Comment: The primary driver for Yoel's quest
+    If: safequest
+    Edits:
+    # Make Yoel invincible
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+    # Don't let Yoel die if you go to Irithyll before talking to him
+    - Match: IfEventFlag(AND_04, ON, TargetEventFlagType.EventFlag, 138)
+      Condition: false
+    - Match: IfEventFlag(AND_05, ON, TargetEventFlagType.EventFlag, 138)
+      Condition: false
 
   - ID: 14005700
     Comment: The primary driver event for Greirat's quest
@@ -261,7 +499,7 @@ ExistingEvents:
     # Don't die in Irithyll if Siegward/Patches haven't saved him by making the check condition
     # always fail.
     - Match: "IfEventFlag(AND_05, OFF, TargetEventFlagType.EventFlag, 1385)"
-      Replace: ["IfParameterComparison(AND_05, ComparisonType.Equal, 0, 1)"]
+      Condition: false
     # Don't require either Siegward or Patches to come back from Irithyll by removing those
     # conditions.
     # TODO: Consider requiring Siegward to save him, and making that unfailable
