@@ -121,7 +121,7 @@ namespace RandomizerCommon
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
-            var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
+            var options = (JObject)slotData["options"];
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
@@ -160,7 +160,7 @@ namespace RandomizerCommon
 
             // Randomize starting loadout *before* adding a bunch of synthetic weapons and armor to
             // the pool that we don't want shoved into shops.
-            if (options["random_starting_loadout"])
+            if (options["random_starting_loadout"].ToObject<bool>())
             {
                 var characters = new CharacterWriter(game, data);
                 characters.Write(random, opt);
@@ -292,22 +292,22 @@ namespace RandomizerCommon
 
             writer.Write(random, permutation, alwaysReplacePathOfTheDragon: true);
 
-            if (options["no_weapon_requirements"])
+            if (options["no_weapon_requirements"].ToObject<bool>())
             {
                 RemoveWeaponRequirements(game);
             }
 
-            if (options["no_spell_requirements"])
+            if (options["no_spell_requirements"].ToObject<bool>())
             {
                 RemoveSpellRequirements(game);
             }
 
-            if (options["no_equip_load"])
+            if (options["no_equip_load"].ToObject<bool>())
             {
                 RemoveEquipLoad(game);
             }
 
-            if (options["randomize_enemies"])
+            if (options["randomize_enemies"].ToObject<bool>())
             {
                 // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
                 // any way to deserialize from an object graph
@@ -331,37 +331,50 @@ namespace RandomizerCommon
         /// <summary>
         /// Converts Archipelago options into options for this randomizer.
         /// </summary>
-        private static RandomizerOptions ConvertRandomizerOptions(Dictionary<string, bool> archiOptions)
+        private static RandomizerOptions ConvertRandomizerOptions(JObject archiOptions)
         {
             var opt = new RandomizerOptions(FromGame.DS3);
             opt["archipelago"] = true;
-            opt["safequest"] = archiOptions["unmissable_quests"];
-            opt["phantomhunters"] = archiOptions["unmissable_invasions"];
-            opt["bosssoulshop"] = archiOptions["unmissable_transpositions"];
-            opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
-            opt["ngplusrings"] = archiOptions["enable_ngp"];
-            opt["nongplusrings"] = !archiOptions["enable_ngp"];
+            opt["safequest"] = archiOptions["unmissable_quests"].ToObject<bool>();
+            opt["phantomhunters"] = archiOptions["unmissable_invasions"].ToObject<bool>();
+            opt["bosssoulshop"] = archiOptions["unmissable_transpositions"].ToObject<bool>();
+            opt["onehand"] = archiOptions["require_one_handed_starting_weapons"].ToObject<bool>();
+            opt["ngplusrings"] = archiOptions["enable_ngp"].ToObject<bool>();
+            opt["nongplusrings"] = !archiOptions["enable_ngp"].ToObject<bool>();
             opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
                                      // when we add enemizer support.
             // Used for infinite items from shops and enemy drops
-            opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"];
-            opt["soulsprogression"] = archiOptions["smooth_soul_locations"];
+            opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"].ToObject<bool>();
+            opt["soulsprogression"] = archiOptions["smooth_soul_locations"].ToObject<bool>();
+            switch (archiOptions["anri_gender"].ToObject<string>())
+            {
+                case "same":
+                    opt["anrisamegender"] = true;
+                    break;
+                case "female":
+                    opt["anrifemale"] = true;
+                    break;
+                case "male":
+                    opt["anrimale"] = true;
+                    break;
+            }
 
-            if (archiOptions["randomize_enemies"])
+            if (archiOptions["randomize_enemies"].ToObject<bool>())
             {
                 opt["bosses"] = true;
                 opt["enemies"] = true;
                 opt["edittext"] = true;
-                opt["mimics"] = archiOptions["randomize_mimics_with_enemies"];
-                opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"];
-                opt["reducepassive"] = archiOptions["reduce_harmless_enemies"];
-                opt["earlyreq"] = archiOptions["simple_early_bosses"];
-                opt["scale"] = archiOptions["scale_enemies"];
-                opt["chests"] = archiOptions["all_chests_are_mimics"];
-                opt["supermimics"] = archiOptions["impatient_mimics"];
+                opt["mimics"] = archiOptions["randomize_mimics_with_enemies"].ToObject<bool>();
+                opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"]
+                    .ToObject<bool>();
+                opt["reducepassive"] = archiOptions["reduce_harmless_enemies"].ToObject<bool>();
+                opt["earlyreq"] = archiOptions["simple_early_bosses"].ToObject<bool>();
+                opt["scale"] = archiOptions["scale_enemies"].ToObject<bool>();
+                opt["chests"] = archiOptions["all_chests_are_mimics"].ToObject<bool>();
+                opt["supermimics"] = archiOptions["impatient_mimics"].ToObject<bool>();
             }
 
-            if (archiOptions["enable_dlc"])
+            if (archiOptions["enable_dlc"].ToObject<bool>())
             {
                 opt["dlc1"] = true;
                 opt["dlc2"] = true;

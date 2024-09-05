@@ -16,6 +16,7 @@ using static RandomizerCommon.Permutation;
 using static RandomizerCommon.Util;
 using static SoulsFormats.EMEVD.Instruction;
 using System.Diagnostics;
+using System.Net.Mail;
 
 namespace RandomizerCommon
 {
@@ -1368,6 +1369,44 @@ namespace RandomizerCommon
                         trackingEvent,
                         pathOfTheDragon?.Item.ID ?? -1
                     });
+                }
+
+                if (opt["anrisamegender"] || opt["anrimale"] || opt["anrifemale"])
+                {
+                    var genderedAnriLines = new Range[] {
+                        13002302..13002304,
+                        14001202..14001203,
+                        14001302..14001303,
+                        29000000..29002602,
+                    };
+                    var talk = game.Param("TalkParam");
+                    foreach (var range in genderedAnriLines)
+                    {
+                        for (var i = range.Start.Value; i < range.End.Value; i++)
+                        {
+                            var row = talk[i];
+                            if (row == null) continue;
+                            if (opt["anrisamegender"])
+                            {
+                                var maleMessage = row["msgId"].Value;
+                                var maleVoice = row["voiceId"].Value;
+                                row["msgId"].Value = row["msgId_female"].Value;
+                                row["voiceId"].Value = row["voiceId_female"].Value;
+                                row["msgId_female"].Value = maleMessage;
+                                row["voiceId_female"].Value = maleVoice;
+                            }
+                            else if (opt["anrimale"])
+                            {
+                                row["msgId_female"].Value = row["msgId"].Value;
+                                row["voiceId_female"].Value = row["voiceId"].Value;
+                            }
+                            else
+                            {
+                                row["msgId"].Value = row["msgId_female"].Value;
+                                row["voiceId"].Value = row["voiceId_female"].Value;
+                            }
+                        }
+                    }
                 }
 
                 // Make every boss soul trigger the event to show it in the shop.

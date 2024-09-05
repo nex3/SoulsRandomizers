@@ -143,11 +143,10 @@ NewEvents:
       Make Yuria invincible until after you've married Anri, at which point you can kill her for her
       drops. We can't put this in Yuria's main event because it depends on flags set by that event.
     If: safequest
-    Edits:
-    - AddBefore:
-        - SetCharacterInvincibility(4000750, Enabled)
-        - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
-        - SetCharacterInvincibility(4000750, Disabled)
+    Commands:
+    - SetCharacterInvincibility(4000750, Enabled)
+    - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
+    - SetCharacterInvincibility(4000750, Disabled)
 
 ExistingEvents:
   common_func:
@@ -183,7 +182,33 @@ ExistingEvents:
     Edits:
     - Match: "EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, AND_15)"
       Remove: First
-    
+
+  # This is the event that sets Anri's gender.
+  - ID: 9012
+    If: anrisamegender
+    Edits:
+    - Match: IfPlayerGender(MAIN, Gender.Male)
+      MatchLength: 4
+      Replace:
+      - IfPlayerGender(MAIN, Gender.Female)
+      - SetNetworkconnectedEventFlag(9013, ON)
+      - IfPlayerGender(MAIN, Gender.Male)
+      - SetNetworkconnectedEventFlag(9013, OFF)
+  - ID: 9012
+    If: anrimale
+    Edits:
+    - Match: IfPlayerGender(MAIN, Gender.Male)
+      MatchLength: 5
+      Replace:
+      - SetNetworkconnectedEventFlag(9013, OFF)
+  - ID: 9012
+    If: anrifemale
+    Edits:
+    - Match: IfPlayerGender(MAIN, Gender.Male)
+      MatchLength: 5
+      Replace:
+      - SetNetworkconnectedEventFlag(9013, ON)
+
   m30_00_00_00: # High Wall
   - ID: 0
     If: safequest

@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <layout>
   <entry>
-    <name>PcGenderFemale1</name>
+    <name>msgId</name>
     <type>s32</type>
     <default>90000000</default>
   </entry>
   <entry>
-    <name>PcGenderMale1</name>
+    <name>voiceId</name>
     <type>s32</type>
     <default>30000001</default>
   </entry>
@@ -46,12 +46,12 @@
     <default>-1</default>
   </entry>
   <entry>
-    <name>EventID_Female</name>
+    <name>msgId_female</name>
     <type>s32</type>
     <default>90000000</default>
   </entry>
   <entry>
-    <name>EventID_Male</name>
+    <name>voiceId_female</name>
     <type>s32</type>
     <default>30000001</default>
   </entry>
