@@ -143,11 +143,10 @@ NewEvents:
       Make Yuria invincible until after you've married Anri, at which point you can kill her for her
       drops. We can't put this in Yuria's main event because it depends on flags set by that event.
     If: safequest
-    Edits:
-    - AddBefore:
-        - SetCharacterInvincibility(4000750, Enabled)
-        - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
-        - SetCharacterInvincibility(4000750, Disabled)
+    Commands:
+    - SetCharacterInvincibility(4000750, Enabled)
+    - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
+    - SetCharacterInvincibility(4000750, Disabled)
 
 ExistingEvents:
   common_func:
