@@ -2385,7 +2385,7 @@ Slots:
 - Key: '03,0:53300070::'
   DebugText:
   - Heretic's Staff - 3300070[Corpse [o000250_0007] @ farronkeep]
-  Text: In the building before Crystal Sage, entering from near Cruficixion Woods, in a corner under the first stairwell and balcony
+  Text: In the building before Crystal Sage, entering from near Cruicfixion Woods, in a corner under the first stairwell and balcony
   Area: farronkeep_road
 - Key: '03,0:53300080::'
   DebugText:
@@ -8246,7 +8246,7 @@ Slots:
 - Key: '99,0:50004321::'
   DebugText:
   - Armor of the Sun - 4321[from talk from talk]
-  Text: Trade Siegbrau with crow
+  Text: Trade Siegbräu with crow
   Area: firelink_roof
   Tags: crow
 - Key: '99,0:50004322::'
