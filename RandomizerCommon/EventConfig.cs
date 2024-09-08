@@ -315,10 +315,10 @@ namespace RandomizerCommon
                         ev.Instructions.RemoveRange(i, matchLength);
                         ev.Instructions.InsertRange(i, ParseInstructions(new[]
                         {
-                            // Event 6001 is always on. I tried using IfParameterComparison to
-                            // do 0 != 1, but for some reason that doesn't seem to work.
-                            $"IfEventFlag({instr[0]}, {(condition ? "ON" : "OFF")}, " +
-                                "TargetEventFlagType.EventFlag, 6001)"
+                            // Map 36 is unused. I tried using IfParameterComparison to do 0 != 1,
+                            // but for some reason that doesn't seem to work.
+                            $"IfPlayerInoutMap({instr[0]}, {(condition ? "false" : "true")}, " +
+                                "36, 0)"
                         }, events, pre));
                     }
 
