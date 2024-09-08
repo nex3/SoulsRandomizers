@@ -1397,13 +1397,13 @@ namespace RandomizerCommon
                             }
                             else if (opt["anrimale"])
                             {
-                                row["msgId_female"].Value = row["msgId"].Value;
-                                row["voiceId_female"].Value = row["voiceId"].Value;
+                                row["msgId"].Value = row["msgId_female"].Value;
+                                row["voiceId"].Value = row["voiceId_female"].Value;
                             }
                             else
                             {
-                                row["msgId"].Value = row["msgId_female"].Value;
-                                row["voiceId"].Value = row["voiceId_female"].Value;
+                                row["msgId_female"].Value = row["msgId"].Value;
+                                row["voiceId_female"].Value = row["voiceId"].Value;
                             }
                         }
                     }
