@@ -44,18 +44,15 @@ NewEvents:
       world or a /send command) manually triggering the event 100001312.
     If: archipelago
     Arguments:
-    # The unique event ID we use to track whether the gesture has been granted.  
-    - trackingEvent
     # The ID of the local Path of the Dragon item, or -1 if it's foreign.
     - itemID
     Commands:
-    - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, trackingEvent)
+    - END IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, 9030, OwnershipState.Owns)
     - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)
     - SKIP IF Comparison (1, ComparisonType.Equal, itemID, -1)
     - IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, itemID, OwnershipState.Owns)
     - IfConditionGroup(MAIN, PASS, OR_01)
-    - Award Gesture Item (29,3,9030)
-    - Set Event Flag (trackingEvent, 1)
+    - Award Gesture Item (29, ItemType.Goods, 9030)
     - Set Event Flag (100001312,0)
 
   - Comment: |

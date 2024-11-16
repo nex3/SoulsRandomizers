@@ -1364,9 +1364,7 @@ namespace RandomizerCommon
                         .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
                         .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
 
-                    var trackingEvent = game.GetUniqueEventId();
                     game.AddInitializer("pathOfTheDragonArchi", new object[] {
-                        trackingEvent,
                         pathOfTheDragon?.Item.ID ?? -1
                     });
                 }
