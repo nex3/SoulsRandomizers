@@ -2,12 +2,14 @@
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using Newtonsoft.Json.Linq;
+using SemanticVersioning;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -63,7 +65,7 @@ namespace RandomizerCommon
                     name.Text,
                     Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.NoItems,
                     password: password.Text.Length == 0 ? null : password.Text,
-                    version: new Version(0, 4, 3),
+                    version: new System.Version(0, 4, 3),
                     requestSlotData: false
                 );
             }
@@ -121,6 +123,7 @@ namespace RandomizerCommon
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
+            CheckVersionRange(slotData);
             var options = (JObject)slotData["options"];
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
@@ -560,11 +563,56 @@ namespace RandomizerCommon
             return match.Groups[1].Value;
         }
 
+        /// <summary>
+        /// Throws an error if the current DS3 Archipelago version doesn't match the server's
+        /// version range.
+        /// </summary>
+        private static void CheckVersionRange(Dictionary<string, object> slotData)
+        {
+            var version = Assembly.GetCallingAssembly()
+                .GetCustomAttribute<VersionAttribute>()
+                .Version;
+
+            if (!slotData.ContainsKey("versions"))
+            {
+                throw new Exception(
+                    "The server's version of the DS3 apworld doesn't include any version " +
+                    "information, which means it's not compatible with this static randomizer." +
+                    (version?.IsPreRelease ?? false
+                        ? " Make sure you use the apworld that comes with this version to " +
+                          "generate the multiworld."
+                        : "")
+                );
+            }
+            var range = new SemanticVersioning.Range((string)slotData["versions"]);
+
+            // This should only be the case during development.
+            if (version == null) return;
+
+            if (range.IsSatisfied(version, includePrerelease: true)) return;
+
+
+            throw new Exception(
+                $"The server's version of the DS3 apworld supports DS3 AP versions {range}, " +
+                $"but this static randomizer is version {version}."
+            );
+        }
+
         private void ShowFailure(String message)
         {
             Enabled = true;
             status.ForeColor = System.Drawing.Color.DarkRed;
             status.Text = message;
+        }
+
+        [System.AttributeUsage(System.AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
+        public sealed class VersionAttribute : System.Attribute
+        {
+            public SemanticVersioning.Version Version { get; }
+            public VersionAttribute(string version)
+            {
+                this.Version = version == "" ? null : new SemanticVersioning.Version(version);
+            }
         }
     }
 }
