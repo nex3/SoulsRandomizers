@@ -48,7 +48,7 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="RandomizerCommon.ArchipelagoForm.VersionAttribute">
-      <_Parameter1>3.0.0-beta.20</_Parameter1>
+      <_Parameter1>$(DS3_AP_VERSION)</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>
