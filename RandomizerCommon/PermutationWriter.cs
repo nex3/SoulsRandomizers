@@ -1361,7 +1361,9 @@ namespace RandomizerCommon
                     // 100001312.
                     var commands = new List<string>(new string[]
                     {
-                        "END IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, 9030, OwnershipState.Owns)",
+                        // This should really just be END IF ... Owns but that doesn't parse here
+                        // for some reason.
+                        "IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, 9030, OwnershipState.DoesntOwn)",
                         "IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
                     });
                     if (pathOfTheDragon != null)
