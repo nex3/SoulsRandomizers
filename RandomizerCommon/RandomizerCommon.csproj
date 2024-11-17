@@ -21,6 +21,7 @@
     <PackageReference Include="Archipelago.MultiClient.Net" Version="6.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Pidgin" Version="3.2.0" />
+    <PackageReference Include="SemanticVersioning" Version="2.0.2" />
     <PackageReference Include="SteamPath" Version="1.1.0" />
     <PackageReference Include="YamlDotNet" Version="12.0.2" />
   </ItemGroup>
@@ -45,4 +46,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="RandomizerCommon.ArchipelagoForm.VersionAttribute">
+      <_Parameter1>3.0.0-beta.20</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>
