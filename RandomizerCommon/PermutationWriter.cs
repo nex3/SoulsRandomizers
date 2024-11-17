@@ -1359,11 +1359,10 @@ namespace RandomizerCommon
                     // Archipelago handles Path of the Dragon as a synthetic item or (when getting
                     // it from another world or a /send command) manually triggering the event
                     // 100001312.
-                    var trackingEvent = game.GetUniqueEventId();
                     var commands = new List<string>(new string[]
                     {
-                        $"END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, {trackingEvent})",
-                        $"IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
+                        "END IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, 9030, OwnershipState.Owns)",
+                        "IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
                     });
                     if (pathOfTheDragon != null)
                     {
@@ -1374,7 +1373,6 @@ namespace RandomizerCommon
                         "IfConditionGroup(MAIN, PASS, OR_01)",
                         "Remove Item From Player (ItemType.Goods, 101312, 1)",
                         "Award Gesture Item (29,3,9030)",
-                        $"Set Event Flag ({trackingEvent},1)",
                         $"Set Event Flag (100001312,0)",
                     });
                     AddNewEvent(commands);
