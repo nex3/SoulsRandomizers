@@ -126,6 +126,10 @@ namespace RandomizerCommon
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
             CheckVersionRange(slotData);
             var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
+            if (disableEnemyRandomizerCheckbox.Checked) {
+                options["randomize_enemies"] = false;
+            }
+
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);

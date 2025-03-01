@@ -34,6 +34,8 @@
             status = new System.Windows.Forms.Label();
             name = new System.Windows.Forms.TextBox();
             password = new System.Windows.Forms.TextBox();
+            disableEnemyRandomizerLabel = new System.Windows.Forms.Label();
+            disableEnemyRandomizerCheckbox = new System.Windows.Forms.CheckBox();
             SuspendLayout();
             // 
             // url
@@ -90,6 +92,22 @@
             password.PlaceholderText = "Password";
             password.Size = new System.Drawing.Size(637, 44);
             password.TabIndex = 3;
+            //
+            // enemyRandomizerLabel
+            //
+            disableEnemyRandomizerLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            disableEnemyRandomizerLabel.Location = new System.Drawing.Point(21, 219);
+            disableEnemyRandomizerLabel.Margin = new System.Windows.Forms.Padding(5);
+            disableEnemyRandomizerLabel.Name = "enemyRandomizerLabel";
+            disableEnemyRandomizerLabel.Size = new System.Drawing.Size(637, 44);
+            disableEnemyRandomizerLabel.Text = "Disable Enemy Randomizer";
+            //
+            // enemyRandomizerCheckbox
+            //
+            disableEnemyRandomizerCheckbox.Location = new System.Drawing.Point(420, 219+3);
+            disableEnemyRandomizerCheckbox.Margin = new System.Windows.Forms.Padding(5);
+            disableEnemyRandomizerCheckbox.Name = "enemyRandomizerCheckbox";
+            disableEnemyRandomizerCheckbox.Size = new System.Drawing.Size(40, 40);
             // 
             // ArchipelagoForm
             // 
@@ -97,6 +115,8 @@
             AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(672, 337);
+            Controls.Add(disableEnemyRandomizerCheckbox);
+            Controls.Add(disableEnemyRandomizerLabel);
             Controls.Add(password);
             Controls.Add(name);
             Controls.Add(status);
@@ -117,5 +137,7 @@
         private System.Windows.Forms.Label status;
         private System.Windows.Forms.TextBox name;
         private System.Windows.Forms.TextBox password;
+        private System.Windows.Forms.Label disableEnemyRandomizerLabel;
+        private System.Windows.Forms.CheckBox disableEnemyRandomizerCheckbox;
     }
 }
