@@ -1132,7 +1132,7 @@ Enemies:
   ESDs: 300324
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Create NPC Part; Display Boss Health Bar; Force Animation Playback; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has Event Message; IF Character Has SpEffect; IF Character HP Ratio; IF NPC Part HP; Initialize Common Event; Play SE; Set Character AI State; Set Character HP Bar Display; Set Character Talk Range; Set Network Update Authority; Set Network Update Rate
   Class: Boss
-  Tags: mid excludeearly npcpart
+  Tags: mid easy npcpart
   FullName: Consumed King $1
   PartName: Oceiros
   DefeatFlag: 13000830
@@ -1160,7 +1160,7 @@ Enemies:
   DebugText: highwall - c2240_0000 - npc 224000 - think 224000 - team StrongEnemy - id 3000800 - Vordt of the Boreal Valley
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Animation Playback; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has Event Message; IF Character HP Ratio; Initialize Common Event; Issue Short Warp Request; Play SE; Set Character AI State; Set Character HP Bar Display; Set Network Update Authority; Set Network Update Rate
   Class: Boss
-  Tags: early earlyreq
+  Tags: early easy earlyreq
   FullName: $1 of the Boreal Valley
   PartName: Vordt
   DefeatFlag: 13000800
@@ -1196,7 +1196,7 @@ Enemies:
   DebugText: highwall - c5270_0001 - npc 527000 - think 527000 - team StrongEnemy - id 3000899 (3005701) - Dancer of the Boreal Valley
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Create NPC Part; Display Boss Health Bar; Force Animation Playback; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has Event Message; IF Character HP Ratio; IF NPC Part HP; Issue Short Warp Request; Play SE; Set Character AI State; Set Character Animation State; Set Network Update Authority; Set Network Update Rate; Set NPC Part HP
   Class: Boss
-  Tags: mid excludeearly npcpart
+  Tags: mid npcpart
   FullName: $1 of the Boreal Valley
   PartName: Dancer
   DefeatFlag: 13000890
@@ -1715,7 +1715,7 @@ Enemies:
   DebugText: lothric - c3160_0000 - npc 316000 - think 316000 - team StrongEnemy - id 3010800 - Dragonslayer Armour
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Animation Playback; Handle Boss Defeat; IF Character Damaged By; IF Character Dead/Alive; IF Character HP Ratio; Play SE; Set Character AI State; Set Character Animation State; Set Character Gravity; Set Network Update Authority; Set Network Update Rate
   Class: Boss
-  Tags: late  # First late boss
+  Tags: late easy # First late boss
   FullName: Dragonslayer $1
   PartName: Dragonslayer Armour
   DefeatFlag: 13010800
@@ -3175,7 +3175,7 @@ Enemies:
   DebugText: archdragon - c3141_0000 - npc 314100 - think 314000 - team StrongEnemy - id 3200800 (3205701) - Ancient Wyvern Boss
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Character Dead/Alive; IF Character HP Ratio; Initialize Common Event; Play SE; Set Character AI State; Set Character Animation State; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: late exclude:5100850
+  Tags: late easy exclude:5100850
   FullName: Ancient $1
   PartName: Wyvern
   DefeatFlag: 13200800
@@ -4056,7 +4056,7 @@ Enemies:
   DebugText: farronkeep - c1320_0000 - npc 132000 - think 132000 - team Enemy - id 3300850 (3305850) - Crystal Sage in Farron
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has Event Message; IF Character HP Ratio; Initialize Common Event; Play SE; Request Character AI Re-plan; Set Character AI State; Set Character Animation State; Set Network Update Authority; Set Network Update Rate; Shoot Bullet; Warp Character and Copy Floor
   Class: Boss
-  Tags: mid
+  Tags: mid easy
   Groups: [3305850, 3305851]
   ExtraName: Crystal Sage
   FullName: Crystal $1
@@ -5369,7 +5369,7 @@ Enemies:
   DebugText: archives - c5250_0000 - npc 525001 - think 525001 - team Enemy - id 3410830 - Twin Princes
   Events: Change Character Enable State; Display Boss Health Bar; Force Animation Playback; Handle Boss Defeat and Display Banner; IF Character Has SpEffect; IF Character HP Ratio; Play SE; Set Character AI State; Set Character Animation State; Set Character Immortality; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: late immortal
+  Tags: late easy immortal
   ExtraName: Lothric, Younger Prince
   FullName: $1, Elder Prince
   PartName: Lorian
@@ -5389,7 +5389,7 @@ Enemies:
   DebugText: archives - c5250_0001 - npc 525000 - think 525000 - team Enemy - id 3410832 - Twin Princes
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; IF Character Has SpEffect; IF Character HP Ratio; Set Character AI State; Set Character Animation State; Set Character Immortality; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: late
+  Tags: late easy
   ExtraName: Lorian, Elder Prince
   FullName: $1, Elder Prince
   PartName: Lorian
@@ -8348,7 +8348,7 @@ Enemies:
   DebugText: irithyll - c5150_0001 - npc 515000 - think 515000 - team StrongEnemy - id 3700800 (3705701) - Aldrich, Devourer of Gods
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Character Death; Handle Boss Defeat and Display Banner; IF Character Dead/Alive; IF Character Has Event Message; IF Character HP Ratio; IF Entity In/Outside Radius Of Entity; Initialize Common Event; Play SE; Set Character AI State; Set Character HP Bar Display; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: mid excludeearly
+  Tags: mid
   FullName: $1, Devourer of Gods
   PartName: Aldrich
   DefeatFlag: 13700800
@@ -9811,7 +9811,7 @@ Enemies:
   DebugText: catacombs - c3050_0000 - npc 305000 - think 305000 - team StrongEnemy - id 3800830 - Old Demon King
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Create NPC Part; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Character Dead/Alive; IF Character Has SpEffect; IF Character HP Ratio; IF Damage Type; IF Entity In/Outside Radius Of Entity; IF NPC Part HP; Initialize Common Event; Initialize Event; Play SE; Set Character AI State; Set Network Update Authority; Set Network Update Rate; Set NPC Part HP; Set SpEffect
   Class: Boss
-  Tags: mid excludeearly npcpart
+  Tags: mid npcpart
   FullName: Old Demon $1
   PartName: Demon King
   DefeatFlag: 13800830
@@ -10925,7 +10925,7 @@ Enemies:
   DebugText: dungeon - c5260_0000 - npc 526000 - think 526000 - team StrongEnemy - id 3900800 - Yhorm the Giant
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Create NPC Part; Display Boss Health Bar; Force Animation Playback; Force Character Death; GOTO IF Character Has SpEffect; Handle Boss Defeat and Display Banner; IF Character Backread Status; IF Character Dead/Alive; IF Character Has Event Message; IF Character Has SpEffect; IF Character HP Ratio; IF Damage Type; IF Entity In/Outside Radius Of Entity; IF NPC Part HP; Initialize Common Event; Issue Short Warp Request; Play SE; Set Character AI State; Set Character Event Target; Set Character Gravity; Set Character MapHit; Set Network Update Authority; Set Network Update Rate; Set SpEffect; SKIP IF Character Has SpEffect
   Class: Boss
-  Tags: mid excludeearly npcpart
+  Tags: mid easy npcpart
   FullName: $1 the Giant
   PartName: Yhorm
   DefeatFlag: 13900800
@@ -11555,7 +11555,7 @@ Enemies:
   DebugText: firelink - c5110_0000 - npc 511000 - think 511000 - team StrongEnemy - id 4000800 - Gundyr
   Events: Activate Multiplayer-dependant Buffs; Change Character DispMask; Change Character Enable State; Change Character HitMask; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Action Button in Area; IF Character Backread Status; IF Character Has Event Message; IF Character HP Ratio; Initialize Common Event; Issue Short Warp Request; Play SE; Set Character AI State; Set Character Animation State; Set Character HP Bar Display; Set Character Invincibility; Set Lock On Point; Set Network Update Authority; Set Network Update Rate; Set SpEffect
   Class: Boss
-  Tags: early earlyreq earlyscale
+  Tags: early easy earlyreq earlyscale
   ExtraName: Iudex Gundyr
   FullName: Iudex $1
   PartName: Gundyr
@@ -11570,7 +11570,7 @@ Enemies:
   DebugText: firelink - c5110_0001 - npc 511100 - think 511100 - team StrongEnemy - id 4000830 - Gundyr
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Change Character HitMask; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Character Dead/Alive; IF Character HP Ratio; Initialize Common Event; Play SE; Set Character AI State; Set Character Animation State; Set Character Immortality; Set Character Invincibility; Set Lock On Point; Set Network Update Authority; Set Network Update Rate
   Class: Boss
-  Tags: mid excludeearly exclude:3000800  # TODO: Vordt doesn't wake up on first encounter somehow
+  Tags: mid easy exclude:3000800  # TODO: Vordt doesn't wake up on first encounter somehow
   ExtraName: Champion Gundyr
   FullName: Champion $1
   PartName: Gundyr
@@ -11661,7 +11661,7 @@ Enemies:
   DebugText: ariandel - c0000_0009 - npc 21300 - think 21300 - team Enemy - chr 21300 - id 4500860 (4505860) - Champion's Gravetender
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Clear SpEffect; Display Decorated Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat; IF Character AI State; IF Character Dead/Alive; IF Character HP Ratio; IF Damage Type; IF Entity In/Outside Radius Of Entity; Initialize Common Event; Rotate Character; Set Character AI State; Set Character Animation State; Set Network Update Authority; Set Network Update Rate; Set SpEffect
   Class: Boss
-  Tags: mid excludeearly
+  Tags: mid
   Groups: [4505860]
   ExtraName: Champion's Gravetender and Gravetender Greatwolf
   FullName: Champion's $1
@@ -12212,7 +12212,7 @@ Enemies:
   ESDs: 450552
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Clear SpEffect; Create Referred Damage Pair; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat and Display Banner; IF Character Has Event Message; IF Character HP Ratio; Initialize Common Event; Play SE; Set Character AI State; Set Character Animation State; Set Character Event Target; Set Character HP Bar Display; Set Character Talk Range; Set Network Update Authority; Set Network Update Rate; Set SpEffect; SKIP IF Character Has SpEffect
   Class: Boss
-  Tags: late bossonlymulti
+  Tags: late easy bossonlymulti
   RemoveGroup: 4505800
   ExtraName: Blackflame Friede
   FullName: Blackflame $1
@@ -15951,7 +15951,7 @@ Enemies:
   DebugText: filianore - c6201_0000 - npc 620100 - think 620100 - team StrongEnemy - id 5110801 (5115800) - Slave Knight Gael 1
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Create Referred Damage Pair; Force Animation Playback; Force Character Death; IF Character HP Ratio; IF Damage Type; IF Entity In/Outside Radius Of Entity; Initialize Common Event; Set Character AI State; Set Character Animation State; Set Character HP Bar Display; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: late exclude:5100850
+  Tags: late easy exclude:5100850
   OwnedBy: 5110800
   RemoveGroup: 5115800
   FullName: Slave Knight $1
