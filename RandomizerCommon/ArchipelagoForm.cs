@@ -135,6 +135,7 @@ namespace RandomizerCommon
                 .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
                 .Result
                 .Values
+                .OrderBy(location => location.LocationId)
                 .ToList();
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
