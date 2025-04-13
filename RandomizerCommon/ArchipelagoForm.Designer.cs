@@ -65,7 +65,7 @@
             status.AutoSize = true;
             status.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             status.ForeColor = System.Drawing.SystemColors.GrayText;
-            status.Location = new System.Drawing.Point(21, 219);
+            status.Location = new System.Drawing.Point(21, 273);
             status.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             status.Name = "status";
             status.Size = new System.Drawing.Size(140, 26);
