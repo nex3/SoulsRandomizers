@@ -630,7 +630,6 @@ namespace RandomizerCommon
 
         private void ShowFailure(String message)
         {
-            blinkTimer.Stop();
             SetStatusText(message, System.Drawing.Color.DarkRed);
             Cursor = Cursors.Default;
             foreach (Control control in Controls)
