@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
@@ -23,17 +24,32 @@ namespace RandomizerCommon
 {
     public partial class ArchipelagoForm : Form
     {
+
+        private Timer blinkTimer;
+
         public ArchipelagoForm()
         {
             InitializeComponent();
+
+            blinkTimer = new Timer();
+            blinkTimer.Interval = 500; // 0.5 seconds
+            blinkTimer.Tick += BlinkTimer_Tick;
         }
 
-        private void submit_Click(object sender, EventArgs e)
+        private async void submit_Click(object sender, EventArgs e)
         {
-            Enabled = false;
-            status.ForeColor = System.Drawing.SystemColors.GrayText;
-            status.Text = "Connecting...";
+            foreach (Control control in Controls)
+            {
+                if (control.Name != "status") {
+                    control.Enabled = false;
+                }
+            }
+
+            Cursor = Cursors.WaitCursor;
+            
+            SetStatusText("Connecting...", System.Drawing.Color.Blue);
             status.Visible = true;
+            status.Refresh();
 
             if (url.Text.Length == 0)
             {
@@ -95,7 +111,7 @@ namespace RandomizerCommon
             try
             {
 #endif
-            RandomizeForArchipelago(session);
+            await Task.Run(() => RandomizeForArchipelago(session));
 #if !DEBUG
 
             }
@@ -114,12 +130,12 @@ namespace RandomizerCommon
 
         private void RandomizeForArchipelago(ArchipelagoSession session)
         {
-
-            status.Text = "Downloading item data...";
+            SetStatusText("Downloading item data...");
             var locations = session.Locations
                 .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
                 .Result
                 .Values
+                .OrderBy(location => location.LocationId)
                 .ToList();
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
@@ -134,7 +150,7 @@ namespace RandomizerCommon
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
 
-            status.Text = "Loading game data...";
+            SetStatusText("Loading game data...");
 
             var distDir = "dist";
             if (!Directory.Exists(distDir))
@@ -278,7 +294,7 @@ namespace RandomizerCommon
                 }
             }
 
-            status.Text = "Randomizing locations...";
+            SetStatusText("Randomizing locations...");
 
             permutation.Forced(items,
                 remove: itemsToRemove
@@ -336,8 +352,10 @@ namespace RandomizerCommon
             MiscSetup.DS3CommonPass(game, events, opt);
             MiscSetup.InjectUncompressed(game);
 
-            status.Text = "Writing game files...";
+            SetStatusText("Writing game files...");
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
+
+            SetStatusText("Finished!", System.Drawing.Color.Green);
         }
 
         /// <summary>
@@ -585,11 +603,39 @@ namespace RandomizerCommon
             );
         }
 
+        /// <summary>
+        /// Sets the status text and color on the UI thread. If called from a background thread, it marshals.
+        /// If the message ends with "...", it will start blinking.
+        /// </summary>
+        private void SetStatusText(string message, System.Drawing.Color color = default(System.Drawing.Color))
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => SetStatusText(message, color)));
+            }
+            else
+            {
+                blinkTimer.Stop();
+                status.Text = message;
+                if (color != default(System.Drawing.Color)){
+                    status.ForeColor = color;
+                }
+                if (message.EndsWith("..."))
+                {
+                    blinkTimer.Start();
+                }
+                status.Refresh();
+            }
+        }
+
         private void ShowFailure(String message)
         {
-            Enabled = true;
-            status.ForeColor = System.Drawing.Color.DarkRed;
-            status.Text = message;
+            SetStatusText(message, System.Drawing.Color.DarkRed);
+            Cursor = Cursors.Default;
+            foreach (Control control in Controls)
+            {
+                control.Enabled = true;
+            }
         }
 
         [System.AttributeUsage(System.AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
@@ -600,6 +646,14 @@ namespace RandomizerCommon
             {
                 this.Version = version == "" ? null : new SemanticVersioning.Version(version);
             }
+        }
+
+        /// <summary>
+        /// Timer tick event handler to blink the status text.
+        /// </summary>
+        private void BlinkTimer_Tick(object sender, EventArgs e)
+        {
+            status.Text = status.Text.EndsWith("...") ? status.Text.Substring(0, status.Text.Length - 2) : status.Text = status.Text + ".";
         }
     }
 }
