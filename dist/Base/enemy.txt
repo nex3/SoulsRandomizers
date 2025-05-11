@@ -12212,7 +12212,7 @@ Enemies:
   ESDs: 450552
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Clear SpEffect; Create Referred Damage Pair; Display Boss Health Bar; Force Animation Playback; Force Character Death; Handle Boss Defeat and Display Banner; IF Character Has Event Message; IF Character HP Ratio; Initialize Common Event; Play SE; Set Character AI State; Set Character Animation State; Set Character Event Target; Set Character HP Bar Display; Set Character Talk Range; Set Network Update Authority; Set Network Update Rate; Set SpEffect; SKIP IF Character Has SpEffect
   Class: Boss
-  Tags: late easy bossonlymulti
+  Tags: late bossonlymulti
   RemoveGroup: 4505800
   ExtraName: Blackflame Friede
   FullName: Blackflame $1
@@ -12231,7 +12231,7 @@ Enemies:
   ESDs: 450551
   Events: Activate Multiplayer-dependant Buffs; Change Character Enable State; Display Boss Health Bar; Force Character Death; IF Character Dead/Alive; Initialize Common Event; Set Character AI State; Set Character Animation State; Set Character Event Target; Set Character Talk Range; Set Network Update Authority; Set Network Update Rate; Warp Character and Copy Floor
   Class: Boss
-  Tags: late
+  Tags: late easy
   RemoveGroup: 4505800
   FullName: Sister $1
   PartName: Friede
