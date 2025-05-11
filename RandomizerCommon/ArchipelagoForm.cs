@@ -363,7 +363,7 @@ namespace RandomizerCommon
         private string SyntheticItemName(ScoutedItemInfo info)
         {
             // Use the player's entire name, if it fits.
-            var name = $"{info.Player.Name}'s {info.ItemName}";
+            var name = $"{info.Player.Alias}'s {info.ItemName}";
             if (name.Length <= ItemNameLimit) return name;
 
             // If the player's name doesn't fit, trim it. Don't trim below four characters in case
@@ -372,7 +372,7 @@ namespace RandomizerCommon
             // necessary.
             var charactersToTrim = name.Length - ItemNameLimit;
             var trimmedPlayerName =
-                info.Player.Name[..Math.Max(info.Player.Name.Length - charactersToTrim, 4)];
+                info.Player.Name[..Math.Max(info.Player.Alias.Length - charactersToTrim, 4)];
             return $"{trimmedPlayerName} {info.ItemName}";
         }
 
