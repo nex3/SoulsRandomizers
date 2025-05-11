@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Newtonsoft.Json.Linq;
 using SemanticVersioning;
@@ -237,7 +238,7 @@ namespace RandomizerCommon
                 {
                     // Create a fake key item for each item from another world.
                     var item = writer.AddSyntheticItem(
-                        $"{player.Alias}'s {info.ItemName}",
+                        SyntheticItemName(info),
                         $"An object from a mysterious world known only as \"{player.Game}\".",
                         // Custom Archipelago icon.
                         iconId: 6020,
@@ -356,6 +357,23 @@ namespace RandomizerCommon
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
 
             SetStatusText("Finished!", System.Drawing.Color.Green);
+        }
+
+        /// <returns>A human-readable name for a foreign item.</returns>
+        private string SyntheticItemName(ScoutedItemInfo info)
+        {
+            // Use the player's entire name, if it fits.
+            var name = $"{info.Player.Name}'s {info.ItemName}";
+            if (name.Length <= ItemNameLimit) return name;
+
+            // If the player's name doesn't fit, trim it. Don't trim below four characters in case
+            // it becomes unrecognizable. This may still result in a string longer than the maximum,
+            // but in that case the item name will automatically get trimmed by the game as
+            // necessary.
+            var charactersToTrim = name.Length - ItemNameLimit;
+            var trimmedPlayerName =
+                info.Player.Name[..Math.Max(info.Player.Name.Length - charactersToTrim, 4)];
+            return $"{trimmedPlayerName} {info.ItemName}";
         }
 
         /// <summary>
@@ -553,6 +571,9 @@ namespace RandomizerCommon
         }
 
         private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( - .*)?$");
+
+        /// <summary>The maximum number of characters in a DS3 item's name.</summary>
+        private const int ItemNameLimit = 32;
 
         /// <summary>
         /// Gets the name of the default item from an Archipelago location name.
