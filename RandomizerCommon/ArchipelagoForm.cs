@@ -360,7 +360,7 @@ namespace RandomizerCommon
         }
 
         /// <returns>A human-readable name for a foreign item.</returns>
-        private string SyntheticItemName(ScoutedItemInfo info)
+        private static string SyntheticItemName(ScoutedItemInfo info)
         {
             // Use the player's entire name, if it fits.
             var name = $"{info.Player.Alias}'s {info.ItemName}";
