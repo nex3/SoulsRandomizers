@@ -372,7 +372,7 @@ namespace RandomizerCommon
             // necessary.
             var charactersToTrim = name.Length - ItemNameLimit;
             var trimmedPlayerName =
-                info.Player.Name[..Math.Max(info.Player.Alias.Length - charactersToTrim, 4)];
+                info.Player.Alias[..Math.Max(info.Player.Alias.Length - charactersToTrim, 4)];
             return $"{trimmedPlayerName} {info.ItemName}";
         }
 
