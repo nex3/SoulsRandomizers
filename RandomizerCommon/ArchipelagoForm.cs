@@ -32,6 +32,8 @@ namespace RandomizerCommon
         {
             InitializeComponent();
 
+            MinimumSize = Size;
+
             blinkTimer = new Timer();
             blinkTimer.Interval = 500; // 0.5 seconds
             blinkTimer.Tick += BlinkTimer_Tick;
