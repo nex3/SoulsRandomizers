@@ -443,8 +443,12 @@ namespace RandomizerCommon
             // but in that case the item name will automatically get trimmed by the game as
             // necessary.
             var charactersToTrim = name.Length - ItemNameLimit;
-            var trimmedPlayerName =
-                info.Player.Alias[..Math.Max(info.Player.Alias.Length - charactersToTrim, 4)];
+            var trimmedPlayerName = info.Player.Alias[
+                ..Math.Min(
+                    info.Player.Alias.Length,
+                    Math.Max(info.Player.Alias.Length - charactersToTrim, 4)
+                )
+            ];
             return $"{trimmedPlayerName} {info.ItemName}";
         }
 
