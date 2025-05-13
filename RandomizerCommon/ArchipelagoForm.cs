@@ -1,9 +1,8 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
-using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SemanticVersioning;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
@@ -26,6 +25,17 @@ namespace RandomizerCommon
     public partial class ArchipelagoForm : Form
     {
 
+        /// <summary>
+        /// The location of the file in which data about this AP session is saved.
+        /// </summary>
+        private static readonly string ConfigFileLocation = "..\\apconfig.json";
+
+        /// <summary>
+        /// The Archipelago configuration data that was already saved in this directory, or an
+        /// empty object if there wasn't any data.
+        /// </summary>
+        private readonly JObject configData;
+
         private Timer blinkTimer;
 
         public ArchipelagoForm()
@@ -37,19 +47,54 @@ namespace RandomizerCommon
             blinkTimer = new Timer();
             blinkTimer.Interval = 500; // 0.5 seconds
             blinkTimer.Tick += BlinkTimer_Tick;
+
+            try
+            {
+                configData = JsonConvert.DeserializeObject<JObject>(
+                    File.ReadAllText(ConfigFileLocation)
+                );
+            }
+            catch (FileNotFoundException)
+            {
+                configData = new JObject();
+            }
+            catch (JsonException)
+            {
+                MessageBox.Show(
+                    $"Failed to load {Path.GetFileName(ConfigFileLocation)}. Running the " + 
+                    "randomizer may overwrite existing save data.",
+                    "Archipelago Warning",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
+
+            if (configData.Value<string>("url") is string savedUrl) url.Text = savedUrl;
+            if (configData.Value<string>("slot") is string savedSlot) name.Text = savedSlot;
+            if (configData.Value<string>("password") is string savedPassword) password.Text = savedPassword;
+        }
+
+        private static SemanticVersioning.Version Version {
+            get
+            {
+                return Assembly.GetCallingAssembly()
+                    .GetCustomAttribute<VersionAttribute>()
+                    .Version;
+            }
         }
 
         private async void submit_Click(object sender, EventArgs e)
         {
             foreach (Control control in Controls)
             {
-                if (control.Name != "status") {
+                if (control.Name != "status")
+                {
                     control.Enabled = false;
                 }
             }
 
             Cursor = Cursors.WaitCursor;
-            
+
             SetStatusText("Connecting...", System.Drawing.Color.Blue);
             status.Visible = true;
             status.Refresh();
@@ -131,6 +176,10 @@ namespace RandomizerCommon
             this.Close();
         }
 
+        /// <summary>
+        /// Runs the randomizer and saves its results.
+        /// </summary>
+        /// <returns>True if randomization succeeded, false if it was canceled.</returns>
         private void RandomizeForArchipelago(ArchipelagoSession session)
         {
             SetStatusText("Downloading item data...");
@@ -145,9 +194,7 @@ namespace RandomizerCommon
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
             CheckVersionRange(slotData);
             var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
-            if (disableEnemyRandomizerCheckbox.Checked) {
-                options["randomize_enemies"] = false;
-            }
+            if (disableEnemyRandomizerCheckbox.Checked) options["randomize_enemies"] = false;
 
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
@@ -358,7 +405,30 @@ namespace RandomizerCommon
             SetStatusText("Writing game files...");
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
 
+            SetStatusText("Writing client save file...");
+            WriteConfigFile(slotData);
+
             SetStatusText("Finished!", System.Drawing.Color.Green);
+        }
+
+        /// <summary>
+        /// Writes or edits the config file for the current Archipelago run.
+        /// </summary>
+        private void WriteConfigFile(Dictionary<string, object> slotData)
+        {
+            configData["url"] = url.Text;
+            configData["slot"] = name.Text;
+            configData["seed"] = (string)slotData["seed"];
+            configData["client_version"] = Version?.ToString();
+            if (savePasswordCheckbox.Checked && password.Text.Length > 0)
+            {
+                configData["password"] = password.Text;
+            }
+            else
+            {
+                configData.Remove("password");
+            }
+            File.WriteAllText(ConfigFileLocation, JsonConvert.SerializeObject(configData));
         }
 
         /// <returns>A human-readable name for a foreign item.</returns>
@@ -389,7 +459,7 @@ namespace RandomizerCommon
             opt["nongplusrings"] = !archiOptions["enable_ngp"];
             opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
                                      // when we add enemizer support.
-            // Used for infinite items from shops and enemy drops
+                                     // Used for infinite items from shops and enemy drops
             opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"];
             opt["soulsprogression"] = archiOptions["smooth_soul_locations"];
 
@@ -597,16 +667,12 @@ namespace RandomizerCommon
         /// </summary>
         private static void CheckVersionRange(Dictionary<string, object> slotData)
         {
-            var version = Assembly.GetCallingAssembly()
-                .GetCustomAttribute<VersionAttribute>()
-                .Version;
-
             if (!slotData.ContainsKey("versions"))
             {
                 throw new Exception(
                     "The server's version of the DS3 apworld doesn't include any version " +
                     "information, which means it's not compatible with this static randomizer." +
-                    (version?.IsPreRelease ?? false
+                    (Version?.IsPreRelease ?? false
                         ? " Make sure you use the apworld that comes with this version to " +
                           "generate the multiworld."
                         : "")
@@ -615,14 +681,14 @@ namespace RandomizerCommon
             var range = new SemanticVersioning.Range((string)slotData["versions"]);
 
             // This should only be the case during development.
-            if (version == null) return;
+            if (Version == null) return;
 
-            if (range.IsSatisfied(version, includePrerelease: true)) return;
+            if (range.IsSatisfied(Version, includePrerelease: true)) return;
 
 
             throw new Exception(
                 $"The server's version of the DS3 apworld supports DS3 AP versions {range}, " +
-                $"but this static randomizer is version {version}."
+                $"but this static randomizer is version {Version}."
             );
         }
 
@@ -640,7 +706,8 @@ namespace RandomizerCommon
             {
                 blinkTimer.Stop();
                 status.Text = message;
-                if (color != default(System.Drawing.Color)){
+                if (color != default(System.Drawing.Color))
+                {
                     status.ForeColor = color;
                 }
                 if (message.EndsWith("..."))
@@ -677,6 +744,24 @@ namespace RandomizerCommon
         private void BlinkTimer_Tick(object sender, EventArgs e)
         {
             status.Text = status.Text.EndsWith("...") ? status.Text.Substring(0, status.Text.Length - 2) : status.Text = status.Text + ".";
+        }
+
+        /// <summary>
+        /// Whenever the password changes, ensure the "Save Password" checkbox is checked or not to
+        /// match.
+        /// </summary>
+        private void password_TextChanged(object sender, EventArgs e)
+        {
+            if (password.Text.Length > 0)
+            {
+                savePasswordLabel.Enabled = true;
+                savePasswordCheckbox.Enabled = true;
+            }
+            else
+            {
+                savePasswordLabel.Enabled = false;
+                savePasswordCheckbox.Enabled = false;
+            }
         }
     }
 }

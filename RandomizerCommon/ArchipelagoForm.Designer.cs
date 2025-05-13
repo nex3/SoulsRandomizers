@@ -36,6 +36,8 @@
             password = new System.Windows.Forms.TextBox();
             disableEnemyRandomizerLabel = new System.Windows.Forms.Label();
             disableEnemyRandomizerCheckbox = new System.Windows.Forms.CheckBox();
+            savePasswordLabel = new System.Windows.Forms.Label();
+            savePasswordCheckbox = new System.Windows.Forms.CheckBox();
             SuspendLayout();
             // 
             // url
@@ -51,7 +53,7 @@
             // submit
             // 
             submit.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            submit.Location = new System.Drawing.Point(495, 272);
+            submit.Location = new System.Drawing.Point(495, 330);
             submit.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             submit.Name = "submit";
             submit.Size = new System.Drawing.Size(162, 48);
@@ -62,10 +64,12 @@
             // 
             // status
             // 
+            status.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            status.AutoEllipsis = true;
             status.AutoSize = true;
             status.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             status.ForeColor = System.Drawing.SystemColors.GrayText;
-            status.Location = new System.Drawing.Point(21, 273);
+            status.Location = new System.Drawing.Point(21, 331);
             status.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             status.Name = "status";
             status.Size = new System.Drawing.Size(140, 26);
@@ -92,29 +96,56 @@
             password.PlaceholderText = "Password";
             password.Size = new System.Drawing.Size(637, 44);
             password.TabIndex = 3;
-            //
-            // enemyRandomizerLabel
-            //
+            password.TextChanged += password_TextChanged;
+            // 
+            // disableEnemyRandomizerLabel
+            // 
             disableEnemyRandomizerLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             disableEnemyRandomizerLabel.Location = new System.Drawing.Point(21, 219);
             disableEnemyRandomizerLabel.Margin = new System.Windows.Forms.Padding(5);
-            disableEnemyRandomizerLabel.Name = "enemyRandomizerLabel";
+            disableEnemyRandomizerLabel.Name = "disableEnemyRandomizerLabel";
             disableEnemyRandomizerLabel.Size = new System.Drawing.Size(637, 44);
+            disableEnemyRandomizerLabel.TabIndex = 1;
             disableEnemyRandomizerLabel.Text = "Disable Enemy Randomizer";
-            //
-            // enemyRandomizerCheckbox
-            //
-            disableEnemyRandomizerCheckbox.Location = new System.Drawing.Point(420, 219+3);
+            // 
+            // disableEnemyRandomizerCheckbox
+            // 
+            disableEnemyRandomizerCheckbox.Location = new System.Drawing.Point(420, 222);
             disableEnemyRandomizerCheckbox.Margin = new System.Windows.Forms.Padding(5);
-            disableEnemyRandomizerCheckbox.Name = "enemyRandomizerCheckbox";
+            disableEnemyRandomizerCheckbox.Name = "disableEnemyRandomizerCheckbox";
             disableEnemyRandomizerCheckbox.Size = new System.Drawing.Size(40, 40);
+            disableEnemyRandomizerCheckbox.TabIndex = 0;
+            // 
+            // savePasswordLabel
+            // 
+            savePasswordLabel.Enabled = false;
+            savePasswordLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            savePasswordLabel.Location = new System.Drawing.Point(20, 269);
+            savePasswordLabel.Margin = new System.Windows.Forms.Padding(5);
+            savePasswordLabel.Name = "savePasswordLabel";
+            savePasswordLabel.Size = new System.Drawing.Size(637, 44);
+            savePasswordLabel.TabIndex = 19;
+            savePasswordLabel.Text = "Save Password";
+            // 
+            // savePasswordCheckbox
+            // 
+            savePasswordCheckbox.Checked = true;
+            savePasswordCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            savePasswordCheckbox.Enabled = false;
+            savePasswordCheckbox.Location = new System.Drawing.Point(251, 272);
+            savePasswordCheckbox.Margin = new System.Windows.Forms.Padding(5);
+            savePasswordCheckbox.Name = "savePasswordCheckbox";
+            savePasswordCheckbox.Size = new System.Drawing.Size(40, 40);
+            savePasswordCheckbox.TabIndex = 20;
             // 
             // ArchipelagoForm
             // 
             AcceptButton = submit;
             AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(672, 337);
+            ClientSize = new System.Drawing.Size(672, 395);
+            Controls.Add(savePasswordCheckbox);
+            Controls.Add(savePasswordLabel);
             Controls.Add(disableEnemyRandomizerCheckbox);
             Controls.Add(disableEnemyRandomizerLabel);
             Controls.Add(password);
@@ -139,5 +170,7 @@
         private System.Windows.Forms.TextBox password;
         private System.Windows.Forms.Label disableEnemyRandomizerLabel;
         private System.Windows.Forms.CheckBox disableEnemyRandomizerCheckbox;
+        private System.Windows.Forms.Label savePasswordLabel;
+        private System.Windows.Forms.CheckBox savePasswordCheckbox;
     }
 }
