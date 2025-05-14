@@ -246,12 +246,12 @@ namespace RandomizerCommon
             // A map from items in the game that should be removed to locations where those items
             // would normally appear, or null if those items should remain in-game (likely because
             // they're assigned elsewhere).
-            var itemsToRemove = new Dictionary<SlotKey, SlotKey>();
+            var itemsToRemove = new HashSet<SlotKey>();
 
             foreach (var info in locations)
             {
                 var targetScope = apLocationsToScopes[info.LocationId];
-                var candidates = data.Location(targetScope);
+                var candidates = data.Locations[targetScope];
                 SlotKey targetSlotKey;
                 if (candidates.Count == 1)
                 {
@@ -261,7 +261,7 @@ namespace RandomizerCommon
                 {
                     var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
                     var defaultItemName = ItemNameForLocation(apLocation);
-                    var match = candidates.FirstOrDefault(candidate => game.ItemNames[candidate.Item] == defaultItemName);
+                    var match = candidates.FirstOrDefault(candidate => game.BaseName(candidate.Item) == defaultItemName);
                     if (match != null)
                     {
                         targetSlotKey = match;
@@ -271,13 +271,7 @@ namespace RandomizerCommon
                         throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
                     }
                 }
-
-                // Tentatively mark all items in this location as not being in the game, unless
-                // we've already seen them or we see them later.
-                foreach (var itemInLocation in data.Locations[targetScope])
-                {
-                    itemsToRemove.TryAdd(itemInLocation, targetSlotKey);
-                }
+                itemsToRemove.Add(targetSlotKey);
 
                 var targetSlot = ann.Slots[targetScope];
                 var player = session.Players.Players[session.ConnectionInfo.Team]
@@ -348,11 +342,7 @@ namespace RandomizerCommon
 
             permutation.Forced(items,
                 remove: itemsToRemove
-                    .Where(entry => entry.Value != null)
-                    .GroupBy(entry => entry.Value)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(entry => entry.Key).ToList()));
+                    .ToDictionary(item => item, item => new List<SlotKey> { item }));
 
             permutation.Logic(random, opt, null, new List<Permutation.RandomSilo> {
                 Permutation.RandomSilo.INFINITE,

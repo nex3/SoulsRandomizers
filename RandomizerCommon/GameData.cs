@@ -649,6 +649,16 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return (ItemNames.ContainsKey(key) ? ItemNames[key] : $"?ITEM?" + $" ({(int)key.Type}:{key.ID})") + suffix;
         }
 
+        /// <returns>The name of the given item, without any upgrades if it's a weapon.</returns>
+        public string BaseName(ItemKey key)
+        {
+            var id = key.ID;
+            // Lower IDs include arrows, which use different IDs differently.
+            if (key.Type == ItemType.WEAPON && id >= 800000) id = id / 10000 * 10000;
+            key = new ItemKey(key.Type, id);
+            return ItemNames.ContainsKey(key) ? ItemNames[key] : $"?ITEM? ({(int)key.Type}:{key.ID})";
+        }
+
         private static readonly Dictionary<ItemKey, string> customNamesDS3 = new Dictionary<ItemKey, string>
         {
             { new ItemKey(ItemType.GOOD, 2123), "Cinders of a Lord (Abyss Watchers)" },
