@@ -246,32 +246,15 @@ namespace RandomizerCommon
             // A map from items in the game that should be removed to locations where those items
             // would normally appear, or null if those items should remain in-game (likely because
             // they're assigned elsewhere).
-            var itemsToRemove = new HashSet<SlotKey>();
+            var itemsToRemove = new Dictionary<SlotKey, List<SlotKey>>();
 
             foreach (var info in locations)
             {
                 var targetScope = apLocationsToScopes[info.LocationId];
-                var candidates = data.Locations[targetScope];
-                SlotKey targetSlotKey;
-                if (candidates.Count == 1)
-                {
-                    targetSlotKey = candidates.First();
-                }
-                else
-                {
-                    var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
-                    var defaultItemName = ItemNameForLocation(apLocation);
-                    var match = candidates.FirstOrDefault(candidate => game.BaseName(candidate.Item) == defaultItemName);
-                    if (match != null)
-                    {
-                        targetSlotKey = match;
-                    }
-                    else
-                    {
-                        throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
-                    }
-                }
-                itemsToRemove.Add(targetSlotKey);
+                var targetSlotKey = FindMatchingSlotKey(
+                    session, game, data.Location(targetScope), info);
+                AddMulti(itemsToRemove, targetSlotKey, FindMatchingSlotKey(
+                    session, game, data.Locations[targetScope], info));
 
                 var targetSlot = ann.Slots[targetScope];
                 var player = session.Players.Players[session.ConnectionInfo.Team]
@@ -340,9 +323,7 @@ namespace RandomizerCommon
 
             SetStatusText("Randomizing locations...");
 
-            permutation.Forced(items,
-                remove: itemsToRemove
-                    .ToDictionary(item => item, item => new List<SlotKey> { item }));
+            permutation.Forced(items, remove: itemsToRemove);
 
             permutation.Logic(random, opt, null, new List<Permutation.RandomSilo> {
                 Permutation.RandomSilo.INFINITE,
@@ -399,6 +380,20 @@ namespace RandomizerCommon
             WriteConfigFile(slotData);
 
             SetStatusText("Finished!", System.Drawing.Color.Green);
+        }
+
+        /// <summary>
+        /// Returns the SlotKey in candidates whose base item name matches the item name in info.
+        /// </summary>
+        private static SlotKey FindMatchingSlotKey(ArchipelagoSession session, GameData game, List<SlotKey> candidates, ScoutedItemInfo info)
+        {
+            if (candidates.Count == 1) return candidates.First();
+
+            var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
+            var defaultItemName = ItemNameForLocation(apLocation);
+            var match = candidates.FirstOrDefault(candidate => game.BaseName(candidate.Item) == defaultItemName);
+            if (match != null) return match;
+            throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
         }
 
         /// <summary>
