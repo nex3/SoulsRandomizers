@@ -130,7 +130,7 @@ namespace RandomizerCommon
                     name.Text,
                     Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.NoItems,
                     password: password.Text.Length == 0 ? null : password.Text,
-                    version: new System.Version(0, 4, 3),
+                    version: new System.Version(0, 6, 1),
                     requestSlotData: false
                 );
             }
