@@ -2006,8 +2006,7 @@ namespace RandomizerCommon
             // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
                 new ItemKey(ItemType.GOOD, 2005),
-                archipelagoLocationId,
-                archipelagoRemoveOnPickup: true
+                archipelagoLocationId
             );
 
             row["iconId"].Value = iconId;
@@ -2041,13 +2040,9 @@ namespace RandomizerCommon
         /// <param name="original">The item on which to base the synthetic replica.</param>
         /// <param name="archipelagoLocationId">The ID of the location the item is found in
         /// according to Archipelago, for Archipelago runs.</param>
-        /// <param name="archipelagoRemoveOnPickup">If this is true, adds a param that tells
-        /// Archipelago to remove this item as soon as it's picked up. Only supported for
-        /// goods.</param>
         public (SlotKey, PARAM.Row) AddSyntheticCopy(
             ItemKey original,
-            long? archipelagoLocationId = null,
-            bool archipelagoRemoveOnPickup = false)
+            long? archipelagoLocationId = null)
         {
             var param = game.Param(original.Type);
 
@@ -2089,10 +2084,6 @@ namespace RandomizerCommon
                     row["vagrantBonusEneDropItemLotId"] ??
                     row["vagrantBonuseneDropItemLotId"]
                 ).Value = (int)((ulong)archipelagoLocationId >> 32);
-            }
-            if (original.Type == ItemType.GOOD)
-            {
-                row["disableUseAtColiseum"].Value = archipelagoRemoveOnPickup;
             }
 
             param.Rows.Add(row);

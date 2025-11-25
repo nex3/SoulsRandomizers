@@ -307,17 +307,6 @@ namespace RandomizerCommon
                     var original = new ItemKey(apIdsToItemIds[info.ItemId]);
                     var (copy, _) = writer.AddSyntheticCopy(original, info.LocationId);
                     AddMulti(items, targetSlotKey, copy);
-
-                    // Because we can't replace items on purchase in the mod the same way we do on
-                    // pickup, we rely on custom events to make the swap for us.
-                    writer.AddNewEvent(new[]
-                    {
-                        $"IfPlayerHasdoesntHaveItem(MAIN, {(int)copy.Item.Type}, {copy.Item.ID}, OwnershipState.Owns)",
-                        $"RemoveItemFromPlayer({(int)copy.Item.Type}, {copy.Item.ID}, 1)",
-                        // The third argument here just needs to be a flag that's always on. 6001
-                        // fits the bill.
-                        $"DirectlyGivePlayerItem({(int)original.Type}, {original.ID}, 6001, 1)"
-                    });
                 }
             }
 
