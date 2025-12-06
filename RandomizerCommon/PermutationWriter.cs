@@ -1347,47 +1347,6 @@ namespace RandomizerCommon
                         "Set Event Flag (6079,1)",
                     });
                 }
-                else
-                {
-                    var fmgs = game.ItemFMGs["アイテム名"];
-                    var pathOfTheDragon = permutation.Silos.Values
-                        .SelectMany(silo => silo.Mapping.Values)
-                        .SelectMany(items => items)
-                        .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
-                        .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
-
-                    // Archipelago handles Path of the Dragon as a synthetic item or (when getting
-                    // it from another world or a /send command) manually triggering the event
-                    // 100001312.
-                    var commands = new List<string>(new string[]
-                    {
-                        // This should really just be END IF ... Owns but that doesn't parse here
-                        // for some reason.
-                        "IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, 9030, OwnershipState.DoesntOwn)",
-                        "IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 100001312)",
-                    });
-                    if (pathOfTheDragon != null)
-                    {
-                        commands.Add($"IF Player Has/Doesn't Have Item (OR_01, ItemType.Goods, {pathOfTheDragon.Item.ID}, OwnershipState.Owns)");
-                    }
-                    commands.AddRange(new string[]
-                    {
-                        "IfConditionGroup(MAIN, PASS, OR_01)",
-                        "Remove Item From Player (ItemType.Goods, 101312, 1)",
-                        "Award Gesture Item (29,3,9030)",
-                        $"Set Event Flag (100001312,0)",
-                    });
-                    AddNewEvent(commands);
-
-                    // Another Archipelago-specific event that display a message with a
-                    // special IDs that the mod can override to show its own messages.
-                    AddNewEvent(new string[]
-                    {
-                        "IF Event Flag (0, ON, TargetEventFlagType.EventFlag, 100001313)",
-                        "Display Message (100001312, 1)",
-                        "Set Event Flag (100001313, OFF)",
-                    });
-                }
 
                 // Make every boss soul trigger the event to show it in the shop.
                 foreach (PARAM.Row row in shops.Rows)
