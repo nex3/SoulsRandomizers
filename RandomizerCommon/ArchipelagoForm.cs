@@ -661,7 +661,14 @@ namespace RandomizerCommon
             // This should only be the case during development.
             if (Version == null) return;
 
-            if (range.IsSatisfied(Version, includePrerelease: true)) return;
+            // Until we actually make server-side changes for v4, declare ourselves compatible with
+            // the 3.x.x branch.
+            var compatibleVersion = new SemanticVersioning.Version("3.0.13");
+            if (range.IsSatisfied(Version, includePrerelease: true) ||
+                range.IsSatisfied(compatibleVersion, includePrerelease: true))
+            {
+                return;
+            }
 
 
             throw new Exception(
