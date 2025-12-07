@@ -36,7 +36,7 @@ namespace RandomizerCommon
         /// </summary>
         private readonly JObject configData;
 
-        private Timer blinkTimer;
+        private readonly Timer blinkTimer;
 
         public ArchipelagoForm()
         {
@@ -44,8 +44,10 @@ namespace RandomizerCommon
 
             MinimumSize = Size;
 
-            blinkTimer = new Timer();
-            blinkTimer.Interval = 500; // 0.5 seconds
+            blinkTimer = new()
+            {
+                Interval = 500 // 0.5 seconds
+            };
             blinkTimer.Tick += BlinkTimer_Tick;
 
             try
