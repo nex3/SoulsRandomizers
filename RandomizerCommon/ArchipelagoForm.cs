@@ -15,6 +15,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tomlyn;
+using Tomlyn.Model;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
@@ -31,10 +33,21 @@ namespace RandomizerCommon
         private static readonly string ConfigFileLocation = "..\\apconfig.json";
 
         /// <summary>
+        /// The location of the file in which ME3's configuration is stored.
+        /// </summary>
+        private static readonly string ME3ConfigFileLocation = "..\\me3-config.me3";
+
+        /// <summary>
         /// The Archipelago configuration data that was already saved in this directory, or an
         /// empty object if there wasn't any data.
         /// </summary>
         private readonly JObject configData;
+
+        /// <summary>
+        /// The ModEngine3 configuration that was saved in this directory, or null if none was
+        /// found.
+        /// </summary>
+        private readonly TomlTable me3ConfigData;
 
         private readonly Timer blinkTimer;
 
@@ -69,6 +82,15 @@ namespace RandomizerCommon
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
+            }
+
+            try
+            {
+                me3ConfigData = Toml.ToModel(File.ReadAllText(ME3ConfigFileLocation));
+            }
+            catch (Exception)
+            {
+                // Allow the config to be null, we just won't customize the save location.
             }
 
             if (configData.Value<string>("url") is string savedUrl) url.Text = savedUrl;
@@ -373,7 +395,7 @@ namespace RandomizerCommon
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
 
             SetStatusText("Writing client save file...");
-            WriteConfigFile(slotData);
+            WriteConfigFiles(slotData);
 
             SetStatusText("Finished!", System.Drawing.Color.Green);
         }
@@ -395,11 +417,12 @@ namespace RandomizerCommon
         /// <summary>
         /// Writes or edits the config file for the current Archipelago run.
         /// </summary>
-        private void WriteConfigFile(Dictionary<string, object> slotData)
-        {
+        private void WriteConfigFiles(Dictionary<string, object> slotData)
+        { 
+            var seed = (string)slotData["seed"];
             configData["url"] = url.Text;
             configData["slot"] = name.Text;
-            configData["seed"] = (string)slotData["seed"];
+            configData["seed"] = seed;
             configData["client_version"] = Version?.ToString();
             if (savePasswordCheckbox.Checked && password.Text.Length > 0)
             {
@@ -410,6 +433,18 @@ namespace RandomizerCommon
                 configData.Remove("password");
             }
             File.WriteAllText(ConfigFileLocation, JsonConvert.SerializeObject(configData));
+
+            if (me3ConfigData != null)
+            {
+                me3ConfigData["savefile"] = $"ap-{seed}.sl2";
+                if (me3ConfigData.PropertiesMetadata.TryGetProperty("profileVersion", out var metadata))
+                {
+                    me3ConfigData.PropertiesMetadata.SetProperty("savefile", metadata);
+                    me3ConfigData.PropertiesMetadata.SetProperty("profileVersion", new());
+                }
+
+                File.WriteAllText(ME3ConfigFileLocation, Toml.FromModel(me3ConfigData).ReplaceLineEndings());
+            }
         }
 
         /// <returns>A human-readable name for a foreign item.</returns>
