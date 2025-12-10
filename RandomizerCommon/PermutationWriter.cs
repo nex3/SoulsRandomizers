@@ -1,12 +1,12 @@
 ﻿using SoulsFormats;
+using SoulsIds;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using SoulsIds;
-using static SoulsIds.Events;
-using static SoulsIds.GameSpec;
+using YamlDotNet.Core.Tokens;
 using static RandomizerCommon.EventConfig;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.LocationData.ItemScope;
@@ -15,7 +15,8 @@ using static RandomizerCommon.Messages;
 using static RandomizerCommon.Permutation;
 using static RandomizerCommon.Util;
 using static SoulsFormats.EMEVD.Instruction;
-using System.Diagnostics;
+using static SoulsIds.Events;
+using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
 {
@@ -1965,18 +1966,13 @@ namespace RandomizerCommon
             // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
                 new ItemKey(ItemType.GOOD, 2005),
-                archipelagoLocationId
+                archipelagoLocationId,
+                replaceWithInArchipelago: replaceWithInArchipelago,
+                replaceWithQuantity: replaceWithQuantity
             );
 
             row["iconId"].Value = iconId;
             row["sortId"].Value = sortId; // Sort external items last of all
-
-            if (replaceWithInArchipelago != null)
-            {
-                row["fragmentNum"].Value = replaceWithInArchipelago.FullID;
-                row["sellValue"].Value = replaceWithQuantity;
-                syntheticToOriginal[key.Item] = replaceWithInArchipelago;
-            }
 
             // Get rid of any old small doll text.
             foreach (var fmgKey in game.ItemFMGs.Keys)
@@ -1999,9 +1995,16 @@ namespace RandomizerCommon
         /// <param name="original">The item on which to base the synthetic replica.</param>
         /// <param name="archipelagoLocationId">The ID of the location the item is found in
         /// according to Archipelago, for Archipelago runs.</param>
+        /// <param name="replaceWithInArchipelago">The item the Archipelago mod should replace this with when
+        /// it's picked up. Used so that Archipelago can notify the server that a specific location
+        /// has been checked even if it contains a non-unique item.</param>
+        /// <param name="replaceWithQuantity">If replaceWith is set, this is the number of items it
+        /// should be replaced with.</param>
         public (SlotKey, PARAM.Row) AddSyntheticCopy(
             ItemKey original,
-            long? archipelagoLocationId = null)
+            long? archipelagoLocationId = null,
+            ItemKey replaceWithInArchipelago = null,
+            uint replaceWithQuantity = 1)
         {
             var param = game.Param(original.Type);
 
@@ -2065,7 +2068,17 @@ namespace RandomizerCommon
             }
 
             var key = new ItemKey(original.Type, row.ID + upgrades);
-            syntheticToOriginal[key] = original;
+            if (replaceWithInArchipelago != null)
+            {
+                row["basicPrice"].Value = replaceWithInArchipelago.FullID;
+                row["sellValue"].Value = replaceWithQuantity;
+                syntheticToOriginal[key] = replaceWithInArchipelago;
+            }
+            else
+            {
+                syntheticToOriginal[key] = original;
+            }
+
             data.AddLocationlessItem(key);
             return (new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1)), row);
         }

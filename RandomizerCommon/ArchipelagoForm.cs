@@ -307,7 +307,12 @@ namespace RandomizerCommon
                 else
                 {
                     var original = new ItemKey(apIdsToItemIds[info.ItemId]);
-                    var (copy, _) = writer.AddSyntheticCopy(original, info.LocationId);
+                    var (copy, _) = writer.AddSyntheticCopy(
+                        original,
+                        info.LocationId,
+                        replaceWithInArchipelago: original,
+                        replaceWithQuantity: 1
+                    );
                     AddMulti(items, targetSlotKey, copy);
                 }
             }
