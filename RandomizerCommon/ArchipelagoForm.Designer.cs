@@ -96,7 +96,6 @@
             password.PlaceholderText = "Password";
             password.Size = new System.Drawing.Size(637, 44);
             password.TabIndex = 3;
-            password.TextChanged += password_TextChanged;
             // 
             // disableEnemyRandomizerLabel
             // 

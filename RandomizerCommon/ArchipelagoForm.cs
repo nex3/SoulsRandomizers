@@ -7,6 +7,8 @@ using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tomlyn;
 using Tomlyn.Model;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
@@ -377,9 +380,17 @@ namespace RandomizerCommon
                     eventConfig = deserializer.Deserialize<EventConfig>(reader);
                 }
 
-                // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
-                // any way to deserialize from an object graph
-                var preset = Preset.ParsePreset("archipelago", (string)slotData["random_enemy_preset"]);
+                var presetYaml = (string)slotData["random_enemy_preset"];
+                Preset preset;
+                try
+                {
+                    preset = Preset.ParsePreset("archipelago", presetYaml);
+                }
+                catch (YamlException)
+                {
+                    DisplayYamlParseError(presetYaml);
+                    throw new Exception("Failed to parse enemy preset");
+                }
                 preset.RemoveSource = preset.RemoveSource == null
                     ? "Yhorm the Giant"
                     : preset.RemoveSource + ";Yhorm the Giant";
@@ -398,6 +409,30 @@ namespace RandomizerCommon
             WriteConfigFiles(slotData);
 
             SetStatusText("Finished!", System.Drawing.Color.Green);
+        }
+
+        /// <summary>
+        /// Show a dialog visually indicating the location of a parse error in the given YAML
+        /// preset. This reformats the preset first, since we're confident that it's syntactically
+        /// valid YAML.
+        /// </summary>
+        private static void DisplayYamlParseError(string presetYaml)
+        {
+            var obj = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build()
+                .Deserialize(new StringReader(presetYaml));
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var formattedYaml = serializer.Serialize(obj);
+
+            try
+            {
+                Preset.ParsePreset("archipelago", formattedYaml);
+            }
+            catch (YamlException ex)
+            {
+                new PresetErrorDialog(formattedYaml, ex).ShowDialog();
+            }
         }
 
         /// <summary>
