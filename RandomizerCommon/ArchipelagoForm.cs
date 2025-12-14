@@ -322,6 +322,9 @@ namespace RandomizerCommon
                     // replace with placeholders, so we can notify the Archipelago server when
                     // they're checked. We can't do this with items in shops because we don't have
                     // a good way to replace them on pickup.
+                    //
+                    // We can't make _all_ items realistic like we do for shops because that can't
+                    // represent bundles of multiple items.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"[Placeholder] {info.ItemName}",
                         "If you can see this your Archipelago mod isn't working.",
