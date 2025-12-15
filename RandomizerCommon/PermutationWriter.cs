@@ -2026,7 +2026,7 @@ namespace RandomizerCommon
                     // that must match the original for the armor to be considered valid. Everything
                     // below that digit is considered invalid.
                     //
-                    // 99003000 is the highest non-debug weapon row in vanilla.
+                    // 99003000 is the highest non-debug armor row in vanilla.
                     ItemType.ARMOR => param.Rows.Count * 10000 + 99003000 + armorType,
                     // 3780000 is the highest goods or accessory row in vanilla.
                     _ => param.Rows.Count + 3780000

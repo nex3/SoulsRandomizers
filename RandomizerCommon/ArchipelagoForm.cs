@@ -402,6 +402,10 @@ namespace RandomizerCommon
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
+            // Sort these params because there are technically debug rows above them, and the game
+            // (as well as fromsoftware-rs) expects rows to be ordered by ID. We don't need to sort
+            // accessories or goods because they don't have debug entries.
+            MiscSetup.SortParams(game, new[] { "EquipParamProtector", "EquipParamWeapon" });
             MiscSetup.DS3CommonPass(game, events, opt);
             MiscSetup.InjectUncompressed(game);
 
