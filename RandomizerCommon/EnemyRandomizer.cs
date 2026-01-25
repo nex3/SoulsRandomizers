@@ -1275,9 +1275,9 @@ namespace RandomizerCommon
                 {
                     if (targetInfo.HasTag("earlyreq"))
                     {
-                        if (sourceInfo.HasTag("late") || sourceInfo.HasTag("excludeearly"))
+                        if (!sourceInfo.HasTag("easy"))
                         {
-                            if (explain) Console.WriteLine($"Not adding {ename(source)} to {ename(target)} because it's not an early boss");
+                            if (explain) Console.WriteLine($"Not adding {ename(source)} to {ename(target)} because it's not an easy boss");
                             return false;
                         }
                     }

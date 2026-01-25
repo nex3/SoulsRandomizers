@@ -1281,5 +1281,25 @@ namespace RandomizerCommon
                 }
             }
         }
+
+        /// <summary>
+        /// Sort the parameter data in [game] by ID, so any newly-added parameters are properly
+        /// ordered as in the vanilla game.
+        /// </summary>
+        /// <param name="game">The game data whose params should be sorted.</param>
+        /// <param name="params">
+        /// The names of parameters to sort. If null, sorts all parameters.
+        /// </param>
+        internal static void SortParams(GameData game, IEnumerable<string> paramNames = null)
+        {
+            var paramObjs = paramNames == null
+                ? game.Params.Inner.Values
+                : paramNames.Select((name) => game.Params[name]);
+
+            foreach (var param in paramObjs)
+            {
+                param.Rows.Sort((row1, row2) => row1.ID.CompareTo(row2.ID));
+            }
+        }
     }
 }

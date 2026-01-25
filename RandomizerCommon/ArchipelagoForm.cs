@@ -1,19 +1,26 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SemanticVersioning;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tomlyn;
+using Tomlyn.Model;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.Util;
 using static SoulsIds.GameSpec;
@@ -22,17 +29,102 @@ namespace RandomizerCommon
 {
     public partial class ArchipelagoForm : Form
     {
+
+        /// <summary>
+        /// The location of the file in which data about this AP session is saved.
+        /// </summary>
+        private static readonly string ConfigFileLocation = "..\\apconfig.json";
+
+        /// <summary>
+        /// The location of the file in which ME3's configuration is stored.
+        /// </summary>
+        private static readonly string ME3ConfigFileLocation = "..\\me3-config.me3";
+
+        /// <summary>
+        /// The Archipelago configuration data that was already saved in this directory, or an
+        /// empty object if there wasn't any data.
+        /// </summary>
+        private readonly JObject configData;
+
+        /// <summary>
+        /// The ModEngine3 configuration that was saved in this directory, or null if none was
+        /// found.
+        /// </summary>
+        private readonly TomlTable me3ConfigData;
+
+        private readonly Timer blinkTimer;
+
         public ArchipelagoForm()
         {
             InitializeComponent();
+
+            MinimumSize = Size;
+
+            blinkTimer = new()
+            {
+                Interval = 500 // 0.5 seconds
+            };
+            blinkTimer.Tick += BlinkTimer_Tick;
+
+            try
+            {
+                configData = JsonConvert.DeserializeObject<JObject>(
+                    File.ReadAllText(ConfigFileLocation)
+                );
+            }
+            catch (FileNotFoundException)
+            {
+                configData = new JObject();
+            }
+            catch (JsonException)
+            {
+                MessageBox.Show(
+                    $"Failed to load {Path.GetFileName(ConfigFileLocation)}. Running the " + 
+                    "randomizer may overwrite existing save data.",
+                    "Archipelago Warning",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
+
+            try
+            {
+                me3ConfigData = Toml.ToModel(File.ReadAllText(ME3ConfigFileLocation));
+            }
+            catch (Exception)
+            {
+                // Allow the config to be null, we just won't customize the save location.
+            }
+
+            if (configData.Value<string>("url") is string savedUrl) url.Text = savedUrl;
+            if (configData.Value<string>("slot") is string savedSlot) name.Text = savedSlot;
+            if (configData.Value<string>("password") is string savedPassword) password.Text = savedPassword;
         }
 
-        private void submit_Click(object sender, EventArgs e)
+        private static SemanticVersioning.Version Version {
+            get
+            {
+                return Assembly.GetCallingAssembly()
+                    .GetCustomAttribute<VersionAttribute>()
+                    .Version;
+            }
+        }
+
+        private async void submit_Click(object sender, EventArgs e)
         {
-            Enabled = false;
-            status.ForeColor = System.Drawing.SystemColors.GrayText;
-            status.Text = "Connecting...";
+            foreach (Control control in Controls)
+            {
+                if (control.Name != "status")
+                {
+                    control.Enabled = false;
+                }
+            }
+
+            Cursor = Cursors.WaitCursor;
+
+            SetStatusText("Connecting...", System.Drawing.Color.Blue);
             status.Visible = true;
+            status.Refresh();
 
             if (url.Text.Length == 0)
             {
@@ -65,7 +157,7 @@ namespace RandomizerCommon
                     name.Text,
                     Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.NoItems,
                     password: password.Text.Length == 0 ? null : password.Text,
-                    version: new System.Version(0, 4, 3),
+                    version: new System.Version(0, 6, 1),
                     requestSlotData: false
                 );
             }
@@ -94,7 +186,7 @@ namespace RandomizerCommon
             try
             {
 #endif
-            RandomizeForArchipelago(session);
+            await Task.Run(() => RandomizeForArchipelago(session));
 #if !DEBUG
 
             }
@@ -111,25 +203,31 @@ namespace RandomizerCommon
             this.Close();
         }
 
+        /// <summary>
+        /// Runs the randomizer and saves its results.
+        /// </summary>
+        /// <returns>True if randomization succeeded, false if it was canceled.</returns>
         private void RandomizeForArchipelago(ArchipelagoSession session)
         {
-
-            status.Text = "Downloading item data...";
+            SetStatusText("Downloading item data...");
             var locations = session.Locations
                 .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
                 .Result
                 .Values
+                .OrderBy(location => location.LocationId)
                 .ToList();
             var slotData = session.DataStorage.GetSlotData();
             var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
             CheckVersionRange(slotData);
             var options = (JObject)slotData["options"];
+            if (disableEnemyRandomizerCheckbox.Checked) options["randomize_enemies"] = false;
+
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
                 .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
 
-            status.Text = "Loading game data...";
+            SetStatusText("Loading game data...");
 
             var distDir = "dist";
             if (!Directory.Exists(distDir))
@@ -176,38 +274,15 @@ namespace RandomizerCommon
             // A map from items in the game that should be removed to locations where those items
             // would normally appear, or null if those items should remain in-game (likely because
             // they're assigned elsewhere).
-            var itemsToRemove = new Dictionary<SlotKey, SlotKey>();
+            var itemsToRemove = new Dictionary<SlotKey, List<SlotKey>>();
 
             foreach (var info in locations)
             {
                 var targetScope = apLocationsToScopes[info.LocationId];
-                var candidates = data.Location(targetScope);
-                SlotKey targetSlotKey;
-                if (candidates.Count == 1)
-                {
-                    targetSlotKey = candidates.First();
-                }
-                else
-                {
-                    var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
-                    var defaultItemName = ItemNameForLocation(apLocation);
-                    var match = candidates.FirstOrDefault(candidate => game.ItemNames[candidate.Item] == defaultItemName);
-                    if (match != null)
-                    {
-                        targetSlotKey = match;
-                    }
-                    else
-                    {
-                        throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
-                    }
-                }
-
-                // Tentatively mark all items in this location as not being in the game, unless
-                // we've already seen them or we see them later.
-                foreach (var itemInLocation in data.Locations[targetScope])
-                {
-                    itemsToRemove.TryAdd(itemInLocation, targetSlotKey);
-                }
+                var targetSlotKey = FindMatchingSlotKey(
+                    session, game, data.Location(targetScope), info);
+                AddMulti(itemsToRemove, targetSlotKey, FindMatchingSlotKey(
+                    session, game, data.Locations[targetScope], info));
 
                 var targetSlot = ann.Slots[targetScope];
                 var player = session.Players.Players[session.ConnectionInfo.Team]
@@ -217,7 +292,7 @@ namespace RandomizerCommon
                 {
                     // Create a fake key item for each item from another world.
                     var item = writer.AddSyntheticItem(
-                        $"{player.Alias}'s {info.ItemName}",
+                        SyntheticItemName(info),
                         $"An object from a mysterious world known only as \"{player.Game}\".",
                         // Custom Archipelago icon.
                         iconId: 6020,
@@ -248,6 +323,9 @@ namespace RandomizerCommon
                     // replace with placeholders, so we can notify the Archipelago server when
                     // they're checked. We can't do this with items in shops because we don't have
                     // a good way to replace them on pickup.
+                    //
+                    // We can't make _all_ items realistic like we do for shops because that can't
+                    // represent bundles of multiple items.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"[Placeholder] {info.ItemName}",
                         "If you can see this your Archipelago mod isn't working.",
@@ -259,31 +337,18 @@ namespace RandomizerCommon
                 {
                     var original = new ItemKey(apIdsToItemIds[info.ItemId]);
                     var (copy, _) = writer.AddSyntheticCopy(
-                        original, archipelagoLocationId: info.LocationId);
+                        original,
+                        archipelagoLocationId: info.LocationId,
+                        replaceWithInArchipelago: original,
+                        replaceWithQuantity: 1
+                    );
                     AddMulti(items, targetSlotKey, copy);
-
-                    // Because we can't replace items on purchase in the mod the same way we do on
-                    // pickup, we rely on custom events to make the swap for us.
-                    writer.AddNewEvent(new[]
-                    {
-                        $"IfPlayerHasdoesntHaveItem(MAIN, {(int)copy.Item.Type}, {copy.Item.ID}, OwnershipState.Owns)",
-                        $"RemoveItemFromPlayer({(int)copy.Item.Type}, {copy.Item.ID}, 1)",
-                        // The third argument here just needs to be a flag that's always on. 6001
-                        // fits the bill.
-                        $"DirectlyGivePlayerItem({(int)original.Type}, {original.ID}, 6001, 1)"
-                    });
                 }
             }
 
-            status.Text = "Randomizing locations...";
+            SetStatusText("Randomizing locations...");
 
-            permutation.Forced(items,
-                remove: itemsToRemove
-                    .Where(entry => entry.Value != null)
-                    .GroupBy(entry => entry.Value)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(entry => entry.Key).ToList()));
+            permutation.Forced(items, remove: itemsToRemove);
 
             permutation.Logic(random, opt, null, new List<Permutation.RandomSilo> {
                 Permutation.RandomSilo.INFINITE,
@@ -310,11 +375,20 @@ namespace RandomizerCommon
                 RemoveEquipLoad(game);
             }
 
-            if (options["randomize_enemies"].ToObject<bool>())
-            {
+            if (options["randomize_enemies"].ToObject<bool>()) {
                 // Serializing this only to parse it again is silly, but YamlDotNet doesn't have
                 // any way to deserialize from an object graph
-                var preset = Preset.ParsePreset("archipelago", (string)slotData["random_enemy_preset"]);
+                var presetYaml = (string)slotData["random_enemy_preset"];
+                Preset preset;
+                try
+                {
+                    preset = Preset.ParsePreset("archipelago", presetYaml);
+                }
+                catch (YamlException)
+                {
+                    DisplayYamlParseError(presetYaml);
+                    throw new Exception("Failed to parse enemy preset");
+                }
                 preset.RemoveSource = preset.RemoveSource == null
                     ? "Yhorm the Giant"
                     : preset.RemoveSource + ";Yhorm the Giant";
@@ -324,11 +398,112 @@ namespace RandomizerCommon
                     .Run(opt, preset);
             }
 
+            // Sort these params because there are technically debug rows above them, and the game
+            // (as well as fromsoftware-rs) expects rows to be ordered by ID. We don't need to sort
+            // accessories or goods because they don't have debug entries.
+            MiscSetup.SortParams(game, new[] { "EquipParamProtector", "EquipParamWeapon" });
             MiscSetup.DS3CommonPass(game, events, opt);
             MiscSetup.InjectUncompressed(game);
 
-            status.Text = "Writing game files...";
+            SetStatusText("Writing game files...");
             game.SaveDS3(Directory.GetCurrentDirectory(), true);
+
+            SetStatusText("Writing client save file...");
+            WriteConfigFiles(slotData);
+
+            SetStatusText("Finished!", System.Drawing.Color.Green);
+        }
+
+        /// <summary>
+        /// Show a dialog visually indicating the location of a parse error in the given YAML
+        /// preset. This reformats the preset first, since we're confident that it's syntactically
+        /// valid YAML.
+        /// </summary>
+        private static void DisplayYamlParseError(string presetYaml)
+        {
+            var obj = new DeserializerBuilder()
+                .WithAttemptingUnquotedStringTypeDeserialization()
+                .Build()
+                .Deserialize(new StringReader(presetYaml));
+            var serializer = new SerializerBuilder().WithQuotingNecessaryStrings().Build();
+            var formattedYaml = serializer.Serialize(obj);
+
+            try
+            {
+                Preset.ParsePreset("archipelago", formattedYaml);
+            }
+            catch (YamlException ex)
+            {
+                new PresetErrorDialog(formattedYaml, ex).ShowDialog();
+            }
+        }
+
+        /// <summary>
+        /// Returns the SlotKey in candidates whose base item name matches the item name in info.
+        /// </summary>
+        private static SlotKey FindMatchingSlotKey(ArchipelagoSession session, GameData game, List<SlotKey> candidates, ScoutedItemInfo info)
+        {
+            if (candidates.Count == 1) return candidates.First();
+
+            var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
+            var defaultItemName = ItemNameForLocation(apLocation);
+            var match = candidates.FirstOrDefault(candidate => game.BaseName(candidate.Item) == defaultItemName);
+            if (match != null) return match;
+            throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
+        }
+
+        /// <summary>
+        /// Writes or edits the config file for the current Archipelago run.
+        /// </summary>
+        private void WriteConfigFiles(Dictionary<string, object> slotData)
+        { 
+            var seed = (string)slotData["seed"];
+            configData["url"] = url.Text;
+            configData["slot"] = name.Text;
+            configData["seed"] = seed;
+            configData["client_version"] = Version?.ToString();
+            if (savePasswordCheckbox.Checked && password.Text.Length > 0)
+            {
+                configData["password"] = password.Text;
+            }
+            else
+            {
+                configData.Remove("password");
+            }
+            File.WriteAllText(ConfigFileLocation, JsonConvert.SerializeObject(configData));
+
+            if (me3ConfigData != null)
+            {
+                me3ConfigData["savefile"] = $"ap-{seed}.sl2";
+                if (me3ConfigData.PropertiesMetadata.TryGetProperty("profileVersion", out var metadata))
+                {
+                    me3ConfigData.PropertiesMetadata.SetProperty("savefile", metadata);
+                    me3ConfigData.PropertiesMetadata.SetProperty("profileVersion", new());
+                }
+
+                File.WriteAllText(ME3ConfigFileLocation, Toml.FromModel(me3ConfigData).ReplaceLineEndings());
+            }
+        }
+
+        /// <returns>A human-readable name for a foreign item.</returns>
+        private static string SyntheticItemName(ScoutedItemInfo info)
+        {
+            // Use the player's entire name, if it fits.
+            var name = $"{info.Player.Alias}'s {info.ItemName}";
+            if (name.Length <= ItemNameLimit) return name;
+
+            // If the player's name doesn't fit, trim it. Don't trim below four characters in case
+            // it becomes unrecognizable. This may still result in a string longer than the maximum,
+            // but in that case the item name will automatically get trimmed by the game as
+            // necessary.
+            var charactersToTrim = name.Length - ItemNameLimit;
+            var trimmedPlayerName = info.Player.Alias[
+                ..Math.Min(
+                    info.Player.Alias.Length,
+                    Math.Max(info.Player.Alias.Length - charactersToTrim, 4)
+                )
+            ];
+            return $"{trimmedPlayerName} {info.ItemName}";
         }
 
         /// <summary>
@@ -549,6 +724,9 @@ namespace RandomizerCommon
 
         private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( - .*)?$");
 
+        /// <summary>The maximum number of characters in a DS3 item's name.</summary>
+        private const int ItemNameLimit = 32;
+
         /// <summary>
         /// Gets the name of the default item from an Archipelago location name.
         /// </summary>
@@ -569,16 +747,12 @@ namespace RandomizerCommon
         /// </summary>
         private static void CheckVersionRange(Dictionary<string, object> slotData)
         {
-            var version = Assembly.GetCallingAssembly()
-                .GetCustomAttribute<VersionAttribute>()
-                .Version;
-
             if (!slotData.ContainsKey("versions"))
             {
                 throw new Exception(
                     "The server's version of the DS3 apworld doesn't include any version " +
                     "information, which means it's not compatible with this static randomizer." +
-                    (version?.IsPreRelease ?? false
+                    (Version?.IsPreRelease ?? false
                         ? " Make sure you use the apworld that comes with this version to " +
                           "generate the multiworld."
                         : "")
@@ -587,22 +761,58 @@ namespace RandomizerCommon
             var range = new SemanticVersioning.Range((string)slotData["versions"]);
 
             // This should only be the case during development.
-            if (version == null) return;
+            if (Version == null) return;
 
-            if (range.IsSatisfied(version, includePrerelease: true)) return;
+            // Until we actually make server-side changes for v4, declare ourselves compatible with
+            // the 3.x.x branch.
+            var compatibleVersion = new SemanticVersioning.Version("3.0.13");
+            if (range.IsSatisfied(Version, includePrerelease: true) ||
+                range.IsSatisfied(compatibleVersion, includePrerelease: true))
+            {
+                return;
+            }
 
 
             throw new Exception(
                 $"The server's version of the DS3 apworld supports DS3 AP versions {range}, " +
-                $"but this static randomizer is version {version}."
+                $"but this static randomizer is version {Version}."
             );
+        }
+
+        /// <summary>
+        /// Sets the status text and color on the UI thread. If called from a background thread, it marshals.
+        /// If the message ends with "...", it will start blinking.
+        /// </summary>
+        private void SetStatusText(string message, System.Drawing.Color color = default(System.Drawing.Color))
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => SetStatusText(message, color)));
+            }
+            else
+            {
+                blinkTimer.Stop();
+                status.Text = message;
+                if (color != default(System.Drawing.Color))
+                {
+                    status.ForeColor = color;
+                }
+                if (message.EndsWith("..."))
+                {
+                    blinkTimer.Start();
+                }
+                status.Refresh();
+            }
         }
 
         private void ShowFailure(String message)
         {
-            Enabled = true;
-            status.ForeColor = System.Drawing.Color.DarkRed;
-            status.Text = message;
+            SetStatusText(message, System.Drawing.Color.DarkRed);
+            Cursor = Cursors.Default;
+            foreach (Control control in Controls)
+            {
+                control.Enabled = true;
+            }
         }
 
         [System.AttributeUsage(System.AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
@@ -612,6 +822,32 @@ namespace RandomizerCommon
             public VersionAttribute(string version)
             {
                 this.Version = version == "" ? null : new SemanticVersioning.Version(version);
+            }
+        }
+
+        /// <summary>
+        /// Timer tick event handler to blink the status text.
+        /// </summary>
+        private void BlinkTimer_Tick(object sender, EventArgs e)
+        {
+            status.Text = status.Text.EndsWith("...") ? status.Text.Substring(0, status.Text.Length - 2) : status.Text = status.Text + ".";
+        }
+
+        /// <summary>
+        /// Whenever the password changes, ensure the "Save Password" checkbox is checked or not to
+        /// match.
+        /// </summary>
+        private void password_TextChanged(object sender, EventArgs e)
+        {
+            if (password.Text.Length > 0)
+            {
+                savePasswordLabel.Enabled = true;
+                savePasswordCheckbox.Enabled = true;
+            }
+            else
+            {
+                savePasswordLabel.Enabled = false;
+                savePasswordCheckbox.Enabled = false;
             }
         }
     }

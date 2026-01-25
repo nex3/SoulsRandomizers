@@ -1,12 +1,12 @@
 ﻿using SoulsFormats;
+using SoulsIds;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using SoulsIds;
-using static SoulsIds.Events;
-using static SoulsIds.GameSpec;
+using YamlDotNet.Core.Tokens;
 using static RandomizerCommon.EventConfig;
 using static RandomizerCommon.LocationData;
 using static RandomizerCommon.LocationData.ItemScope;
@@ -15,8 +15,8 @@ using static RandomizerCommon.Messages;
 using static RandomizerCommon.Permutation;
 using static RandomizerCommon.Util;
 using static SoulsFormats.EMEVD.Instruction;
-using System.Diagnostics;
-using System.Net.Mail;
+using static SoulsIds.Events;
+using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
 {
@@ -1355,19 +1355,6 @@ namespace RandomizerCommon
                         game.AddInitializer("pathOfTheDragon", new object[] { dragonFlag });
                     }
                 }
-                else
-                {
-                    var fmgs = game.ItemFMGs["アイテム名"];
-                    var pathOfTheDragon = permutation.Silos.Values
-                        .SelectMany(silo => silo.Mapping.Values)
-                        .SelectMany(items => items)
-                        .Where(source => source.Item.Type == ItemType.GOOD && source.Scope.Type == ScopeType.SPECIAL)
-                        .FirstOrDefault(source => fmgs[source.Item.ID] == "Path of the Dragon");
-
-                    game.AddInitializer("pathOfTheDragonArchi", new object[] {
-                        pathOfTheDragon?.Item.ID ?? -1
-                    });
-                }
 
                 if (opt["anrisamegender"] || opt["anrimale"] || opt["anrifemale"])
                 {
@@ -2058,18 +2045,12 @@ namespace RandomizerCommon
                 new ItemKey(ItemType.GOOD, 2005),
                 id,
                 archipelagoLocationId,
-                archipelagoRemoveOnPickup: archipelagoRemoveOnPickup
+                replaceWithInArchipelago: replaceWithInArchipelago,
+                replaceWithQuantity: replaceWithQuantity
             );
 
             row["iconId"].Value = iconId;
             row["sortId"].Value = sortId; // Sort external items last of all
-
-            if (replaceWithInArchipelago != null)
-            {
-                row["fragmentNum"].Value = replaceWithInArchipelago.FullID;
-                row["sellValue"].Value = replaceWithQuantity;
-                syntheticToOriginal[key.Item] = replaceWithInArchipelago;
-            }
 
             // Get rid of any old small doll text.
             foreach (var fmgKey in game.ItemFMGs.Keys)
@@ -2094,14 +2075,17 @@ namespace RandomizerCommon
         /// automatically generated.</param>
         /// <param name="archipelagoLocationId">The ID of the location the item is found in
         /// according to Archipelago, for Archipelago runs.</param>
-        /// <param name="archipelagoRemoveOnPickup">If this is true, adds a param that tells
-        /// Archipelago to remove this item as soon as it's picked up. Only supported for
-        /// goods.</param>
+        /// <param name="replaceWithInArchipelago">The item the Archipelago mod should replace this with when
+        /// it's picked up. Used so that Archipelago can notify the server that a specific location
+        /// has been checked even if it contains a non-unique item.</param>
+        /// <param name="replaceWithQuantity">If replaceWith is set, this is the number of items it
+        /// should be replaced with.</param>
         public (SlotKey, PARAM.Row) AddSyntheticCopy(
             ItemKey original,
             int? id = null,
             long? archipelagoLocationId = null,
-            bool archipelagoRemoveOnPickup = false)
+            ItemKey replaceWithInArchipelago = null,
+            uint replaceWithQuantity = 1)
         {
             var param = game.Param(original.Type);
 
@@ -2123,7 +2107,7 @@ namespace RandomizerCommon
                     // that must match the original for the armor to be considered valid. Everything
                     // below that digit is considered invalid.
                     //
-                    // 99003000 is the highest non-debug weapon row in vanilla.
+                    // 99003000 is the highest non-debug armor row in vanilla.
                     ItemType.ARMOR => param.Rows.Count * 10000 + 99003000 + armorType,
                     // 3780000 is the highest goods or accessory row in vanilla.
                     _ => param.Rows.Count + 3780000
@@ -2143,10 +2127,6 @@ namespace RandomizerCommon
                     row["vagrantBonusEneDropItemLotId"] ??
                     row["vagrantBonuseneDropItemLotId"]
                 ).Value = (int)((ulong)archipelagoLocationId >> 32);
-            }
-            if (original.Type == ItemType.GOOD)
-            {
-                row["disableUseAtColiseum"].Value = archipelagoRemoveOnPickup;
             }
 
             param.Rows.Add(row);
@@ -2169,7 +2149,17 @@ namespace RandomizerCommon
             }
 
             var key = new ItemKey(original.Type, row.ID + upgrades);
-            syntheticToOriginal[key] = original;
+            if (replaceWithInArchipelago != null)
+            {
+                row["basicPrice"].Value = replaceWithInArchipelago.FullID;
+                row["sellValue"].Value = replaceWithQuantity;
+                syntheticToOriginal[key] = replaceWithInArchipelago;
+            }
+            else
+            {
+                syntheticToOriginal[key] = original;
+            }
+
             data.AddLocationlessItem(key);
             return (new SlotKey(key, new ItemScope(ScopeType.SPECIAL, -1)), row);
         }
