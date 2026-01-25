@@ -685,26 +685,29 @@ namespace RandomizerCommon
                 Hints[type] = new Dictionary<SlotKey, SlotKey>();
             }
 
-            // Fill in hint log, and also sort ring items roughly by progression in the game (to avoid disappointing later drops)
             Dictionary<int, List<(SlotKey, SlotKey)>> ringGroups = new Dictionary<int, List<(SlotKey, SlotKey)>>();
-            foreach (KeyValuePair<SlotKey, List<SlotKey>> entry in Silos[RandomSilo.FINITE].Mapping)
+            if (silos == null || silos.Contains(RandomSilo.FINITE))
             {
-                for (int i = 0; i < entry.Value.Count; i++)
+                // Fill in hint log, and also sort ring items roughly by progression in the game (to avoid disappointing later drops)
+                foreach (KeyValuePair<SlotKey, List<SlotKey>> entry in Silos[RandomSilo.FINITE].Mapping)
                 {
-                    SlotKey source = entry.Value[i];
-                    SlotKey target = entry.Key;
-                    // Console.WriteLine($"hint for {game.Name(source.Item)}");
-                    if (hintItems.ContainsKey(source.Item))
+                    for (int i = 0; i < entry.Value.Count; i++)
                     {
-                        Hints[hintItems[source.Item]][source] = target;
-                    }
-                    if (assign.Assign.ContainsKey(source.Item))
-                    {
-                        specialAssign[source.Item] = target;
-                    }
-                    if (source.Item.Type == ItemType.RING && !game.Sekiro)
-                    {
-                        AddMulti(ringGroups, source.Item.ID - (source.Item.ID % 10), (source, target));
+                        SlotKey source = entry.Value[i];
+                        SlotKey target = entry.Key;
+                        // Console.WriteLine($"hint for {game.Name(source.Item)}");
+                        if (hintItems.ContainsKey(source.Item))
+                        {
+                            Hints[hintItems[source.Item]][source] = target;
+                        }
+                        if (assign.Assign.ContainsKey(source.Item))
+                        {
+                            specialAssign[source.Item] = target;
+                        }
+                        if (source.Item.Type == ItemType.RING && !game.Sekiro)
+                        {
+                            AddMulti(ringGroups, source.Item.ID - (source.Item.ID % 10), (source, target));
+                        }
                     }
                 }
             }
