@@ -8342,14 +8342,14 @@ Slots:
 - Key: '99,0:50006130::'
   DebugText:
   - Young Dragon Ring - 61300[?EVENT?]
-  Text: Given by Orbeck after purchasing four sorceries from him, and giving him one scroll, as a non-sorcerer.
+  Text: Given by Orbeck after purchasing four sorceries from him and giving him one scroll.
   Area: firelink
   Tags: missable exclusive
   QuestReqs: farronkeep_road
 - Key: '99,0:50006131::'
   DebugText:
   - Slumbering Dragoncrest Ring - 61310[?EVENT?]
-  Text: Given by Orbeck after purchasing the shop items corresponding to Aural Decoy, Farron Flashsword, Spook (starting items), and Pestilent Mist (after giving one scroll).
+  Text: Given by Orbeck after purchasing four sorceries from him and giving him one scroll.
   Area: firelink
   Tags: missable
   QuestReqs: farronkeep_road
