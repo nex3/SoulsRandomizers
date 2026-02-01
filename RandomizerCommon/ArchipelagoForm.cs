@@ -229,13 +229,16 @@ namespace RandomizerCommon
 
             SetStatusText("Loading game data...");
 
-            var distDir = "dist";
-            if (!Directory.Exists(distDir))
-            {
-                // From Release/Debug dirs
-                distDir = $@"..\..\..\{distDir}";
-                opt["dryrun"] = true;
-            }
+            var distBasename = "dist";
+#if DEBUG
+            // In debug mode, always use the data files from the local repository rather than those
+            // in the directory we're randomizing to. This ensures we don't accidentally end up
+            // testing against the data that shipped with whichever release copy of the Archipelago
+            // client we downloaded.
+            var distDir = Path.Join(Application.StartupPath, $@"..\..\..\..\..\{distBasename}");
+#else
+            var distDir = distBasename;
+#endif
             if (!Directory.Exists(distDir))
             {
                 throw new Exception("Missing data directory");
