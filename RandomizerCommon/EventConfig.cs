@@ -183,17 +183,6 @@ namespace RandomizerCommon
         /// </remarks>
         public class EventEdit
         {
-            /// <summary>Options for which matching instructions to remove.</summary>
-            public enum RemoveType
-            {
-                /// <summary>The default: do not remove matching instructions.</summary>
-                None,
-                /// <summary>Remove the first matching region.</summary>
-                First,
-                /// <summary>Remove all matching instructions.</summary>
-                All,
-            }
-
             /// <summary>The matcher which indicates which instruction to choose.</summary>
             /// <remarks>
             /// <para>
@@ -215,11 +204,17 @@ namespace RandomizerCommon
             /// </remarks>
             public int MatchLength { get; set; } = 1;
 
+            /// <summary>The number of times to repeat the match. Default is 1.</summary>
+            /// <remarks>
+            /// If this is -1, the match is repeated as many times as it matches.
+            /// </remarks>
+            public int Repeat { get; set; } = 1;
+
             /// <summary>Sets a parameter of a matched instruction.</summary>
-            public SetEdit Set { get; set; }
+            public List<SetEdit> Set { get; set; } = new();
 
             /// <summary>Removes matching instructions entirely.</summary>
-            public RemoveType Remove { get; set; } = RemoveType.None;
+            public bool Remove { get; set; } = false;
 
             /// <summary>
             /// Removes the matching instructions and replaces them with a list of commands.
@@ -250,8 +245,8 @@ namespace RandomizerCommon
                 var matchLength = Match == null ? ev.Instructions.Count : MatchLength;
 
                 var editTypes = 0;
-                if (Set != null) editTypes++;
-                if (Remove != RemoveType.None) editTypes++;
+                if (Set.Count > 0) editTypes++;
+                if (Remove) editTypes++;
                 if (Replace.Count > 0) editTypes++;
                 if (AddBefore.Count > 0) editTypes++;
                 if (AddAfter.Count > 0) editTypes++;
@@ -268,28 +263,23 @@ namespace RandomizerCommon
                 // parameter references as well. Fortunately, OldParams handles that for us as long
                 // as we tell it which new instructions we're adding.
                 var pre = OldParams.Preprocess(ev);
-                if (Remove == RemoveType.All)
-                {
-                    AssertNoRegion("Remove: All");
-                    var removed = ev.Instructions
-                        .RemoveAll(inst => Match.Match(events.Parse(inst, pre), events));
-                    pre.Postprocess();
-                    if (removed > 0) return;
-                    throw new Exception("Expected EditEvent to match an instruction");
-                }
-
+                var matches = 0;
                 for (var i = 0; i < ev.Instructions.Count; i++)
                 {
                     var instr = events.Parse(ev.Instructions[i]);
                     if (Match != null && !Match.Match(instr, events)) continue;
+                    matches++;
 
-                    if (Set != null)
+                    if (Set.Count > 0)
                     {
                         AssertNoRegion("Set");
-                        Set.Edit(instr);
+                        foreach (var edit in Set)
+                        {
+                            edit.Edit(instr, events);
+                        }
                         instr.Save(pre);
                     }
-                    else if (Remove == RemoveType.First)
+                    else if (Remove)
                     {
                         ev.Instructions.RemoveRange(i, matchLength);
                     }
@@ -322,11 +312,18 @@ namespace RandomizerCommon
                         }, events, pre));
                     }
 
-                    pre.Postprocess();
-                    return;
+                    if (matches == Repeat) {
+                        break;
+                    } else {
+                        i += matchLength - 1;
+                    }
                 }
 
-                throw new Exception("Expected EditEvent to match an instruction");
+                if (matches > 0) {
+                    pre.Postprocess();
+                } else {
+                    throw new Exception("Expected EditEvent to match an instruction");
+                }
             }
 
             /// <summary>
@@ -379,18 +376,18 @@ namespace RandomizerCommon
             /// <summary>
             /// A union type for arguments that can be passed to <see cref="Arguments"/>.
             /// </summary>
-            public record Argument
+            public record ArgumentMatcher
             {
                 /// <summary>A literal number passed as an argument.</summary>
-                public record Literal(int Value): Argument();
+                public record Literal(int Value): ArgumentMatcher();
 
                 /// <summary>A named EMEVD constant, such as <c>ComparisonType.Equal</c>.</summary>
-                public record Constant(string Name): Argument();
+                public record Constant(string Name): ArgumentMatcher();
 
                 /// <summary>Allows any argument in this position.</summary>
-                public record Anything(): Argument();
+                public record Anything(): ArgumentMatcher();
 
-                public static explicit operator Argument(string name)
+                public static explicit operator ArgumentMatcher(string name)
                 {
                     if (name == null) return new Anything();
                     // YamlDotNet treats integers as strings here for some reason.
@@ -398,7 +395,7 @@ namespace RandomizerCommon
                     return new Constant(name);
                 }
 
-                private Argument() { }
+                private ArgumentMatcher() { }
             }
 
             /// <summary>A matcher for initializer instructions found in event 0s.</summary>
@@ -414,7 +411,7 @@ namespace RandomizerCommon
             /// <para>For an initializer instruction, neither the initializer index nor the callee
             /// are considered arguemnts.</para>
             /// </remarks>
-            public List<Argument> Arguments { get; set; } = new();
+            public List<ArgumentMatcher> Arguments { get; set; } = new();
 
             /// <summary>A literal instruction to match.</summary>
             public string Instruction { get; set; }
@@ -458,8 +455,8 @@ namespace RandomizerCommon
                     dynamic actual = instr[instr.Offset + i];
                     var match = Arguments[i] switch
                     {
-                        Argument.Literal arg => actual == (dynamic)arg.Value,
-                        Argument.Constant arg =>
+                        ArgumentMatcher.Literal arg => actual == (dynamic)arg.Value,
+                        ArgumentMatcher.Constant arg =>
                             // Events doesn't have a direct way to convert an enum name to its
                             // value, so we have to parse a fake instruction to get it. We use
                             // IfConditionGroup() because its first argument is a signed integer,
@@ -500,15 +497,48 @@ namespace RandomizerCommon
         /// <summary>Sets the value of a specific parameter of a matched instruction.</summary>
         public class SetEdit
         {
+            /// <summary>
+            /// A union type for arguments that can be set as <see cref="Value"/>.
+            /// </summary>
+            public record ArgumentValue
+            {
+                /// <summary>A literal number passed as an argument.</summary>
+                public record Literal(int Value): ArgumentValue();
+
+                /// <summary>A named EMEVD constant, such as <c>ComparisonType.Equal</c>.</summary>
+                public record Constant(string Name): ArgumentValue();
+
+                public static explicit operator ArgumentValue(string name)
+                {
+                    // YamlDotNet treats integers as strings here for some reason.
+                    if (int.TryParse(name, out var value)) return new Literal(value);
+                    return new Constant(name);
+                }
+
+                private ArgumentValue() { }
+            }
+
             /// <summary>The parameter to set.</summary>
             public InstructionParameter Param { get; set; }
 
             /// <summary>The new value for the parameter.</summary>
-            public uint Value { get; set; }
+            public ArgumentValue Value { get; set; }
 
-            public void Edit(Instr instr)
+            public void Edit(Instr instr, Events events)
             {
-                instr[Param.Offset(instr)] = Value;
+                instr[Param.Offset(instr)] = Value switch
+                {
+                    ArgumentValue.Literal arg => arg.Value,
+                    ArgumentValue.Constant arg =>
+                        // Events doesn't have a direct way to convert an enum name to its
+                        // value, so we have to parse a fake instruction to get it. We use
+                        // IfConditionGroup() because its first argument is a signed integer,
+                        // and so within range for all actual constants defined by EMEDF.
+                        events.Parse(
+                            events.ParseAdd($"IfConditionGroup({arg.Name}, 0, 0)")
+                        )[0],
+                    _ => throw new ArgumentException($"Unkown ArgumentValue {Value}")
+                };
             }
         }
 

@@ -187,8 +187,24 @@ namespace RandomizerCommon
                         expr.Value = 0;
                         args[i] = AST.AssembleExpression(expr);
                     }
-                    game.WriteESDs.Add("m40_00_00_00");
                 }
+
+                // Replace references to four specific Orbeck spell purchase events with one custom
+                // event that we set once the player has purchased any seven spells. This ensures
+                // that players don't have to guess which randomized items to buy in order to
+                // trigger Orbeck's Slumbering Dragoncrest Ring lot.
+                var orbeckTalk = game.Talk["m40_00_00_00"]["t400230"];
+                var condition = orbeckTalk.StateGroups[0x7FFFFFFF - 17][1].Conditions[3];
+                var conditionExpr = AST.DisassembleExpression(condition.Evaluator);
+                conditionExpr.Visit(AST.AstVisitor.PostAct(expr =>
+                {
+                    if (expr is AST.ConstExpr c && c.Value is int v && v >= 73301100 && v < 73301200)
+                    {
+                        c.Value = 74000800;
+                    }
+                }));
+                condition.Evaluator = AST.AssembleExpression(conditionExpr);
+                game.WriteESDs.Add("m40_00_00_00");
             }
         }
 
