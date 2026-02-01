@@ -79,6 +79,12 @@ NewEvents:
     - SetCharacterInvincibility(3300710, Enabled)
     - SetCharacterInvincibility(3300715, Enabled)
 
+  m39_00_00_00: # Irithyll Dungeon / Profaned Capitol
+  - Comment: Make Karla invincible.
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(3900700, Enabled)
+
   m40_00_00_00: # Firelink
   - Comment: |
       Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
@@ -119,6 +125,15 @@ NewEvents:
     - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 50006131)
     - IfConditionGroup(MAIN, PASS, AND_01)
     - SetCharacterInvincibility(4000745, Disabled)
+    
+  - Comment: |
+      Make Karla invincible as long as she doesn't have all four pyromancy tomes. We do want her
+      killable eventually so the player can get her drops.
+    If: safequest
+    Commands:
+    - SetCharacterInvincibility(4000740, Enabled)
+    - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000300, 70000303)
+    - SetCharacterInvincibility(4000740, Disabled)
 
   - Comment: Make Greirat invincible.
     If: safequest
@@ -470,7 +485,16 @@ ExistingEvents:
     - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
       Condition: false
 
-  m39_00_00_00: # Profaned Capitol
+  m39_00_00_00: # Irithyll Dungeon / Profaned Capitol
+  - ID: 0
+    If: safequest  
+    Edits:
+    # Remove the events that make Karla die or aggro.
+    - Match: {Init: {Callee: 20006002}, Arguments: [3900700]}
+      Remove: true
+    - Match: {Init: {Callee: 20006000}, Arguments: [3900700]}
+      Remove: true
+
   # Prevent Storm Ruler infinite shiny from appearing, since it's randomized elsewhere
   - ID: 13905870
     Edits:
@@ -499,7 +523,7 @@ ExistingEvents:
       Remove: true
     - Match: {Init: {Callee: 20006001}, Arguments: [4000745]}
       Remove: true
-    # Remove events that make Anri and Horace hostile or dead
+    # Same with Anri and Horace
     - Match: {Init: {Callee: 20006001}, Arguments: [null, 1356]} # Anri attacked
       Repeat: -1
       Remove: true
@@ -521,6 +545,9 @@ ExistingEvents:
       Remove: true
     - Match: {Init: {Callee: 14005587}} # Despairing Anri dead
       Repeat: -1
+      Remove: true
+    # Same with Karla
+    - Match: {Init: {Callee: 20006002}, Arguments: [4000740]}
       Remove: true
 
   - ID: 14005501
