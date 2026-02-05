@@ -1,19 +1,18 @@
 # Events for the item randomizer.
 NewEvents:
   common:
-  - Comment: |
-      Hacky Greirat Lothric Castle softlock fix. If you don't have Grand Archives key yet, mark him
-      as having talked about looting Lothric (74000308) so the actual looting flag (74000309) isn't
-      touched by ESD.
-    Commands:
+  # Hacky Greirat Lothric Castle softlock fix. If you don't have Grand Archives key yet, mark him as
+  # having talked about looting Lothric (74000308) so the actual looting flag (74000309) isn't
+  # touched by ESD.
+  - Commands:
     - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventIDSlotNumber, 0)
     - EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, 74000309)
     - SetEventFlag(74000308, ON)
     - IfPlayerHasdoesntHaveItem(MAIN, ItemType.Goods, 2014, OwnershipState.Owns)
     - SetEventFlag(74000308, OFF)
 
+  # Make a boss soul trigger the event to show its items in the shop.
   - Name: showLudlethItems
-    Comment: Make a boss soul trigger the event to show its items in the shop.
     # Run this everywhere, not just in Firelink, so that items still show up if the player cracks the
     # soul before visiting Ludleth.
     Arguments:
@@ -26,10 +25,9 @@ NewEvents:
     - IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, itemID, OwnershipState.Owns)
     - Set Event Flag (qwcID, ON)
 
+  # Do the Path of the Dragon swap. We can't just use the item all of the time, since it would
+  # appear as a double drop.
   - Name: pathOfTheDragon
-    Comment: |
-      Do the Path of the Dragon swap.
-      We can't just use the item all of the time, since it would appear as a double drop.
     If: "!archipelago"
     Arguments: [dragonFlag]
     Commands:
@@ -38,9 +36,8 @@ NewEvents:
     - Award Gesture Item (29,3,9030)
     - Set Event Flag (6079,1)
 
-  - Comment:
-      Trigger Greirat returning from Undead Settlement after beating Crystal Sage or Abyss Watchers.
-    If: safequest
+  # Trigger Greirat returning from Undead Settlement after beating Crystal Sage or Abyss Watchers.
+  - If: safequest
     Commands:
     # If Greirat has been sent to the Settlment
     - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 74000303)
@@ -52,9 +49,8 @@ NewEvents:
     # Return Greirat to Firelink
     - Set Event Flag (74000316, ON)
 
-  - Comment:
-      Trigger Greirat returning from Irithyll after beating Pontiff or Yhorm.
-    If: safequest
+  # Trigger Greirat returning from Irithyll after beating Pontiff or Yhorm.
+  - If: safequest
     Commands:
     # If Greirat has been sent to Irithyll
     - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 74000306)
@@ -65,9 +61,9 @@ NewEvents:
     - IfConditionGroup(MAIN, PASS, AND_01)
     # Return Greirat to Firelink
     - Set Event Flag (74000318, ON)
-    
-  - Comment: Trigger Patches returning from Lothric after beating Twin Princes.
-    If: safequest
+
+  # Trigger Patches returning from Lothric after beating Twin Princes.
+  - If: safequest
     Commands:
     # If Patches has been sent to Lothric
     - IF Event Flag (AND_01, ON, TargetEventFlagType.EventFlag, 74000921)
@@ -78,26 +74,26 @@ NewEvents:
     - Set Event Flag (74000925, ON)
 
   m33_00_00_00: # Road of Sacrifices / Farron Keep
-  - Comment: Make Orbeck invincible
-    If: safequest
+  # Make Orbeck invincible
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(3300700, Enabled)
 
-  - Comment: Make Anri and Horace invincible
-    If: safequest
+  # Make Anri and Horace invincible
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(3300705, Enabled)
     - SetCharacterInvincibility(3300710, Enabled)
     - SetCharacterInvincibility(3300715, Enabled)
 
   m39_00_00_00: # Irithyll Dungeon / Profaned Capitol
-  - Comment: Make Karla invincible.
-    If: safequest
+  # Make Karla invincible.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(3900700, Enabled)
 
-  - Comment: Grant Siegbräu after picking up Siegward's death lot.
-    If: safequest
+  # Grant Siegbräu after picking up Siegward's death lot.
+  - If: safequest
     Commands:
     - END IF Event Flag (EventEndType.End, ON, TargetEventFlagType.EventFlag, 50006212)
     - IF Event Flag (OR_01, ON, TargetEventFlagType.EventFlag, 50006216)
@@ -106,39 +102,34 @@ NewEvents:
     - Award Item Lot (62105)
 
   m40_00_00_00: # Firelink
-  - Comment: |
-      Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
-      ActionButtonParam in PermutationWriter.
-    Rest: Restart
+  # Make Firelink Shrine greyed out without having the Coiled Sword, in combination with setting
+  # ActionButtonParam in PermutationWriter.
+  - Rest: Restart
     Commands:
     - Set Event Flag (14005108,1)
     - IF Player Has/Doesn't Have Item (0,3,2137,1)
     - Set Event Flag (14005108,0)
 
-  - Comment: |
-      Make Irina invincible as long as she doesn't have both light tomes. We do want her killable
-      eventually so the player can get her drop. We don't need to worry about the dark tomes here
-      since we edit the ESD to make her unable to take them.
-    If: safequest
+  # Make Irina invincible as long as she doesn't have both light tomes. We do want her killable
+  # eventually so the player can get her drop. We don't need to worry about the dark tomes here
+  # since we edit the ESD to make her unable to take them.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000725, Enabled)
     - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000350, 70000351)
     - SetCharacterInvincibility(4000725, Disabled)
     
-  - Comment: |
-      Make Cornyx invincible as long as he doesn't have all three pyromancy tomes. We do want him
-      killable eventually so the player can get his drops.
-    If: safequest
+  # Make Cornyx invincible as long as he doesn't have all three pyromancy tomes. We do want him
+  # killable eventually so the player can get his drops.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000735, Enabled)
     - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000250, 70000252)
     - SetCharacterInvincibility(4000735, Disabled)
 
-  - Comment: |
-      Make Orbeck invincible as long as he doesn't have all four scrolls and as long as the player
-      hasn't received his gift. We do want him killable eventually so the player can do Yuria's
-      quest.
-    If: safequest
+  # Make Orbeck invincible as long as he doesn't have all four scrolls and as long as the player
+  # hasn't received his gift. We do want him killable eventually so the player can do Yuria's quest.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000745, Enabled)
     - IfBatchEventFlags(AND_01, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000200, 70000204)
@@ -146,17 +137,16 @@ NewEvents:
     - IfConditionGroup(MAIN, PASS, AND_01)
     - SetCharacterInvincibility(4000745, Disabled)
     
-  - Comment: |
-      Make Karla invincible as long as she doesn't have all four pyromancy tomes. We do want her
-      killable eventually so the player can get her drops.
-    If: safequest
+  # Make Karla invincible as long as she doesn't have all four pyromancy tomes. We do want her
+  # killable eventually so the player can get her drops.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000740, Enabled)
     - IfBatchEventFlags(0, LogicalOperationType.AllON, TargetEventFlagType.EventFlag, 70000300, 70000303)
     - SetCharacterInvincibility(4000740, Disabled)
 
-  - Comment: "Make Patches invincible until he's looted Lothric Castle."
-    If: safequest
+  # Make Patches invincible until he's looted Lothric Castle.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000790, Enabled)
     - SetCharacterInvincibility(4000791, Enabled)
@@ -164,22 +154,21 @@ NewEvents:
     - SetCharacterInvincibility(4000790, Disabled)
     - SetCharacterInvincibility(4000791, Disabled)
 
-  - Comment: Make Greirat invincible.
-    If: safequest
+  # Make Greirat invincible.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000720, Enabled)
 
-  - Comment: Make Anri and Horace invincible
-    If: safequest
+  # Make Anri and Horace invincible
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000765, Enabled)
     - SetCharacterInvincibility(4000770, Enabled)
     - SetCharacterInvincibility(4000775, Enabled)
 
-  - Comment: |
-      Make Yuria invincible until after you've married Anri, at which point you can kill her for her
-      drops. We can't put this in Yuria's main event because it depends on flags set by that event.
-    If: safequest
+  # Make Yuria invincible until after you've married Anri, at which point you can kill her for her
+  # drops. We can't put this in Yuria's main event because it depends on flags set by that event.
+  - If: safequest
     Commands:
     - SetCharacterInvincibility(4000750, Enabled)
     - IfEventFlag(0, ON, TargetEventFlagType.EventFlag, 1042)
@@ -313,8 +302,8 @@ ExistingEvents:
     - Match: "SetCharacterInvincibility(X0_4, Disabled)"
       Remove: true
 
+  # Yoel logic
   - ID: 13105600
-    Comment: The driver for Yoel's quest in US
     If: safequest
     Edits:
     # Make Yoel invincible
@@ -489,8 +478,8 @@ ExistingEvents:
     Edits:
     - AddBefore: ["GotoUnconditionally(Label.LABEL10)"]
   
+  # Anri logic
   - ID: 13705640
-    Comment: Basic Anri setup logic
     If: safequest
     Edits:
     # Make Anri invulnerable (male and female versions)
@@ -498,8 +487,8 @@ ExistingEvents:
       - SetCharacterInvincibility(X0_4, Enabled)
       - SetCharacterInvincibility(X4_4, Enabled)
 
+  # Anri and Pilgrim logic at the decision point after Pontiff is defeated
   - ID: 13705641
-    Comment: Anri and Pilgrim logic at the decision point after Pontiff is defeated
     If: safequest
     Edits:
     # By default, this event runs as soon as Anri is in the church and Pontiff is defeated. Add an
@@ -512,10 +501,9 @@ ExistingEvents:
     - Match: IfBatchEventFlags(AND_03, LogicalOperationType.AllOFF, TargetEventFlagType.EventFlag, 1041, 1043)
       Condition: false
 
+  # Anri and Pilgrim logic that triggers the moment at which Pontiff is defeated. Has a lot of
+  # overlap with the previous event.
   - ID: 13700643
-    Comment: |
-        Anri and Pilgrim logic that triggers the moment at which Pontiff is defeated. Has a lot of
-        overlap with the previous event.
     If: safequest
     # Same edits as above, essentially
     Edits:
@@ -524,8 +512,8 @@ ExistingEvents:
     - Match: IfBatchEventFlags(AND_05, LogicalOperationType.AllOFF, TargetEventFlagType.EventFlag, 1041, 1043)
       Condition: false
   
+  # Londor Pilgrim logic
   - ID: 13705645
-    Comment: Londor Pilgrim logic
     If: safequest
     Edits:
     # Make the pilgrim in the church and the temple, as well as its statue equivalent
@@ -534,8 +522,8 @@ ExistingEvents:
       - SetCharacterInvincibility(X4_4, Enabled)
       - SetCharacterInvincibility(X8_4, Enabled)
 
+  # Yoel and Yuria logic
   - ID: 13705650
-    Comment: Yoel and Yuria logic
     If: safequest
     Edits:
     # Don't make Yoel die upon entering Catacombs (interestingly *not* Irithyll here)
@@ -554,8 +542,8 @@ ExistingEvents:
     - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
       Condition: false
 
+  # Siegward logic
   - ID: 13705660
-    Comment: Siegward logic
     If: safequest
     Edits:
     # Make Siegward invincible
@@ -573,8 +561,8 @@ ExistingEvents:
       Repeat: -1
       Remove: true
 
+  # Anri logic. For some reason there are two of these
   - ID: 13805700
-    Comment: The primary driver for Anri's quest. For some reason there are two of these
     If: safequest
     Edits:
     # Make Anri invincible (male/female, in catacombs/by bridge)
@@ -590,8 +578,8 @@ ExistingEvents:
     - Match: IfEventFlag(AND_06, OFF, TargetEventFlagType.EventFlag, 73800102)
       Remove: true
 
+  # Anri logic #2
   - ID: 13805703
-    Comment: The *second* primary driver for Anri's quest
     If: safequest
     Edits:
     # Same edits as above
@@ -600,8 +588,8 @@ ExistingEvents:
     - Match: IfEventFlag(AND_07, OFF, TargetEventFlagType.EventFlag, 73800102)
       Remove: true
 
+  # Yuria logic
   - ID: 13805707
-    Comment: Yuria logic
     If: safequest
     Edits:
     # Disable various events that fail Yuria's quest. These shouldn't be triggerable, but just in
@@ -640,8 +628,8 @@ ExistingEvents:
     - Match: {Name: IfEventFlag, Arguments: [null, null, null, 73500105]}
       Set: [{Param: targetEventFlagId, Value: 50006211}]
 
+  # Siegward logic
   - ID: 13905720
-    Comment: Siegward logic
     If: safequest
     Edits:
     # Make Siegward invincible
@@ -697,8 +685,8 @@ ExistingEvents:
       Repeat: -1
       Remove: true
 
+  # Patches betrayal
   - ID: 14000621
-    Comment: Patches Betrayal
     If: safequest
     Edits:
     # Rather than allowing Patches to show up at the bell tower under a variety of circumstances,
@@ -709,7 +697,6 @@ ExistingEvents:
 
   - ID: 14005501
     Name: countOrbeckSpells
-    Comment: Orbeck Spell Counter
     Edits:
     # This event contains conditions for every spell, but those outside the default shop items and
     # Sage's Scroll are in the unused AND_01 condition group. Put them in OR_01 instead so that
@@ -720,8 +707,8 @@ ExistingEvents:
       - {Param: {Index: 0}, Value: OR_01}
       - {Param: {Index: 1}, Value: CHANGE}
 
+  # Yuria logic
   - ID: 14005520
-    Comment: Yuria logic
     If: safequest
     Edits:
     # Disable various events that fail Yuria's quest. These shouldn't be triggerable, but just in
@@ -735,8 +722,8 @@ ExistingEvents:
     - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
       Condition: false
 
+  # Yoel logic
   - ID: 14005740
-    Comment: Yoel logic
     If: safequest
     Edits:
     # Make Yoel invincible
@@ -747,8 +734,8 @@ ExistingEvents:
     - Match: IfEventFlag(AND_05, ON, TargetEventFlagType.EventFlag, 138)
       Condition: false
 
+  # Greirat logic
   - ID: 14005700
-    Comment: Greirat logic
     If: safequest
     Edits:
     # Prevent the player from killing Greirat
