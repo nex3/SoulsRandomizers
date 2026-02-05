@@ -196,7 +196,7 @@ namespace RandomizerCommon
 
                     notify?.Invoke("Editing game files");
                     PermutationWriter write =
-                        new PermutationWriter(game, data, anns, events, eventConfig, opt);
+                        new(game, data, anns, events, null, eventConfig, null, opt);
                     write.Write(new Random(seed + 1), perm);
                     if (!opt["norandom_skills"])
                     {
@@ -244,9 +244,14 @@ namespace RandomizerCommon
 
                     notify?.Invoke("Editing game files");
                     random = new Random(seed + 1);
+                    var esdDoc = ESDDocumentation.DeserializeFromFile(
+                        $@"{game.Dir}\Base\ds3.esd.json",
+                        new ESDDocumentation.DocOptions() { Game = "ds3" }
+                    );
                     var itemEventConfig = game.ParseYaml<EventConfig>("itemevents.yaml");
+                    var ezstateConfig = game.ParseYaml<EzstateConfig>("ezstate.yaml");
                     PermutationWriter writer =
-                        new PermutationWriter(game, data, ann, events, itemEventConfig, opt);
+                        new(game, data, ann, events, esdDoc, itemEventConfig, ezstateConfig, opt);
                     writer.Write(random, permutation);
                     random = new Random(seed + 2);
                     // TODO maybe randomize other characters no matter what, only do self for item rando
@@ -313,8 +318,18 @@ namespace RandomizerCommon
 
                     notify?.Invoke(messages.Get(editPhase));
                     random = new Random(seed + 1);
-                    PermutationWriter writer = new PermutationWriter(
-                        game, data, ann, null, itemEventConfig, opt, messages, coord);
+                    PermutationWriter writer = new(
+                        game,
+                        data,
+                        ann,
+                        null,
+                        null,
+                        itemEventConfig,
+                        null,
+                        opt,
+                        messages,
+                        coord
+                    );
                     permResult = writer.Write(random, perm);
 
                     if (opt["markareas"])

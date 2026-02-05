@@ -176,7 +176,7 @@ namespace RandomizerCommon
         /// <remarks>
         /// An edit has two critical components: the <c>Matcher</c> which determines which
         /// instruction(s) in the event to change, and the other properties which indicate which
-        /// change(s) to make. Only one change may be made per edit.
+        /// change(s) to make.
         /// </remarks>
         public class EventEdit
         {

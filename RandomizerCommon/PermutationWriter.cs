@@ -29,7 +29,9 @@ namespace RandomizerCommon
         private LocationData data;
         private AnnotationData ann;
         private Events events;
+        private ESDDocumentation esdDoc;
         private EventConfig eventConfig;
+        private EzstateConfig ezstateConfig;
         private RandomizerOptions opt;
         private Messages messages;
         private EldenCoordinator coord;
@@ -64,7 +66,9 @@ namespace RandomizerCommon
             LocationData data,
             AnnotationData ann,
             Events events,
+            ESDDocumentation esdDoc,
             EventConfig eventConfig,
+            EzstateConfig ezstateConfig,
             RandomizerOptions opt,
             Messages messages = null,
             EldenCoordinator coord = null
@@ -74,7 +78,9 @@ namespace RandomizerCommon
             this.data = data;
             this.ann = ann;
             this.events = events;
+            this.esdDoc = esdDoc;
             this.eventConfig = eventConfig;
+            this.ezstateConfig = ezstateConfig;
             this.opt = opt;
             this.messages = messages;
             this.coord = coord;
@@ -168,87 +174,6 @@ namespace RandomizerCommon
                         "Equip this covenant in place of the conventional requirements to " +
                         "summon dark spirits.";
                 }
-
-                if (opt["safequest"])
-                {
-                    // Remove the option to say you haven't met Patches before in the Cathedral.
-                    game
-                        .Talk["m35_00_00_00"]["t350301"]
-                        .StateGroups[0x7FFFFFFF - 8][5]
-                        .EntryCommands
-                        .RemoveAt(1);
-                    game.WriteESDs.Add("m35_00_00_00");
-
-                    // Remove the option to not forgive Patches in Firelink.
-                    game
-                        .Talk["m40_00_00_00"]["t400301"]
-                        .StateGroups[0x7FFFFFFF - 8][8]
-                        .EntryCommands
-                        .RemoveAt(0);
-
-                    // Make Patches enquire about Greirat even if you bought the Catarina set lots.
-                    var patchesFirelink = game.Talk["m40_00_00_00"]["t400301"];
-                    patchesFirelink
-                        .StateGroups[0x7FFFFFFF - 8][1]
-                        .Conditions.Find(c => c.TargetState == 6)
-                        .Evaluator = AST.AssembleExpression(CheckEvent(1204, true));
-
-                    // Make Patches talk about Greirat (and trigger the Horsehoof Ring lot) as long
-                    // as Greirat has been freed at all.
-                    patchesFirelink
-                        .StateGroups[0x7FFFFFFF - 24][7]
-                        .Conditions.Find(c => c.TargetState == 12)
-                        .Evaluator = AST.AssembleExpression(CheckEvent(1200, false));
-
-                    // Make Greirat unable to go to Irithyll until Patches is in Firelink, and thus
-                    // is able to rescue him. This ensures you can't softlock yourself if, for
-                    // example, Greirat's shop has the Tower Key.
-                    var greiratIrithyllCondition = game
-                        .Talk["m40_00_00_00"]["t400220"]
-                        .StateGroups[0x7FFFFFFF - 8][14]
-                        .Conditions.Find(c => c.TargetState == 16);
-                    greiratIrithyllCondition.Evaluator = AST.AssembleExpression(new AST.BinaryExpr
-                    {
-                        Op = "&&",
-                        Lhs = AST.DisassembleExpression(greiratIrithyllCondition.Evaluator),
-                        Rhs = CheckEvent(1365, true),
-                    });
-
-                    // Replace the references to the dark tomes in Irina's ESD with 0s. There aren't
-                    // any items with ID 0, so she'll never take the tomes or anything in their
-                    // place, and thus never enter dark mode.
-                    //
-                    // Doing this manually kinda sucks, but it's not yet clear to me how best to
-                    // generalize it. Once I know a few more types of edits I want to make, I'll
-                    // try putting this in a config file. The in-progress work is in the talk-edit
-                    // branch.
-                    var irinaTalk = game.Talk["m40_00_00_00"]["t400260"];
-                    var state = irinaTalk.StateGroups[0x7FFFFFFF - 7][16];
-                    var args = state.EntryCommands[0].Arguments;
-                    for (var i = 3; i <= 4; i++)
-                    {
-                        var expr = (AST.ConstExpr)AST.DisassembleExpression(args[i]);
-                        expr.Value = 0;
-                        args[i] = AST.AssembleExpression(expr);
-                    }
-                }
-
-                // Replace references to four specific Orbeck spell purchase events with one custom
-                // event that we set once the player has purchased any seven spells. This ensures
-                // that players don't have to guess which randomized items to buy in order to
-                // trigger Orbeck's Slumbering Dragoncrest Ring lot.
-                var orbeckTalk = game.Talk["m40_00_00_00"]["t400230"];
-                var orbeckCondition = orbeckTalk.StateGroups[0x7FFFFFFF - 17][1].Conditions[3];
-                var orbeckConditionExpr = AST.DisassembleExpression(orbeckCondition.Evaluator);
-                orbeckConditionExpr.Visit(AST.AstVisitor.PostAct(expr =>
-                {
-                    if (expr is AST.ConstExpr c && c.Value is int v && v >= 73301100 && v < 73301200)
-                    {
-                        c.Value = 74000800;
-                    }
-                }));
-                orbeckCondition.Evaluator = AST.AssembleExpression(orbeckConditionExpr);
-                game.WriteESDs.Add("m40_00_00_00");
             }
         }
 
@@ -1021,6 +946,8 @@ namespace RandomizerCommon
 
             // Events
             if (eventConfig != null) game.UpdateEvents(eventConfig, events, opt);
+            // NPC Dialog
+            if (ezstateConfig != null) game.UpdateEzstate(ezstateConfig, esdDoc, opt);
 
             if (game.Sekiro)
             {
