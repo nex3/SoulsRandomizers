@@ -768,6 +768,5 @@ Initialize:
   # Trigger a custom event when Orbeck sells seven scrolls. We use this as the
   # new trigger for giving the Slumbering Dragoncrest Ring lot, so the player
   # doesn't have to guess which of the four spells trigger it.
-  - ID: 14005501
-    Name: countOrbeckSpells
+  - Name: countOrbeckSpells
     Arguments: [74000800, 74000801, 4, 4, 4]
