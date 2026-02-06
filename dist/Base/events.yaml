@@ -1,8 +1,8 @@
 # Events for the enemy randomizer.
 NewEvents:
   common_func:
+  # Applying a speffect when a character is backread. This might not work with generators
   - Name: scale
-    Comment: Applying a speffect when a character is backread. This might not work with generators
     Arguments: [entity, spEffect]
     Commands:
     - IfCharacterBackreadStatus(MAIN, entity, true, ComparisonType.Equal, 1)
@@ -16,13 +16,13 @@ NewEvents:
     - WaitFixedTimeSeconds(1)
     - EndUnconditionally(EventEndType.Restart)
 
+  # Set a team type according to the target's original type.
   - Name: teamtype
-    Comment: Set a team type according to the target's original type.
     Arguments: [entity, {Name: teamType, Width: 1}]
     Commands: ["SetCharacterTeamType(entity, teamType)"]
 
+  # Gives an enemy fall damage cancel in Greatwood Arena, based on 13105813.
   - Name: greatwoodfall
-    Comment: Gives an enemy fall damage cancel in Greatwood Arena, based on 13105813.
     Arguments: [entity]
     Commands:
     - IfInoutsideArea(MAIN, InsideOutsideState.Inside, entity, 3102802, 1)
@@ -31,8 +31,8 @@ NewEvents:
     - WaitFixedTimeSeconds(3)
     - EndUnconditionally(EventEndType.Restart)
 
+  # Awards flagless Storm Ruler lot if player doesn't have one and Yhorm has started
   - Name: yhormruler
-    Comment: Awards flagless Storm Ruler lot if player doesn't have one and Yhorm has started
     Commands:
     - IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 13905819)
     - SetEventFlag(13905819, OFF)
@@ -46,8 +46,8 @@ NewEvents:
     - EndIfConditionGroupStateUncompiled(EventEndType.End, PASS, OR_01)
     - AwardItemLot(4600)
 
+  # Sets a music flag for a generic health condition.
   - Name: musicflag
-    Comment: Sets a music flag for a generic health condition.
     Arguments: [entity, outputEvent]
     Commands:
     - IfCharacterHPRatio(MAIN, entity, ComparisonType.LessOrEqual, 0.5, ComparisonType.Equal, 1)
@@ -55,12 +55,12 @@ NewEvents:
 
 ExistingEvents:
   common_func:
+  # Drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
   - ID: 20005350
     Name: enemydrop
-    Comment: Drop item upon enemy death, no disabling enemy. X0 = entity id, X4 = item lot, X8 = drop flag
+  # Enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
   - ID: 20000343
     Name: showmimic
-    Comment: Enable mimic in various states. X0 = death flag, X4 = entity id, X8 = drop flag.
 
 DefaultSegments:
 - Type: disable

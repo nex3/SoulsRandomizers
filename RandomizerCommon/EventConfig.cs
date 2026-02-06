@@ -50,9 +50,6 @@ namespace RandomizerCommon
             /// </remarks>
             public string Name { get; set; }
 
-            /// <summary>Documentation for this event.</summary>
-            public string Comment { get; set; }
-
             /// <summary>
             /// A boolean expression. This event is only applied if it returns true.
             /// </summary>
