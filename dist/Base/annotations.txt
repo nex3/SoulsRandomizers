@@ -8062,7 +8062,7 @@ Slots:
   - Firelink Armor - 110551[Shrine Handmaid after defeating Soul of Cinder (1)]
   - Firelink Gauntlets - 110552[Shrine Handmaid after defeating Soul of Cinder (1)]
   - Firelink Leggings - 110553[Shrine Handmaid after defeating Soul of Cinder (1)]
-  Text: Sold by Handmaid after defeating Soul of Cinder
+  Text: Sold by Handmaid after defeating Soul of Cinder or with NG+ locations enabled
   Area: kiln
   Tags: end raceshop
 - Key: '99,0:-1:9210,110000:'
