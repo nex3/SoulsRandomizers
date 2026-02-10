@@ -1349,9 +1349,9 @@ namespace RandomizerCommon
                     });
                 }
 
-                // Make every boss soul trigger the event to show it in the shop.
                 foreach (PARAM.Row row in shops.Rows)
                 {
+                    // Make every boss soul trigger the event to show it in the shop.
                     int mat = (int)row["mtrlId"].Value;
                     if (mat > 0 && bossSoulItems.TryGetValue(mat, out ItemKey soul))
                     {
@@ -1366,6 +1366,14 @@ namespace RandomizerCommon
                             $"IF Player Has/Doesn't Have Item (MAIN, ItemType.Goods, {soul.ID}, OwnershipState.Owns)",
                             $"Set Event Flag ({eventFlag}, ON)"
                         });
+                    }
+
+                    // Make the Firelink Set trigger on the current-cycle boss defeat flag rather
+                    // than the cross-cycle boss defeat flag. Otherwise the change above would make
+                    // them show up as soon as the player gets Soul of the Lords.
+                    if (row.ID / 10000 == 11 && (int)row["qwcID"].Value == 6321)
+                    {
+                        row["qwcID"].Value = 9321;
                     }
                 }
             }
