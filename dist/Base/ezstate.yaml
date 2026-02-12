@@ -1,6 +1,16 @@
 ExistingStates:
   ## Cathedral of the Deep
 
+  t350020: # Rosaria
+  # Don't allow the player to join the covenant until Leonhard's seen them with
+  # a pale tongue, so they can't spend them all before progressing his quest.
+  - Group: 8
+    State: 2
+    If: safequest
+    EditCommands:
+    - Match: {Name: AddTalkListDataIf, Arguments: [null, null, 14020001]}
+      Arguments: {1: {AndAlso: GetEventStatus(1143)}}
+
   t350301: # Patches
   # Remove the option to say you haven't met Patches before in the Cathedral.
   - Group: 8

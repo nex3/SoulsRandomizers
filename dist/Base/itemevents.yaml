@@ -421,6 +421,18 @@ ExistingEvents:
     - Match: {Init: {Callee: 20006032}}
       Repeat: -1
       Remove: true
+
+    # Same with Leonhard
+    - Match: {Init: {Callee: 20006002}, Arguments: [3500715]}
+      Repeat: -1
+      Remove: true
+    - Match: {Init: {Callee: 20006000}, Arguments: [3500715]}
+      Repeat: -1
+      Remove: true
+    - Match: {Init: {Callee: 20006001}, Arguments: [3500715]}
+      Repeat: -1
+      Remove: true
+
     # Remove an event that makes Patches leave prematurely
     - Match: {Init: {Callee: 13500782}}
       Remove: true
@@ -432,6 +444,13 @@ ExistingEvents:
     # as you've met Yuria.
     - Match: {Init: {Callee: 20005750}, Arguments: [null, null, null, null, null, null, null, null, 70000004]}
       Set: [{Param: 8, Value: 74000600}]
+
+  # Leonhard logic
+  - ID: 13505720
+    If: safequest
+    Edits:
+    # Make Leonhard invulnerable
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
 
   - ID: 13505760
     If: safequest
@@ -792,6 +811,13 @@ ExistingEvents:
     # dialogue so he doesn't suggest raiding Irithyll until Patches is in Firelink.)
     - Match: "IfEventFlag(OR_01, ON, TargetEventFlagType.EventFlag, 1385)"
       Condition: true
+
+  # Leonhard logic
+  - ID: 14005750
+    If: safequest
+    Edits:
+    # Make Leonhard invincible
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
 
   m45_00_00_00: # Painted World of Ariandel
   - ID: 14505181
