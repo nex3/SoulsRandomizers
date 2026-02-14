@@ -620,8 +620,6 @@ ExistingEvents:
     If: safequest  
     Edits:
     # Remove the events that make Karla die or aggro.
-    - Match: {Init: {Callee: 20006003}, Arguments: [3900700]}
-      Remove: true
     - Match: {Init: {Callee: 20006002}, Arguments: [3900700]}
       Remove: true
     # Same with Siegward
