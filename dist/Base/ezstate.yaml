@@ -12,6 +12,22 @@ ExistingStates:
 
   ## Firelink Shrine
 
+  t400201: # Shrine Handmaiden
+  # Both of the following edits remove the option to not tell the handmaiden
+  # where you found Dreamchaser's Ashes.
+  - Group: 6
+    State: 10
+    If: safequest
+    EditCommands:
+    - Match: {Name: AddTalkListData, Arguments: [null, 14011001]}
+      Remove: true
+  - Group: 13
+    State: 6
+    If: safequest
+    EditCommands:
+    - Match: {Name: AddTalkListData, Arguments: [null, 14011001]}
+      Remove: true
+
   t400220: # Greirat
   # Make Greirat unable to go to Irithyll until Patches is in Firelink, and thus is able to rescue
   # him. This ensures you can't softlock yourself if, for example, Greirat's shop has the Tower Key.
