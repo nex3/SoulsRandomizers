@@ -180,7 +180,29 @@ ExistingEvents:
   - ID: 20005523
     If: ngplusrings
     Edits: [AddBefore: ["GOTO Unconditionally (0)"]]
-    
+
+  # Scripted invasion trigger
+  - ID: 20005750
+    If: phantomhunters
+    Edits:
+    # Allow invaders to invade after the boss has been defeated
+    - Match: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, X_0)
+      Remove: true
+    # Detect the Phantom Hunters covenant instead of ember status
+    - Match: IfCharacterHasSpEffect(AND_01, 10000, 490, true, ComparisonType.Equal, 1)
+      Replace: ["IfPlayersCovenant(AND_01, 10)"]
+
+  # Multi-location scripted invasion trigger
+  #
+  # Note that these invasions (only used in the DLC) don't require the player to be embered in
+  # vanilla, so we don't require the phantom hunter covenant.
+  - ID: 20005752
+    If: phantomhunters
+    Edits:
+    # Allow invaders to invade after the boss has been defeated
+    - Match: EndIfEventFlag(EventEndType.End, ON, TargetEventFlagType.EventFlag, eventFlagId)
+      Remove: true
+
   common:
   - ID: 0
     If: safequest
@@ -403,6 +425,14 @@ ExistingEvents:
     - Match: {Init: {Callee: 13500782}}
       Remove: true
 
+  - ID: 0
+    If: phantomhunters
+    Edits:
+    # Instead of Londor Pale Shade only invading after you've angered Yuria, it now invades as long
+    # as you've met Yuria.
+    - Match: {Init: {Callee: 20005750}, Arguments: [null, null, null, null, null, null, null, null, 70000004]}
+      Set: [{Param: 8, Value: 74000600}]
+
   - ID: 13505760
     If: safequest
     Edits:
@@ -469,6 +499,21 @@ ExistingEvents:
       Remove: true
     - Match: {Init: {Callee: 20006002}, Arguments: [3700715]}
       Remove: true
+
+  # The following two events both control when Londor Pale Shade can invade, and they're both
+  # modified to make it invade as soon as you've met Yuria even if she isn't hostile.
+  - ID: 13705280
+    if: phantomhunters
+    Edits:
+    - Match: GotoIfEventFlag(Label.LABEL1, OFF, TargetEventFlagType.EventFlag, 70000004)
+      Set: {Param: 3, Value: 74000600}
+  - ID: 13705281
+    if: phantomhunters
+    Edits:
+    - Match: IfEventFlag(OR_01, CHANGE, TargetEventFlagType.EventFlag, 70000004)
+      Set: {Param: 3, Value: 74000600}
+    - Match: GotoIfEventFlag(Label.LABEL1, OFF, TargetEventFlagType.EventFlag, 70000004)
+      Set: {Param: 3, Value: 74000600}
 
   # Prevent Greirat becoming lost from triggering here. Skip straight ahead to the point where his
   # corpse either does or doesn't spawn. (His quest should never get to the point where he creates
@@ -747,6 +792,13 @@ ExistingEvents:
     # dialogue so he doesn't suggest raiding Irithyll until Patches is in Firelink.)
     - Match: "IfEventFlag(OR_01, ON, TargetEventFlagType.EventFlag, 1385)"
       Condition: true
+
+  m45_00_00_00: # Painted World of Ariandel
+  - ID: 14505181
+    If: phantomhunters
+    # Detect the Phantom Hunters covenant instead of ember status
+    - Match: IfCharacterHasSpEffect(AND_01, 10000, 490, true, ComparisonType.Equal, 1)
+      Replace: ["IfPlayersCovenant(AND_01, 10)"]
 
 Initialize:
   m40_00_00_00: # Firelink
