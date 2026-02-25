@@ -52,7 +52,7 @@ namespace DS3Randomizer
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 #if ARCHIPELAGO
-                Application.Run(new ArchipelagoForm());
+                Application.Run(new ArchipelagoForm(FromGame.DS3));
 #else
                 Application.Run(new MainForm());
 #endif

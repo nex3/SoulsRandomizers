@@ -9,6 +9,11 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
+    <Configurations>Debug;Release;Debug (Archipelago);Release (Archipelago)</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug (Archipelago)' Or '$(Configuration)' == 'Release (Archipelago)' ">
+    <DefineConstants>$(DefineConstants);ARCHIPELAGO</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ArchipelagoForm));
             url = new System.Windows.Forms.TextBox();
             submit = new System.Windows.Forms.Button();
             status = new System.Windows.Forms.Label();
@@ -152,10 +151,10 @@
             Controls.Add(status);
             Controls.Add(submit);
             Controls.Add(url);
-            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             Margin = new System.Windows.Forms.Padding(5);
             Name = "ArchipelagoForm";
             Text = "Connect to Archipelago";
+            Load += ArchipelagoForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }

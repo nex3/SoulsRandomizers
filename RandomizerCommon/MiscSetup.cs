@@ -15,6 +15,7 @@ using static RandomizerCommon.LocationData;
 using SoulsFormats.Util;
 using Org.BouncyCastle.Math;
 using System.Collections;
+using SteamPath;
 
 namespace RandomizerCommon
 {
@@ -69,9 +70,9 @@ namespace RandomizerCommon
                 {
                     File.Copy(@"..\oo2core_6_win64.dll", "oo2core_6_win64.dll");
                 }
-                else if (File.Exists(@"C:\Program Files (x86)\Steam\steamapps\common\Sekiro\oo2core_6_win64.dll"))
+                else if (SteamPath.SteamPath.Find("814380") is String path && File.Exists($@"{path}\oo2core_6_win64.dll"))
                 {
-                    File.Copy(@"C:\Program Files (x86)\Steam\steamapps\common\Sekiro\oo2core_6_win64.dll", "oo2core_6_win64.dll");
+                    File.Copy($@"{path}\oo2core_6_win64.dll", "oo2core_6_win64.dll");
                 }
                 else
                 {

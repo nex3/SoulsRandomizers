@@ -52,7 +52,11 @@ namespace SekiroRandomizer
 #endif
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+#if ARCHIPELAGO
+                Application.Run(new ArchipelagoForm(FromGame.SDT));
+#else
                 Application.Run(new SekiroForm());
+#endif
             }
         }
     }

@@ -49,7 +49,7 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="RandomizerCommon.ArchipelagoForm.VersionAttribute">
-      <_Parameter1>$(DS3_AP_VERSION)</_Parameter1>
+      <_Parameter1>$(AP_CLIENT_VERSION)</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

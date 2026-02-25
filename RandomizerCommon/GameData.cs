@@ -1349,7 +1349,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         private void LoadParams()
         {
-            bool lazy = true;
+            bool lazy = false;
             Dictionary<string, PARAM> dict;
             string path;
             if (!lazy)

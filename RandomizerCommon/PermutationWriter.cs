@@ -22,7 +22,7 @@ namespace RandomizerCommon
 {
     public class PermutationWriter
     {
-        private static List<string> itemValueCells = new List<string> { "shopPrice", "Unk9", "Costvalue", "shopId" };
+        private static List<string> itemValueCells = new List<string> { "shopPrice", "Unk9", "Costvalue", "saleValue" };
 
         private GameData game;
         private LocationData data;
@@ -255,6 +255,9 @@ namespace RandomizerCommon
                 itemLotFlags = game.Params["ItemLotParam"].Rows
                     .Where(r => (int)r["getItemFlagId"].Value > 0)
                     .Select(r => ((int)r.ID, (int)r["getItemFlagId"].Value)).OrderBy(r => r.Item1).ToList();
+                shopFlags = game.Params["ShopLineupParam"].Rows
+                    .Where(r => (int)r["EventFlag"].Value > 0)
+                    .Select(r => ((int)r.ID, (int)r["EventFlag"].Value)).OrderBy(r => r.Item1).ToList();
             }
             else if (game.EldenRing)
             {
@@ -1971,9 +1974,16 @@ namespace RandomizerCommon
             long? archipelagoLocationId  = null, ItemKey replaceWithInArchipelago = null,
             uint replaceWithQuantity = 1)
         {
-            // Use the Small Doll as the basis for the row
             var (key, row) = this.AddSyntheticCopy(
-                new ItemKey(ItemType.GOOD, 2005),
+                new ItemKey(
+                    ItemType.GOOD,
+                    game.Type switch
+                    {
+                        FromGame.DS3 => 2005, // Small Doll
+                        FromGame.SDT => 2501, // Shelter Stone
+                        var g => throw UnsupportedGame(g),
+                    }
+                ),
                 archipelagoLocationId,
                 replaceWithInArchipelago: replaceWithInArchipelago,
                 replaceWithQuantity: replaceWithQuantity
@@ -2060,7 +2070,7 @@ namespace RandomizerCommon
 
             // If a spell gets duplicated, duplicate its corresponding Magic entry as well so that
             // it has proper stat requirements and so on.
-            if (original.Type == ItemType.GOOD)
+            if (original.Type == ItemType.GOOD && this.game.Type != FromGame.SDT)
             {
                 var magic = game.Params["Magic"][original.ID];
                 if (magic != null)
@@ -2078,8 +2088,20 @@ namespace RandomizerCommon
             var key = new ItemKey(original.Type, row.ID + upgrades);
             if (replaceWithInArchipelago != null)
             {
-                row["basicPrice"].Value = replaceWithInArchipelago.FullID;
-                row["sellValue"].Value = replaceWithQuantity;
+                switch (this.game.Type)
+                {
+                    case FromGame.DS3:
+                        row["basicPrice"].Value = replaceWithInArchipelago.FullID;
+                        row["sellValue"].Value = replaceWithQuantity;
+                        break;
+
+                    case FromGame.SDT:
+                        row["saleValue"].Value = replaceWithInArchipelago.FullID;
+                        row["sellValue"].Value = replaceWithQuantity;
+                        break;
+
+                    case var g: throw UnsupportedGame(g);
+                }
                 syntheticToOriginal[key] = replaceWithInArchipelago;
             }
             else
@@ -2496,9 +2518,9 @@ namespace RandomizerCommon
                 }
                 if (key.Type != ItemType.GOOD) throw new Exception($"Trying to sell non-item {key} in Sekiro, todo need to handle this");
                 PARAM.Row itemRow = game.Item(key);
-                if ((int)itemRow["shopId"].Value == -1)
+                if ((int)itemRow["saleValue"].Value == -1)
                 {
-                    itemRow["shopId"].Value = 100;
+                    itemRow["saleValue"].Value = 100;
                 }
             }
             else if (game.DS3)
