@@ -61,7 +61,7 @@
 2121 [Tengu of Ashina: Ashina Castle] Memory: Isshin Ashina
 2122 [Tengu of Ashina: Ashina Castle] Memory
 2130 [Sword Saint Isshin: Ashina Reservoir] Dragon Flash
-2131 [Sword Saint Isshin: Ashina Reservoir] Memory: Saint Isshin 
+2131 [Sword Saint Isshin: Ashina Reservoir] Memory: Saint Isshin
 2132 [Sword Saint Isshin: Ashina Reservoir] Memory
 2200 [Headless Ape's Centipede: Sunken Valley] Bestowal Ninjutsu
 2499 [Unused/Unknown] Regenerative Power 2x
