@@ -135,10 +135,7 @@ namespace RandomizerCommon
             /// <remarks>Throws an exception if no command matches <c>Match</c>.</remarks>
             public void Edit(State state, ESDDocumentation doc)
             {
-                var editTypes = 0;
-                if (Arguments.Count > 0) editTypes++;
-                if (Remove) editTypes++;
-                if (editTypes > 1)
+                if (Arguments.Count > 0 && Remove)
                 {
                     throw new Exception("Each CommandEdit may only contain one edit");
                 }
