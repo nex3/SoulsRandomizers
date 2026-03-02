@@ -346,7 +346,11 @@ namespace RandomizerCommon
                         SyntheticItemName(info),
                         $"An object from a mysterious world known only as \"{player.Game}\".",
                         // Custom Archipelago icon.
-                        iconId: 6020,
+                        iconId: type switch {
+                            FromGame.DS3 => 6020,
+                            FromGame.SDT => 579,
+                            var g => throw UnsupportedGame(g),
+                        },
                         // The highest in-game sortId across all supported games is 133,100, so for
                         // foreign items we start from 200,000 to sort them after in-game key
                         // items. From there we add the player ID as the primary sort, followed by

@@ -41,9 +41,9 @@ namespace RandomizerCommon
                     FromGame.DS3 => "374320",
                     FromGame.SDT => "814380",
                     FromGame.ER => "1245620",
-                    _ => throw new NotImplementedException(),
+                    var g => throw UnsupportedGame(g),
                 }) ?? throw new Exception("Can't find game executable, is it installed?");
-                return $@"{parent}\Game";
+                return Type == FromGame.SDT ? parent : $@"{parent}\Game";
             }
         }
 

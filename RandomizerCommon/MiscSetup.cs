@@ -518,7 +518,7 @@ namespace RandomizerCommon
                     Directory.GetDirectories(bdtOverlay, "*.tpf.dcx", SearchOption.AllDirectories);
                 var archivesToOutputs = archives.ToDictionary(
                     archive => archive,
-                    archive => Path.Join(game.Dir, "..", Path.GetRelativePath(bdtOverlay, archive))
+                    archive => Path.GetRelativePath(bdtOverlay, archive)
                 );
 
                 // If all the archives are already present in the mod, don't waste time loading the
