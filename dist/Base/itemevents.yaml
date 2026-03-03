@@ -316,6 +316,21 @@ ExistingEvents:
       Remove: true
     - Match: {Init: {Callee: 20006002}, Arguments: [3100731]}
       Remove: true
+    # Same with friendly Hodrick. The invader and invadee don't use these events.
+    - Match: {Init: {Callee: 20006002}, Arguments: [3100740]}
+      Remove: true
+    - Match: {Init: {Callee: 20006000}, Arguments: [3100740]}
+      Remove: true
+    - Match: {Init: {Callee: 20006001}, Arguments: [3100740]}
+      Remove: true
+
+  # Trigger Hodrick's invadability
+  - ID: 13100180
+    If: safequest
+    Edits:
+    # Don't let Sirris invade Hodrick before invading Creighton
+    - Match: {Name: IfEventFlag, Arguments: [null, ON, TargetEventFlagType.EventFlag, 1124]}
+      Remove: true
 
   - ID: 13100210
     If: safequest
@@ -323,6 +338,16 @@ ExistingEvents:
     # Remove an event that can disable Siegward's invincibility
     - Match: "SetCharacterInvincibility(X0_4, Disabled)"
       Remove: true
+
+  # Kill Hodrick when Greatwood falls
+  - ID: 13100701
+    If: safequest
+    Edits:
+    # Don't kill Hodrick unless the player has received the Mound-Makers item lot. We specifically
+    # end the event, rather than adding it to the `IfConditionGroup`, so that Hodrick dies after you
+    # reload the region rather than immediately after giving you the item.
+    - Match: IfConditionGroup(MAIN, PASS, AND_01)
+      AddAfter: ["EndIfEventFlag(EventEndType.End, OFF, TargetEventFlagType.EventFlag, 6710)"]
 
   # Yoel logic
   - ID: 13105600
@@ -746,6 +771,9 @@ ExistingEvents:
     - Match: {Init: {Callee: 14005587}} # Despairing Anri dead
       Repeat: -1
       Remove: true
+    # Same with Sirris
+    - Match: {Init: {Callee: 20006002}, Arguments: [4000780]}
+      Remove: true
 
   # Patches betrayal
   - ID: 14000621
@@ -783,6 +811,23 @@ ExistingEvents:
       Condition: false
     - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
       Condition: false
+
+  # Sirris logic
+  - ID: 14005570
+    If: safequest
+    Edits:
+    # Make Sirris invincible 
+    - AddBefore: ["SetCharacterInvincibility(X0_4, Enabled)"]
+    # Disable the conditions that cause Sirris's quest to fail after joining Rosaria's fingers.
+    - Match: {Name: IfEventFlag, Arguments: [null, ON, TargetEventFlagType.EventFlag, 73500150]}
+      Condition: false
+      Repeat: -1
+    # Remove the events that cause her to aggro. These are here rather than in the main initializer
+    # because they're disabled in vanilla once she swears fealty to you.
+    - Match: {Init: {Callee: 20006000}}
+      Remove: true
+    - Match: {Init: {Callee: 20006001}}
+      Remove: true
 
   # Yoel logic
   - ID: 14005740
