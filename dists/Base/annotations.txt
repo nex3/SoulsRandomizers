@@ -338,7 +338,7 @@ Events:
 Areas:
 - Name: ashinareservoir_start
   Text: Ashina Reservoir Tutorial
-  Archipelago: AR1
+  Archipelago: T
 - Name: ashinaoutskirts_temple
   Text: Dilapidated Temple
   Req: ashinareservoir_start
@@ -346,89 +346,89 @@ Areas:
 - Name: ashinaoutskirts_gatepath
   Text: Ashina Outskirts Gate Path
   Req: ashinaoutskirts_temple AND shinobiprosthetic
-  Archipelago: AO1
+  Archipelago: AO
   Until: invasion2
 - Name: ashinaoutskirts_stairway
   Text: Ashina Outskirts Stairway
   Req: ashinaoutskirts_gatepath
-  Archipelago: AO1
+  Archipelago: AO
 - Name: ashinaoutskirts_courtyard
   Text: Ashina Outskirts Courtyard
   Req: ashinaoutskirts_stairway AND chainedogre AND (latehirata OR hirata)  # AND (earlykusabimaru OR kusabimaru)
-  Archipelago: AO1
+  Archipelago: AO
 - Name: ashinaoutskirts_fortress1
   Text: Ashina Castle Fortress
   Req: ashinaoutskirts_courtyard
-  Archipelago: AO1
+  Archipelago: AO
   Until: invasion2
 - Name: ashinaoutskirts_fortress2
   Text: Ashina Castle Gate
   Req: ashinaoutskirts_fortress1 AND gyoubu
-  Archipelago: AO1
+  Archipelago: AO
 - Name: ashinaoutskirts_invasion2
   Text: Ashina Outskirts after Central Forces
   Req: ashinacastle_invasion2  # ashinaoutskirts_courtyard AND invasion2
-  Archipelago: AO2
+  Archipelago: AO/C
 - Name: ashinareservoir_entrance
   Text: Ashina Reservoir
   Req: ashinacastle
-  Archipelago: AR2
+  Archipelago: AR
 - Name: ashinareservoir
   Text: Ashina Reservoir
   Req: ashinareservoir_entrance
   Until: invasion2
-  Archipelago: AR2
+  Archipelago: AR
 - Name: ashinareservoir_underwater
   Text: Ashina Reservoir
   Req: ashinareservoir AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
-  Archipelago: AR2
+  Archipelago: AR
 - Name: ashinareservoir_gatehouse
   Text: Ashina Reservoir # Gate House
   Req: ashinareservoir AND gatehousekey
   Until: invasion2
-  Archipelago: AR2
+  Archipelago: AR
 - Name: ashinareservoir_invasion2
   Text: Ashina Reservoir after Central Forces
   Req: ashinacastle_invasion2 # reservoir_entrance AND invasion2
-  Archipelago: AR3
+  Archipelago: AR/C
 - Name: ashinareservoir_endfield
   Text: Ashina Reservoir Ending
   Req: ashinareservoir_invasion2 AND secretpassagekey
-  Archipelago: AR3
+  Archipelago: AR/C
 - Name: ashinareservoir_end
   Text: Ashina Reservoir Ending
   Req: ashinareservoir_endfield AND (noextraitems OR divinedragonstears)
-  Archipelago: AR3
+  Archipelago: AR/C
 - Name: ashinacastle_gate
   Text: Ashina Castle Gate
   Req: ashinaoutskirts_fortress2
   Until: invasion1
-  Archipelago: AC1
+  Archipelago: AC
 - Name: ashinacastle
   Text: Ashina Castle
   Req: ashinacastle_gate AND blazingbull
-  Archipelago: AC1
+  Archipelago: AC
 - Name: ashinacastle_underwater
   Text: Ashina Castle
   Req: ashinacastle AND mibubreathingtechnique
-  Archipelago: AC1
+  Archipelago: AC
 - Name: ashinacastle_kuro1
   Text: Ashina Castle # after Genichiro
   Req: ashinacastle AND genichiro # Until: invasion1, After: ashinacastle_invasion1. Includes isshin quest
-  Archipelago: AC1
+  Archipelago: AC
 - Name: ashinacastle_invasion1
   Text: Ashina Castle after Interior Ministry
   Req: ashinacastle AND invasion1
-  Archipelago: AC2
+  Archipelago: AC/I
 - Name: ashinacastle_kuro2
   Text: Ashina Castle after Owl
   Req: ashinacastle_invasion1 AND owl AND (noextraitems OR aromaticbranch)
-  Archipelago: AC2
+  Archipelago: AC/I
 - Name: ashinacastle_invasion2
   Text: Ashina Castle after Central Forces
   Req: invasion2  # ashinacastle
-  Archipelago: AC3
+  Archipelago: AC/C
 - Name: hirata
   Text: Hirata Estate
   Req: ashinaoutskirts_temple AND younglordsbellcharm AND (veryearlyhirata OR ashinaoutskirts_stairway)
@@ -477,12 +477,12 @@ Areas:
 - Name: dungeon
   Text: Abandoned Dungeon
   Req: ashinacastle  # Excluding area after loneshadow/shichimen
-  Archipelago: ADG
+  Archipelago: AD
 - Name: dungeon_underwater
   Text: Abandoned Dungeon
   Req: dungeon AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
-  Archipelago: ADG
+  Archipelago: AD
 - Name: senpou
   Text: Senpou Temple
   Req: dungeon
