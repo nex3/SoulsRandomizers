@@ -157,7 +157,7 @@ ConfigItems:
   - Name: 'Memory: True Monk'
   - Name: 'Memory: Divine Dragon'
   - Name: 'Memory: Hatred Demon'
-  - Name: 'Memory: Saint Isshin '
+  - Name: 'Memory: Saint Isshin'
   - Name: 'Memory: Isshin Ashina'
   - Name: 'Memory: Headless Ape'
 - GroupName: estushints
@@ -338,201 +338,261 @@ Events:
 Areas:
 - Name: ashinareservoir_start
   Text: Ashina Reservoir Tutorial
+  Archipelago: T
 - Name: ashinaoutskirts_temple
   Text: Dilapidated Temple
   Req: ashinareservoir_start
+  Archipelago: DT
 - Name: ashinaoutskirts_gatepath
   Text: Ashina Outskirts Gate Path
   Req: ashinaoutskirts_temple AND shinobiprosthetic
+  Archipelago: AO
   Until: invasion2
 - Name: ashinaoutskirts_stairway
   Text: Ashina Outskirts Stairway
   Req: ashinaoutskirts_gatepath
+  Archipelago: AO
 - Name: ashinaoutskirts_courtyard
   Text: Ashina Outskirts Courtyard
   Req: ashinaoutskirts_stairway AND chainedogre AND (latehirata OR hirata)  # AND (earlykusabimaru OR kusabimaru)
+  Archipelago: AO
 - Name: ashinaoutskirts_fortress1
   Text: Ashina Castle Fortress
   Req: ashinaoutskirts_courtyard
+  Archipelago: AO
   Until: invasion2
 - Name: ashinaoutskirts_fortress2
   Text: Ashina Castle Gate
   Req: ashinaoutskirts_fortress1 AND gyoubu
+  Archipelago: AO
 - Name: ashinaoutskirts_invasion2
   Text: Ashina Outskirts after Central Forces
   Req: ashinacastle_invasion2  # ashinaoutskirts_courtyard AND invasion2
+  Archipelago: AO/C
 - Name: ashinareservoir_entrance
   Text: Ashina Reservoir
   Req: ashinacastle
+  Archipelago: AR
 - Name: ashinareservoir
   Text: Ashina Reservoir
   Req: ashinareservoir_entrance
   Until: invasion2
+  Archipelago: AR
 - Name: ashinareservoir_underwater
   Text: Ashina Reservoir
   Req: ashinareservoir AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: AR
 - Name: ashinareservoir_gatehouse
   Text: Ashina Reservoir # Gate House
   Req: ashinareservoir AND gatehousekey
   Until: invasion2
+  Archipelago: AR
 - Name: ashinareservoir_invasion2
   Text: Ashina Reservoir after Central Forces
   Req: ashinacastle_invasion2 # reservoir_entrance AND invasion2
+  Archipelago: AR/C
 - Name: ashinareservoir_endfield
   Text: Ashina Reservoir Ending
   Req: ashinareservoir_invasion2 AND secretpassagekey
+  Archipelago: AR/C
 - Name: ashinareservoir_end
   Text: Ashina Reservoir Ending
   Req: ashinareservoir_endfield AND (noextraitems OR divinedragonstears)
+  Archipelago: AR/C
 - Name: ashinacastle_gate
   Text: Ashina Castle Gate
   Req: ashinaoutskirts_fortress2
   Until: invasion1
+  Archipelago: AC
 - Name: ashinacastle
   Text: Ashina Castle
   Req: ashinacastle_gate AND blazingbull
+  Archipelago: AC
 - Name: ashinacastle_underwater
   Text: Ashina Castle
   Req: ashinacastle AND mibubreathingtechnique
+  Archipelago: AC
 - Name: ashinacastle_kuro1
   Text: Ashina Castle # after Genichiro
   Req: ashinacastle AND genichiro # Until: invasion1, After: ashinacastle_invasion1. Includes isshin quest
+  Archipelago: AC
 - Name: ashinacastle_invasion1
   Text: Ashina Castle after Interior Ministry
   Req: ashinacastle AND invasion1
+  Archipelago: AC/I
 - Name: ashinacastle_kuro2
   Text: Ashina Castle after Owl
   Req: ashinacastle_invasion1 AND owl AND (noextraitems OR aromaticbranch)
+  Archipelago: AC/I
 - Name: ashinacastle_invasion2
   Text: Ashina Castle after Central Forces
   Req: invasion2  # ashinacastle
+  Archipelago: AC/C
 - Name: hirata
   Text: Hirata Estate
   Req: ashinaoutskirts_temple AND younglordsbellcharm AND (veryearlyhirata OR ashinaoutskirts_stairway)
+  Archipelago: HE1
 - Name: hirata_underwater
   Text: Hirata Estate
   Req: hirata AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: HE1
 - Name: hirata_sidepath
   Text: Hirata Estate
   Req: hirata AND shinobiprosthetic
   WeightBase: hirata
+  Archipelago: HE1
 - Name: hirata_thicketslope
   Text: Hirata Estate
   Req: hirata AND shinobihunter
+  Archipelago: HE1
 - Name: hirata_pagoda
   Text: Hirata Estate
   Req: hirata_thicketslope AND shinobiprosthetic
   WeightBase: hirata
+  Archipelago: HE1
 - Name: hirata_courtyard1
   Text: Hirata Estate
   Req: hirata_thicketslope
   Until: hirata2
   WeightBase: hirata
+  Archipelago: HE1
 - Name: hirata_beforetemple
   Text: Hirata Estate
   Req: hirata_sidepath AND juzou  # Until: courtyard2, After: temple2
+  Archipelago: HE1
 - Name: hirata_temple1
   Text: Hirata Estate Hidden Temple
   Req: hirata_beforetemple AND hiddentemplekey
+  Archipelago: HE1
 - Name: hirata_courtyard2
   Text: Hirata Estate Revisited
   Req: hirata2
+  Archipelago: HE2
 - Name: hirata_temple2
   Text: Hirata Estate Revisited
   Req: hirata_courtyard2 AND juzou2
+  Archipelago: HE2
 - Name: dungeon
   Text: Abandoned Dungeon
   Req: ashinacastle  # Excluding area after loneshadow/shichimen
+  Archipelago: AD
 - Name: dungeon_underwater
   Text: Abandoned Dungeon
   Req: dungeon AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: AD
 - Name: senpou
   Text: Senpou Temple
   Req: dungeon
+  Archipelago: ST
 - Name: senpou_bell
   Text: Bell Demon's Temple
   Req: ashinaoutskirts_courtyard  # also from senpou, but courtyard is earlier
+  Archipelago: ST
 - Name: senpou_cavern
   Text: Sunken Valley Cavern from Senpou Temple
   Req: senpou AND puppeteerninjutsu
+  Archipelago: ST
 - Name: senpou_grounds
   Text: Senpou Temple Grounds
   Req: senpou AND armoredwarrior
+  Archipelago: ST
 - Name: senpou_sanctum
   Text: Senpou Temple Inner Sanctum
   Req: senpou_grounds AND ashinacastle_kuro1
   WeightBase: senpou_grounds
+  Archipelago: ST
 - Name: senpou_underwater
   Text: Senpou Temple Grounds
   Req: senpou_grounds AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: ST
 - Name: sunkenvalley
   Text: Upper Sunken Valley
   Req: ashinacastle
+  Archipelago: SV
 - Name: sunkenvalley_cave
   Text: Upper Sunken Valley
   Req: sunkenvalley AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: SV
 - Name: sunkenvalley_passage
   Text: Sunken Valley Passage
   Req: sunkenvalley AND gunfortshrinekey
+  Archipelago: SVP
 - Name: sunkenvalley_underwater
   Text: Sunken Valley Passage
   Req: sunkenvalley_passage AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: SVP
 - Name: sunkenvalley_flower
   Text: Sunken Valley Passage
   Req: sunkenvalley_passage AND guardianape
+  Archipelago: SVP
 - Name: sunkenvalley_carp
   Text: Sunken Valley after Fountainhead
   Req: sunkenvalley_passage AND fountainhead_carp
+  Archipelago: SVP
 - Name: sunkenvalley_shrine
   Text: Sunken Valley Serpent Cave
   Req: sunkenvalley_passage AND (cavesnakeskip OR mistravensfeathers OR puppeteerninjutsu)
+  Archipelago: SVP
 - Name: sunkenvalley_senpou
   Text: Sunken Valley Passage after Senpou Temple
   Req: senpou_cavern AND sunkenvalley_passage
   WeightBase: senpou_cavern
+  Archipelago: SVP
 - Name: sunkenvalley_poisonpool
   Text: Poison Pool
   Req: dungeon # Can also access from sunken valley, but abandoned dungeon always accessible earlier
+  Archipelago: PP
 - Name: sunkenvalley_burrow1
   Text: Guardian Ape's Burrow
   Req: sunkenvalley_poisonpool AND snakeeyes
+  Archipelago: PP
 - Name: sunkenvalley_burrow2
   Text: Guardian Ape's Burrow
   Req: sunkenvalley_burrow1 AND guardianape
+  Archipelago: PP
 - Name: sunkenvalley_burrow3
   Text: Guardian Ape's Burrow
   Req: sunkenvalley_burrow2 AND headlessape AND mortalblade
+  Archipelago: PP
 - Name: hiddenforest
   Text: Hidden Forest
   Req: sunkenvalley_burrow1
+  Archipelago: HF
 - Name: mibuvillage
   Text: Mibu Village
   Req: hiddenforest AND mistnoble
+  Archipelago: MV
 - Name: mibuvillage_underwater
   Text: Mibu Village
   Req: mibuvillage AND mibubreathingtechnique
   WeightBase: ashinacastle_underwater
+  Archipelago: MV
 - Name: mibuvillage_cave
   Text: Mibu Village  # Wedding Cave
   Req: mibuvillage AND corruptedmonk
+  Archipelago: MV
 - Name: fountainhead_bridge
   Text: Fountainhead Vermillion Bridge
   Req: ashinacastle_kuro2 AND mibuvillage_cave
+  Archipelago: FP1
 - Name: fountainhead_surface
   Text: Fountainhead Palace
   Req: fountainhead_bridge AND truemonk
+  Archipelago: FP1
 - Name: fountainhead
   Text: Fountainhead Palace
   Req: fountainhead_surface AND mibubreathingtechnique
+  Archipelago: FP2
 - Name: fountainhead_carp
   Text: Fountainhead Palace
   Req: fountainhead AND (trulypreciousbait1 OR trulypreciousbait2)  # May want to take out Hirata bait, or else the shop may become unavailable... maybe put the shops as areas here...??
+  Archipelago: FP2
 PlacementRestrictions:
 - Name: Gourd Seed
   Switch: healthprogression
@@ -1571,7 +1631,7 @@ Slots:
   QuestReqs: ashinacastle
 - Key: '01,0:50002131::'
   DebugText:
-  - 'Memory: Saint Isshin  - 2131[Sword Saint Isshin (c5400_0000 #1120860) ashinareservoir]'
+  - 'Memory: Saint Isshin - 2131[Sword Saint Isshin (c5400_0000 #1120860) ashinareservoir]'
   Text: Dropped by Sword Saint Isshin
   Area: ashinareservoir_endfield
   Tags: boss
@@ -2154,7 +2214,7 @@ Slots:
 - Key: '02,0:51110330::'
   DebugText:
   - Gachiin's Sugar - 1110330[Treasure (o000100_0033) ashinacastle] 2x
-  Text: In the basement of the Upper Tower building, in the side room with the Sabimaru
+  Text: On the rafters which can be grappled to from one of the Upper Tower rooms, in the corner.
   Area: ashinacastle
 - Key: '02,0:51110340::'
   DebugText:
@@ -2216,9 +2276,8 @@ Slots:
 - Key: '02,0:51110450::'
   DebugText:
   - Scrap Iron - 1110450[Treasure (o000100_0045) ashinacastle]
-  Text: Near the end of the path leading up to Blazing Bull, rather than going through the gate and up the stairs to the right, it's hidden up the stairs behind the building to the left
-  Area: ashinacastle_gate
-  Tags: outoftheway
+  Text: Between two trees on a ledge overlooking the Ashina Castle Sculptor's Idol. To the right of the Idol, facing the castle
+  Area: ashinacastle
 - Key: '02,0:51110460::'
   DebugText:
   - Treasure Carp Scale - 1110460[Treasure (o000100_0046) ashinacastle]
@@ -2570,7 +2629,7 @@ Slots:
   DebugText:
   - 'Gatehouse Key - 10101400[Treasure (o000100_0073 #1111510) ashinacastle, Ashina Soldier (c1010_0035 #1110225) ashinacastle]'
   Text: Dropped by a soldier on the bridge leading to the Abandoned Dungeon entrance, or in the courtyard immediately to the left after the Ashina Castle Sculptor's Idol
-  Area: ashinareservoir_entrance
+  Area: ashinacastle
   Tags: racemode enemyhint
 - Key: '02,0:51110985::'
   DebugText:
@@ -2595,7 +2654,7 @@ Slots:
   DebugText:
   - 'Treasure Carp Scale - 13200030[Treasure Carp (c1320_0000 #1110650) ashinacastle]'
   Text: Dropped by the underwater Treasure Carp in the moat below the Ashina Castle Sculptor's Idol
-  Area: ashinacastle_underwater
+  Area: ashinacastle_invasion1
   Tags: enemy nokey carp  # XX When does this dude spawn?
 - Key: '02,0:6505::'
   DebugText:
@@ -2729,7 +2788,7 @@ Slots:
   - Dragon's Blood Droplet - 1000007[Pot Noble Harunaga after using Harunaga's Truly Precious Bait (1) for 1 Treasure Carp Scale - event 72501030], 2500002[Pot Noble Koremori (1) for 1 Treasure Carp Scale - event 72501030]
   - Lapis Lazuli - 1000006[Pot Noble Harunaga after using Harunaga's Truly Precious Bait (2) for 6 Treasure Carp Scale - event 72501020], 2500001[Pot Noble Koremori (2) for 6 Treasure Carp Scale - event 72501020]
   Text: Sold by Pot Noble Koremori, or Harunaga in Hirata after using his Truly Precious Bait
-  Area: fountainhead
+  Area: fountainhead_surface
   Tags: nokey premium exclude:treasurecarpscale exclude:gourdseed exclude:bulgingcoinpurse exclude:heavycoinpurse exclude:mechanicalbarrel
 - Key: '03,0:50002031::'
   DebugText:
@@ -3327,7 +3386,7 @@ Slots:
 - Key: '04,0:51300070::'
   DebugText:
   - Oil - 1300070[Treasure (o000100_0007) dungeon]
-  Text: Crouching into the first cell on the left entering the dungeon from Ashina Castle
+  Text: In the cricket-filled pit in the middle of Abandoned Dungeon
   Area: dungeon
 - Key: '04,0:51300080::'
   DebugText:
@@ -3709,7 +3768,7 @@ Slots:
   DebugText:
   - Yashariku's Sugar - 1500410[Treasure (o000100_0041) mibuvillage] 3x
   Text: Under the tree branch bridge between the Temple Master and the forest before the temple, near the Headless
-  Area: mibuvillage
+  Area: hiddenforest
 - Key: '05,0:51500420::'
   DebugText:
   - Divine Confetti - 1500420[Treasure (o000100_0042) mibuvillage]
@@ -5249,7 +5308,7 @@ Slots:
   DebugText:
   - Treasure Carp Scale - 2500100[Treasure (o000100_0010) fountainhead]
   Text: On the other side of the hole in the floor in Mibu Manor shortly before the Flower Viewing Stage Sculptor's Idol
-  Area: fountainhead
+  Area: fountainhead_surface
 - Key: '08,0:52500110::'
   DebugText:
   - Bite Down - 2500110[Treasure (o000100_0011) fountainhead] 2x
@@ -5259,7 +5318,7 @@ Slots:
   DebugText:
   - Treasure Carp Scale - 2500120[Treasure (o000100_0012) fountainhead]
   Text: On the other side of the hole in the floor in Mibu Manor shortly before the Flower Viewing Stage Sculptor's Idol
-  Area: fountainhead
+  Area: fountainhead_surface
 - Key: '08,0:52500130::'
   DebugText:
   - Pellet - 2500130[Treasure (o000100_0013) fountainhead]
@@ -5516,7 +5575,7 @@ Slots:
   DebugText:
   - Treasure Carp Scale - 2500570[Treasure (o000100_0057) fountainhead]
   Text: On the other side of the hole in the floor in Mibu Manor shortly before the Flower Viewing Stage Sculptor's Idol
-  Area: fountainhead
+  Area: fountainhead_surface
 - Key: '08,0:52500580::'
   DebugText:
   - Adamantite Scrap - 2500580[Treasure (o000100_0058) fountainhead]
@@ -5558,7 +5617,7 @@ Slots:
   DebugText:
   - 'Water of the Palace - 2500650[Fountainhead Chest (o255300_0004 #2501503) fountainhead]'
   Text: In a chest on the other side of the hole in the floor in Mibu Manor shortly before the Flower Viewing Stage Sculptor's Idol
-  Area: fountainhead
+  Area: fountainhead_surface
 - Key: '08,0:52500660::'
   DebugText:
   - Ceramic Shard - 2500660[o005390 (o005390_0002) fountainhead] 3x
@@ -5591,7 +5650,7 @@ Slots:
   DebugText:
   - 'Lapis Lazuli - 10801000[Shichimen Warrior (c1080_0000 #2500580,2505440) fountainhead]'
   Text: Dropped by Shichimen Warrior
-  Area: fountainhead
+  Area: fountainhead_surface
   Tags: miniboss unfair
   Event: shichimen3
 - Key: '08,0:52500940::'
@@ -5610,7 +5669,7 @@ Slots:
   DebugText:
   - 'Dragonspring Sake - 13100100[Okami Warrior (c1310_0001 #2500401,2505441,2505220) fountainhead]'
   Text: Guaranteed drop from the lightning katana Okami Warrior before the Great Sakura Sculptor's Idol
-  Area: fountainhead
+  Area: fountainhead_surface
   Tags: enemy
 - Key: '08,0:52500972::'
   DebugText:
@@ -5683,7 +5742,7 @@ Slots:
   DebugText:
   - 'Prayer Bead - 13100000[Okami Warrior (c1310_0006 #2500406,2505441) fountainhead]'
   Text: Dropped by Okami Leader Shizu
-  Area: fountainhead
+  Area: fountainhead_surface
   Tags: miniboss
 - Key: '08,0:6797::'
   DebugText:

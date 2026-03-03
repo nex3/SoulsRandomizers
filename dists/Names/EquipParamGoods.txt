@@ -122,7 +122,7 @@
 5208 Memory: True Monk
 5209 Memory: Divine Dragon
 5210 Memory: Hatred Demon
-5211 Memory: Saint Isshin 
+5211 Memory: Saint Isshin
 5212 Memory: Isshin Ashina
 5213 Memory: Headless Ape
 5300 Remnant: Gyoubu
