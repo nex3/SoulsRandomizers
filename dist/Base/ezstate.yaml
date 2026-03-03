@@ -1,0 +1,70 @@
+ExistingStates:
+  ## Cathedral of the Deep
+
+  t350301: # Patches
+  # Remove the option to say you haven't met Patches before in the Cathedral.
+  - Group: 8
+    State: 5
+    If: safequest
+    EditCommands:
+    - Match: {Name: AddTalkListData, Arguments: [null, 14020001]}
+      Remove: true
+
+  ## Firelink Shrine
+
+  t400220: # Greirat
+  # Make Greirat unable to go to Irithyll until Patches is in Firelink, and thus is able to rescue
+  # him. This ensures you can't softlock yourself if, for example, Greirat's shop has the Tower Key.
+  - Group: 8
+    State: 14
+    If: safequest
+    EditConditions:
+    - Match: {Target: 16}
+      AndAlso: GetEventStatus(1365)
+
+  t400230: # Orbeck
+  # Replace references to four specific Orbeck spell purchase events with one custom event that we
+  # set once the player has purchased any seven spells. This ensures that players don't have to
+  # guess which randomized items to buy in order to trigger Orbeck's Slumbering Dragoncrest Ring
+  # lot.
+  - Group: 17
+    State: 1
+    EditConditions:
+    - Match: {Target: 12}
+      Replace: {73301140: 74000800, 73301150: 74000800, 73301160: 74000800, 73301170: 74000800}
+
+  t400260: # Irina
+  # Replace the references to the dark tomes in Irina's ESD with 0s. There aren't any items with ID
+  # 0, so she'll never take the tomes or anything in their place, and thus never enter dark mode.
+  - Group: 7
+    State: 16
+    If: safequest
+    EditCommands:
+    - Match: {Arguments: [2119, 2120, 2121, 2144, 2145]}
+      Arguments: {3: {Set: 0}, 4: {Set: 0}}
+
+  t400301: # Patches
+  # Remove the option to not forgive Patches in Firelink.
+  - Group: 8
+    State: 8
+    If: safequest
+    EditCommands:
+    - Match: {Name: AddTalkListData, Arguments: [null, 14020011]}
+      Remove: true
+
+  # Make Patches enquire about Greirat even if you bought the Catarina set lots.
+  - Group: 8
+    State: 1
+    If: safequest
+    EditConditions:
+    - Match: {Target: 6}
+      Set: GetEventStatus(1204)
+
+  # Make Patches talk about Greirat (and trigger the Horsehoof Ring lot) as long as Greirat has been
+  # freed at all.
+  - Group: 24
+    State: 7
+    If: safequest
+    EditConditions:
+    - Match: {Target: 12}
+      Set: "!GetEventStatus(1200)"

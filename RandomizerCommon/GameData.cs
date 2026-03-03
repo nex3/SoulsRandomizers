@@ -995,12 +995,53 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return Util.ParseYaml<T>($@"{Dir}\Base\{pathInBase}");
         }
 
+
+
+        /// <summary>
+        /// Updates Ezstate machines according to <paramref name="config"/>.
+        /// </summary>
+        /// <param name="doc">Used to decode <paramref name="config"/>.</param>
+        /// <param name="opt">Used to determine which edits to include.</param>
+        public void UpdateEzstate(EzstateConfig config, ESDDocumentation doc, RandomizerOptions opt)
+        {
+            var existingStates =
+                new Dictionary<string, List<EzstateConfig.ExistingState>>(config.ExistingStates);
+
+            foreach (var (map, esds) in Talk)
+            {
+                var edited = false;
+                foreach (var (esdName, esd) in esds)
+                {
+                    if (!existingStates.Remove(esdName, out var states)) continue;
+
+                    foreach (var state in states)
+                    {
+                        if (state.IncludeFor(opt))
+                        {
+                            state.Edit(esd, doc);
+                            edited = true;
+                        }
+                    }
+                }
+
+                if (edited) WriteESDs.Add(map);
+            }
+
+            if (existingStates.Count > 0)
+            {
+                throw new Exception(
+                    "One or more ezstate.yaml entries didn't match any ESD files:\n" +
+                        String.Join("\n", existingStates.Keys.Select(k => $"* {k}"))
+                );
+            }
+        }
+
         /// <summary>
         /// Adds and updates events according to <paramref name="config"/>.
         /// </summary>
         /// <remarks>
-        /// This currently only supports <c>EventConfig.NewEvents</c> and
-        /// <c>EventConfig.ExistingEvents</c>.
+        /// This currently only supports <c>EventConfig.NewEvents</c>,
+        /// <c>EventConfig.ExistingEvents</c>, and <c>EventConfig.UpdateEvents</c>.
         /// </remarks>
         /// <param name="events">Used to decode events in <paramref name="config"/>.</param>
         /// <param name="opt">Used to determine which events to include.</param>

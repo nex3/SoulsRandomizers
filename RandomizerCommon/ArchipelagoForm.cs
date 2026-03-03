@@ -251,7 +251,18 @@ namespace RandomizerCommon
             ann.Load(opt);
             var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
             var writer = new PermutationWriter(
-                game, data, ann, events, game.ParseYaml<EventConfig>("itemevents.yaml"), opt);
+                game,
+                data,
+                ann,
+                events,
+                ESDDocumentation.DeserializeFromFile(
+                    $@"{game.Dir}\Base\ds3.esd.json",
+                    new ESDDocumentation.DocOptions() { Game = "ds3" }
+                ),
+                game.ParseYaml<EventConfig>("itemevents.yaml"),
+                game.ParseYaml<EzstateConfig>("ezstate.yaml"),
+                opt
+            );
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 

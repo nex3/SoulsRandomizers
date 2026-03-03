@@ -21,6 +21,19 @@ only understand it through code archaeology.
       * [`Condition`](#condition)
     * [`Initialize`](#initialize)
   * [`events.yaml`](#events-yaml)
+    * [Editing Expressions](#editing-expressions)
+      * [`Replace`](#replace-1)
+      * [`Set`](#set-1)
+      * [`Arguments`](#arguments)
+      * [`AndAlso`](#andalso)
+      * [`OrElse`](#orelse)
+    * [`ExistingStates`](#existingstates)
+      * [`EditCommands`](#editcommands)
+        * [`Match`](#match-1)
+        * [`Arguments`](#arguments-1)
+        * [`Remove`](#remove-1)
+      * [`EditConditions`](#editConditions)
+        * [`Match`](#match-2)
 
 ## Data Files
 
@@ -321,3 +334,240 @@ Initialize:
 This file tracks events that are managed and modified by the enemy randomizer.
 Only Matt really understands it, althought he `NewEvents` and `ExistingEvents`
 fields are the same as for `itemevents.yaml`.
+
+## `ezstate.yaml`
+
+This file tracks edits to the game's ESD files, which control NPC dialogs and
+menus. It's organized by ESD filename, which encodes both the map and NPC that
+each file refers to.
+
+### `ExistingStates`
+
+This group contains edits that apply to states that already exist in the vanilla
+game. Each state is identified by its `Group` and `State`. If you decompile an
+ESD file using [soulstruct], you'll see a bunch of state groups that look like
+this:
+
+[soulstruct]: https://github.com/Grimrukh/soulstruct/
+
+```python
+def t400230_x14():
+    """State 0"""
+    while True:
+        """State 1"""
+        call = t400230_x18()
+        assert not GetEventStatus(1221)
+        """State 2"""
+        call = t400230_x19()
+        assert GetEventStatus(1221) == 1
+    """Unused"""
+    """State 3"""
+    return 0
+```
+
+The `Group` is the number after the `_x` in the function name (in this case 14),
+and the `State` is the number after `"""State `. Each state can contain several
+commands, which are actions performed in sequence, followed by several
+conditions, which are boolean expressions that cause the state machine to
+transition to a new state if they evaluate to true.
+
+Each state edit can also have an `If` field, which works just like [conditional
+edits for events].
+
+[conditional edits for events]: #conditional-events
+
+Both commands and conditions can be edited; each one has its own field which
+takes its own kind of edit map. These are called `EditCommands` and
+`EditConditions`, respectively.
+
+#### Editing Expressions
+
+An improtant difference between ESD and EMEVD is that ESD commands and
+conditions are more like a normal programming language, with a syntax tree of
+complex nested expressions. These appear both in the conditions' boolean
+expressions and in the arguments to commands, which can be either booleans or
+numbers.
+
+In order to edit these easily and consistently, `ezstate.yaml` has a common set
+of expression edits that can be applied in multiple contexts. Each of these acts
+on an expression that's already been matched (for example, the condition under
+`EditConditions` or a command argument).
+
+##### `Replace`
+
+This takes a map from subexpressions to replacements. It traverses the original
+expression and replaces the first occurrence of each subexpression with its
+replacement, which can be an arbitrary ESD expression. For example:
+
+```yaml
+EditConditions:
+- Match: {Target: 12}
+  Replace: {73301140: 74000800, 73301150: 74000800, 73301160: 74000800, 73301170: 74000800}
+```
+
+##### `Set`
+
+This replaces the entire expression with a single replacement. For example:
+
+```yaml
+EditConditions:
+- Match: {Target: 6}
+  Set: GetEventStatus(1204)
+```
+
+##### `Arguments`
+
+This is a map from argument indexes to nested [expression edits] to make for
+those arguments. It only works when matched against a function call; it'll throw
+an error otherwise. For example:
+
+[expression edits]: #editing-expressions
+
+```yaml
+EditCommands:
+- Match: {Arguments: [2119, 2120, 2121, 2144, 2145]}
+  Arguments: {3: {Set: 0}, 4: {Set: 0}}
+```
+
+##### `AndAlso`
+
+This takes a single boolean expression and adds it as a condition to the
+existing boolean that must also match in order for the expression to evaluate to
+true. In other words, it changes the expression to `(original) && new`. It's
+useful when you want to add extra constraints for quest progression. For
+example:
+
+```yaml
+EditConditions:
+- Match: {Target: 16}
+  AndAlso: GetEventStatus(1365)
+```
+
+##### `OrElse`
+
+This takes a single boolean expression and adds it as a condition to the
+existing boolean that may match as well in order for the expression to evaluate
+to true. In other words, it changes the expression to `(original) || new`. It's
+useful when you want to loosen the constraints for quest progression. For
+example:
+
+```yaml
+EditConditions:
+- Match: {Target: 16}
+  OrElse: GetEventStatus(1365)
+```
+
+#### `EditCommands`
+
+Each of these edits contains two components: the `Match` key, which determines
+which command to edit, and the remaining keys which describe how to edit it. For
+example:
+
+```yaml
+t350301:
+- Group: 8
+  State: 5
+  If: safequest
+  EditCommands:
+  - Match: {Name: AddTalkListData, Arguments: [null, 14020001]}
+    Remove: true
+```
+
+[expression editing]: #editing-expressions
+
+##### `Match`
+
+The match can be thought of as a pattern that either does or does not match any
+given command. Matches match the *first* matching command.
+
+A match can have two different forms:
+
+* It can be an ESD command represented as a literal string, in which case it
+  will match exactly that command invocation. For example:
+
+  ```yaml
+  - Match: "AddTalkListData(2, 14020001, -1)"
+    Remove: true
+  ```
+
+* It can be be a map with `Name` and `Arguments` fields. The `Name` is the ESD
+  command name to match, and the `Arguments` represent a *subset* of arguments
+  that must match. Null arguments or those past the end of the argument list are
+  allowed to be anything. Arguments themselves are parsed as ESD expressions.
+  For example:
+
+  ```yaml
+  - Match: {Name: AddTalkListData, Arguments: [null, 14020001]}
+    Remove: true
+  ```
+
+##### `Arguments`
+
+The `Arguments` field works exactly the same as the one for [editing
+expressions] in general. For example:
+
+[editing expressions]: #editing-expressions
+
+```yaml
+EditCommands:
+- Match: {Arguments: [2119, 2120, 2121, 2144, 2145]}
+  Arguments: {3: {Set: 0}, 4: {Set: 0}}
+```
+
+##### `Remove`
+
+If `Remove` is true, the command is removed from the state machine entirely. For
+example:
+
+```yaml
+- Match: {Name: AddTalkListData, Arguments: [null, 14020001]}
+  Remove: true
+```
+
+#### `EditConditions`
+
+Each of these edits contains two components: the `Match` key, which determines
+which conditional branch to edit, and the remaining keys which describe how to
+edit it. For example:
+
+```yaml
+t400220:
+- Group: 8
+  State: 14
+  If: safequest
+  EditConditions:
+  - Match: {Target: 16}
+    AndAlso: GetEventStatus(1365)
+```
+
+This can contain all the same fields as a general [expression edit].
+
+[expression edit]: #editing-expressions
+
+##### `Match`
+
+A match can have three different forms:
+
+* It can be a boolean ESD expression represented as a literal string, in which
+  case it will match exactly that boolean condition. For example:
+
+  ```yaml
+  - Match: "GetEventStatus(50006131) == 1 && !GetEventStatus(74000555)"
+    Set: 1
+  ```
+
+* It can be be an `Index` field, in which case it will match the condition at
+  that index in the list of state transitions. For example:
+
+  ```yaml
+  - Match: {Index: 2}
+    AndAlso: GetEventStatus(1365)
+  ```
+
+* It can be be a `Target` field, in which case it will match the condition that
+  transitions to the given state number. For example:
+
+  ```yaml
+  - Match: {Target: 6}
+    Set: GetEventStatus(1204)
+  ```
