@@ -429,6 +429,16 @@ ExistingEvents:
       Repeat: -1
       Remove: true
 
+  # Hawkwood logic
+  - ID: 13305760
+    Edits:
+    # In vanilla, Hawkwood only moves to Farron Keep if you have the Twinkling
+    # Dragon Torso Stone *and* you've gone accessed the location that grants it.
+    # We remove the latter condition because it doesn't work well in a
+    # randomizer context.
+    - Match: IfEventFlag(AND_06, ON, TargetEventFlagType.EventFlag, 53200900)
+      Remove: true
+
   m35_00_00_00: # Cathedral of the Deep
   - ID: 0
     If: safequest
@@ -774,6 +784,15 @@ ExistingEvents:
     # Same with Sirris
     - Match: {Init: {Callee: 20006002}, Arguments: [4000780]}
       Remove: true
+    # Same with Hawkwood
+    - Match: {Init: {Callee: 20006002}, Arguments: [4000760]}
+      Remove: true
+    - Match: {Init: {Callee: 20006000}, Arguments: [4000760]}
+      Remove: true
+    - Match: {Init: {Callee: 20006001}, Arguments: [4000760]}
+      Remove: true
+    # Same with Andre
+    - Match: {Init: {Callee: 20006002}, Arguments: [4000710]}
 
   # Patches betrayal
   - ID: 14000621
@@ -811,6 +830,16 @@ ExistingEvents:
       Condition: false
     - Match: IfEventFlag(AND_08, ON, TargetEventFlagType.EventFlag, 1043)
       Condition: false
+
+  # Hawkwood logic
+  - ID: 14005560
+    Edits:
+    # In vanilla, Hawkwood only moves to Farron Keep if you have the Twinkling
+    # Dragon Torso Stone *and* you've gone accessed the location that grants it.
+    # We remove the latter condition because it doesn't work well in a
+    # randomizer context.
+    - Match: IfEventFlag(AND_06, ON, TargetEventFlagType.EventFlag, 53200900)
+      Remove: true
 
   # Sirris logic
   - ID: 14005570
