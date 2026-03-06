@@ -480,6 +480,16 @@ ExistingEvents:
     - Match: {Init: {Callee: 13500782}}
       Remove: true
 
+  # Heysel Corpse-Grub Spawn
+  - ID: 13505275
+    If: phantomhunters
+    Edits:
+    - Match: IfConditionGroup(MAIN, PASS, AND_01)
+      # Only spawn the grub once both of Heysel's invasions have been defeated.
+      AddBefore:
+      - IfEventFlag(AND_01, ON, TargetEventFlagType.EventFlag, 13300180)
+      - IfEventFlag(AND_01, ON, TargetEventFlagType.EventFlag, 13300182)
+
   # Leonhard logic
   - ID: 13505720
     If: safequest
