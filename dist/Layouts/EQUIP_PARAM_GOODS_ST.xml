@@ -486,7 +486,7 @@
     <size>1</size>
   </entry>
   <entry>
-    <name>shopId</name>
+    <name>saleValue</name>
     <type>s32</type>
     <default>-1</default>
   </entry>
