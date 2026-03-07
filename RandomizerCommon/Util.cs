@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
 {
@@ -393,5 +394,8 @@ namespace RandomizerCommon
                 return index.Value >= range.Start.Value && index.Value < range.End.Value;
             }
         }
+
+        /// <returns>An exception for a game that isn't supported by the randomizer.</returns>
+        public static Exception UnsupportedGame(FromGame game) => new($"Unsupported game {game}");
     }
 }

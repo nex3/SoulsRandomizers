@@ -323,7 +323,7 @@ namespace RandomizerCommon
                     int actualCost = value;
                     if (actualCost == -1)
                     {
-                        actualCost = (int)game.Item(item)["shopId"].Value;
+                        actualCost = (int)game.Item(item)["saleValue"].Value;
                     }
                     if (priceRate != 0) actualCost = (int)(actualCost * priceRate);
                     costText = costText == "" ? $" for {actualCost} Sen" : $"{costText} and {actualCost} Sen";

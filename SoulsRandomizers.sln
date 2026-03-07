@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31912.275
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11512.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RandomizerCommon", "RandomizerCommon\RandomizerCommon.csproj", "{153B7DAC-12FC-4F0F-B5DC-3FCFE546C50C}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -86,8 +86,8 @@ Global
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|x64.ActiveCfg = Release|Any CPU
 		{C46D537C-54DC-48BF-B824-8A950DD9D4F8}.Release|x64.Build.0 = Release|Any CPU
-		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug|Any CPU
-		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.Build.0 = Debug|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.ActiveCfg = Debug (Archipelago)|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|Any CPU.Build.0 = Debug (Archipelago)|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|x64.ActiveCfg = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug (Archipelago)|x64.Build.0 = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

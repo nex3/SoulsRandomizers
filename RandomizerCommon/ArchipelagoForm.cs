@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using SoulsIds;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -40,6 +41,9 @@ namespace RandomizerCommon
         /// </summary>
         private static readonly string ME3ConfigFileLocation = "..\\me3-config.me3";
 
+        /// <summary>The game that's being randomized.</summary>
+        private readonly FromGame type;
+
         /// <summary>
         /// The Archipelago configuration data that was already saved in this directory, or an
         /// empty object if there wasn't any data.
@@ -54,12 +58,22 @@ namespace RandomizerCommon
 
         private readonly Timer blinkTimer;
 
-        public ArchipelagoForm()
+        public ArchipelagoForm(FromGame type)
         {
             InitializeComponent();
+            var resources = new ComponentResourceManager(typeof(ArchipelagoForm));
+            Icon = (System.Drawing.Icon)resources.GetObject(
+                type switch
+                {
+                    FromGame.DS3 => "$this.DS3Icon",
+                    FromGame.SDT => "$this.SDTIcon",
+                    var g => throw UnsupportedGame(g),
+                }
+            );
 
             MinimumSize = Size;
 
+            this.type = type;
             blinkTimer = new()
             {
                 Interval = 500 // 0.5 seconds
@@ -79,7 +93,7 @@ namespace RandomizerCommon
             catch (JsonException)
             {
                 MessageBox.Show(
-                    $"Failed to load {Path.GetFileName(ConfigFileLocation)}. Running the " + 
+                    $"Failed to load {Path.GetFileName(ConfigFileLocation)}. Running the " +
                     "randomizer may overwrite existing save data.",
                     "Archipelago Warning",
                     MessageBoxButtons.OK,
@@ -101,7 +115,8 @@ namespace RandomizerCommon
             if (configData.Value<string>("password") is string savedPassword) password.Text = savedPassword;
         }
 
-        private static SemanticVersioning.Version Version {
+        private static SemanticVersioning.Version Version
+        {
             get
             {
                 return Assembly.GetCallingAssembly()
@@ -153,7 +168,12 @@ namespace RandomizerCommon
             try
             {
                 result = session.TryConnectAndLogin(
-                    "Dark Souls III",
+                    type switch
+                    {
+                        FromGame.DS3 => "Dark Souls III",
+                        FromGame.SDT => "Sekiro: Shadows Die Twice",
+                        var g => throw UnsupportedGame(g)
+                    },
                     name.Text,
                     Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.NoItems,
                     password: password.Text.Length == 0 ? null : password.Text,
@@ -229,7 +249,12 @@ namespace RandomizerCommon
 
             SetStatusText("Loading game data...");
 
-            var distBasename = "dist";
+            var distBasename = type switch
+            {
+                FromGame.DS3 => "dist",
+                FromGame.SDT => "dists",
+                var g => throw UnsupportedGame(g),
+            };
 #if DEBUG
             // In debug mode, always use the data files from the local repository rather than those
             // in the directory we're randomizing to. This ensures we don't accidentally end up
@@ -243,14 +268,38 @@ namespace RandomizerCommon
             {
                 throw new Exception("Missing data directory");
             }
-            var game = new GameData(distDir, FromGame.DS3);
+            var game = new GameData(distDir, type);
             game.Load();
-            var scraper = new LocationDataScraper(logUnused: false);
-            var data = scraper.FindItems(game);
+
+            EventConfig eventConfig;
+            using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+            {
+                eventConfig = new DeserializerBuilder().Build().Deserialize<EventConfig>(reader);
+            }
+
+            LocationData data;
+            Events events;
+            switch (type)
+            {
+                case FromGame.DS3:
+                    data = new LocationDataScraper(logUnused: false).FindItems(game);
+                    events = new Events(
+                        $@"{game.Dir}\Base\ds3-common.emedf.json",
+                        darkScriptMode: true
+                    );
+                    break;
+
+                case FromGame.SDT:
+                    data = new SekiroLocationDataScraper().FindItems(game);
+                    events = new Events($@"{game.Dir}\Base\sekiro-common.emedf.json");
+                    break;
+
+                case var g: throw UnsupportedGame(g);
+            }
+
             var ann = new AnnotationData(game, data);
             ann.Load(opt);
-            var events = new Events($@"{game.Dir}\Base\ds3-common.emedf.json", darkScriptMode: true);
-            var writer = new PermutationWriter(game, data, ann, events, null);
+            var writer = new PermutationWriter(game, data, ann, events, eventConfig);
             var permutation = new Permutation(game, data, ann, new Messages(null));
             var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
 
@@ -263,7 +312,7 @@ namespace RandomizerCommon
 
             // Randomize starting loadout *before* adding a bunch of synthetic weapons and armor to
             // the pool that we don't want shoved into shops.
-            if (options["random_starting_loadout"])
+            if (type != FromGame.SDT && options["random_starting_loadout"])
             {
                 var characters = new CharacterWriter(game, data);
                 characters.Write(random, opt);
@@ -297,19 +346,23 @@ namespace RandomizerCommon
                         SyntheticItemName(info),
                         $"An object from a mysterious world known only as \"{player.Game}\".",
                         // Custom Archipelago icon.
-                        iconId: 6020,
-                        // The highest in-game sortId is 133,100, so for foreign items we start
-                        // from 200,000 to sort them after in-game key items. From there we add
-                        // the player ID as the primary sort, followed by the item ID (mod 10k
-                        // because Archipelago puts all item IDs in a single 54-bit numberspace).
-                        // This means that in shops, foreign items will be grouped first by player
-                        // and then by item.
+                        iconId: type switch {
+                            FromGame.DS3 => 6020,
+                            FromGame.SDT => 579,
+                            var g => throw UnsupportedGame(g),
+                        },
+                        // The highest in-game sortId across all supported games is 133,100, so for
+                        // foreign items we start from 200,000 to sort them after in-game key
+                        // items. From there we add the player ID as the primary sort, followed by
+                        // the item ID (mod 10k because Archipelago puts all item IDs in a single
+                        // 54-bit numberspace). This means that in shops, foreign items will be
+                        // grouped first by player and then by item.
                         sortId: 200000 + (uint)info.Player.Slot * 10000 +
                             (uint)(info.ItemId % 10000),
                         archipelagoLocationId: info.LocationId);
                     AddMulti(items, targetSlotKey, item);
                 }
-                else if (info.ItemName == "Path of the Dragon")
+                else if (type == FromGame.DS3 && info.ItemName == "Path of the Dragon")
                 {
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"Path of the Dragon",
@@ -362,30 +415,15 @@ namespace RandomizerCommon
 
             writer.Write(random, permutation, opt, alwaysReplacePathOfTheDragon: true);
 
-            if (options["no_weapon_requirements"])
+            if (type != FromGame.SDT)
             {
-                RemoveWeaponRequirements(game);
-            }
-
-            if (options["no_spell_requirements"])
-            {
-                RemoveSpellRequirements(game);
-            }
-
-            if (options["no_equip_load"])
-            {
-                RemoveEquipLoad(game);
+                if (options["no_weapon_requirements"]) RemoveWeaponRequirements(game);
+                if (options["no_spell_requirements"]) RemoveSpellRequirements(game);
+                if (options["no_equip_load"]) RemoveEquipLoad(game);
             }
 
             if (options["randomize_enemies"])
             {
-                EventConfig eventConfig;
-                using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
-                {
-                    var deserializer = new DeserializerBuilder().Build();
-                    eventConfig = deserializer.Deserialize<EventConfig>(reader);
-                }
-
                 var presetYaml = (string)slotData["random_enemy_preset"];
                 Preset preset;
                 try
@@ -397,23 +435,54 @@ namespace RandomizerCommon
                     DisplayYamlParseError(presetYaml);
                     throw new Exception("Failed to parse enemy preset");
                 }
-                preset.RemoveSource = preset.RemoveSource == null
-                    ? "Yhorm the Giant"
-                    : preset.RemoveSource + ";Yhorm the Giant";
-                preset.Enemies ??= new Dictionary<string, string>();
-                preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
+
+                switch (type)
+                {
+                    case FromGame.DS3:
+                        preset.RemoveSource = preset.RemoveSource == null
+                        ? "Yhorm the Giant"
+                        : preset.RemoveSource + ";Yhorm the Giant";
+                        preset.Enemies ??= new Dictionary<string, string>();
+                        preset.Enemies[(string)slotData["yhorm"]] = "Yhorm the Giant";
+                        break;
+
+                    case FromGame.SDT:
+                        // Handle explicit headless locations once the apworld has logic for them.
+                        break;
+                }
+
                 new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
             }
 
-            // Sort these params because there are technically debug rows above them, and the game
-            // (as well as fromsoftware-rs) expects rows to be ordered by ID. We don't need to sort
-            // accessories or goods because they don't have debug entries.
-            MiscSetup.SortParams(game, new[] { "EquipParamProtector", "EquipParamWeapon" });
-            MiscSetup.DS3CommonPass(game, events, opt);
+            switch (type)
+            {
+                case FromGame.DS3:
+                    // Sort params that have debug rows above them, so we don't break code that expects the
+                    // params to be sorted by ID.
+                    MiscSetup.SortParams(game, new[] { "EquipParamProtector", "EquipParamWeapon" });
+                    MiscSetup.DS3CommonPass(game, events, opt);
+                    break;
+
+                case FromGame.SDT:
+                    MiscSetup.SortParams(game, new[] { "EquipParamGoods", "EquipParamWeapon" });
+                    MiscSetup.SekiroCommonPass(game, events, opt);
+                    break;
+            }
             MiscSetup.InjectUncompressed(game);
 
             SetStatusText("Writing game files...");
-            game.SaveDS3(Directory.GetCurrentDirectory(), true);
+            switch (type)
+            {
+                case FromGame.DS3:
+                    game.SaveDS3(Directory.GetCurrentDirectory(), true);
+                    break;
+
+                case FromGame.SDT:
+                    game.SaveSekiro(Directory.GetCurrentDirectory());
+                    break;
+
+                case var g: throw UnsupportedGame(g);
+            }
 
             SetStatusText("Writing client save file...");
             WriteConfigFiles(slotData);
@@ -463,7 +532,7 @@ namespace RandomizerCommon
         /// Writes or edits the config file for the current Archipelago run.
         /// </summary>
         private void WriteConfigFiles(Dictionary<string, object> slotData)
-        { 
+        {
             var seed = (string)slotData["seed"];
             configData["url"] = url.Text;
             configData["slot"] = name.Text;
@@ -516,41 +585,60 @@ namespace RandomizerCommon
         /// <summary>
         /// Converts Archipelago options into options for this randomizer.
         /// </summary>
-        private static RandomizerOptions ConvertRandomizerOptions(Dictionary<string, bool> archiOptions)
+        private RandomizerOptions ConvertRandomizerOptions(Dictionary<string, bool> archiOptions)
         {
-            var opt = new RandomizerOptions(FromGame.DS3);
-            opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
-            opt["ngplusrings"] = archiOptions["enable_ngp"];
-            opt["nongplusrings"] = !archiOptions["enable_ngp"];
-            opt["nooutfits"] = true; // Don't randomize NPC equipment. We should add this option
-                                     // when we add enemizer support.
-                                     // Used for infinite items from shops and enemy drops
-            opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"];
-            opt["soulsprogression"] = archiOptions["smooth_soul_locations"];
+            var opt = new RandomizerOptions(type);
+            switch (type)
+            {
+                case FromGame.DS3:
+                    opt["onehand"] = archiOptions["require_one_handed_starting_weapons"];
+                    opt["ngplusrings"] = archiOptions["enable_ngp"];
+                    opt["nongplusrings"] = !archiOptions["enable_ngp"];
+                    // Don't randomize NPC equipment. We should add this option when we add
+                    // enemizer support. Used for infinite items from shops and enemy drops.
+                    opt["nooutfits"] = true;
+                    opt["weaponprogression"] = archiOptions["smooth_upgrade_locations"];
+                    opt["soulsprogression"] = archiOptions["smooth_soul_locations"];
 
-            if (archiOptions["randomize_enemies"])
-            {
-                opt["bosses"] = true;
-                opt["enemies"] = true;
-                opt["edittext"] = true;
-                opt["mimics"] = archiOptions["randomize_mimics_with_enemies"];
-                opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"];
-                opt["reducepassive"] = archiOptions["reduce_harmless_enemies"];
-                opt["earlyreq"] = archiOptions["simple_early_bosses"];
-                opt["scale"] = archiOptions["scale_enemies"];
-                opt["chests"] = archiOptions["all_chests_are_mimics"];
-                opt["supermimics"] = archiOptions["impatient_mimics"];
-            }
+                    if (archiOptions["randomize_enemies"])
+                    {
+                        opt["bosses"] = true;
+                        opt["enemies"] = true;
+                        opt["edittext"] = true;
+                        opt["mimics"] = archiOptions["randomize_mimics_with_enemies"];
+                        opt["lizards"] = archiOptions["randomize_small_crystal_lizards_with_enemies"];
+                        opt["reducepassive"] = archiOptions["reduce_harmless_enemies"];
+                        opt["earlyreq"] = archiOptions["simple_early_bosses"];
+                        opt["scale"] = archiOptions["scale_enemies"];
+                        opt["chests"] = archiOptions["all_chests_are_mimics"];
+                        opt["supermimics"] = archiOptions["impatient_mimics"];
+                    }
 
-            if (archiOptions["enable_dlc"])
-            {
-                opt["dlc1"] = true;
-                opt["dlc2"] = true;
-                opt["dlc2fromdlc1"] = true;
-            }
-            else
-            {
-                opt["omitdlc"] = true;
+                    if (archiOptions["enable_dlc"])
+                    {
+                        opt["dlc1"] = true;
+                        opt["dlc2"] = true;
+                        opt["dlc2fromdlc1"] = true;
+                    }
+                    else
+                    {
+                        opt["omitdlc"] = true;
+                    }
+                    break;
+
+                case FromGame.SDT:
+                    if (archiOptions["randomize_enemies"])
+                    {
+                        opt["bosses"] = true;
+                        opt["minibosses"] = true;
+                        opt["enemies"] = true;
+                        opt["edittext"] = true;
+                        opt["phases"] = archiOptions["similar_boss_phases"];
+                        opt["phasebuff"] = archiOptions["balanced_endgame_boss_phases"];
+                        opt["earlyreq"] = archiOptions["simple_early_minibosses"];
+                        opt["scale"] = archiOptions["scale_enemies"];
+                    }
+                    break;
             }
 
             // These options aren't actually used, but they're necessary to run the offlien item
@@ -833,6 +921,19 @@ namespace RandomizerCommon
             {
                 savePasswordLabel.Enabled = false;
                 savePasswordCheckbox.Enabled = false;
+            }
+        }
+
+        private void ArchipelagoForm_Load(object sender, EventArgs e)
+        {
+            if (type == FromGame.SDT && !MiscSetup.CheckRequiredSekiroFiles(out var error))
+            {
+                MessageBox.Show(
+                    $"Error setting up static randomizer: {error}",
+                    $"Archipelago Randomizer v{Version}",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
+                this.Close();
             }
         }
     }
