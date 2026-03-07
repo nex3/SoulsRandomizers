@@ -555,11 +555,8 @@ namespace RandomizerCommon
             /// <remarks>This requires that the instruction is an initialization.</remarks>
             public int? InitArg { get; set; }
 
-            public static explicit operator InstructionParameter(int index) =>
-                new() { Index = index };
-
             public static explicit operator InstructionParameter(string name) =>
-                new() { Name = name };
+                int.TryParse(name, out var index) ? new() { Index = index } :  new() { Name = name };
 
             /// <returns>
             /// The offset into <c>instr</c>'s arguments that this parameter indicates.
