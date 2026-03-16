@@ -404,7 +404,7 @@ Areas:
   Text: Ashina Castle Gate
   Req: ashinaoutskirts_fortress2
   Until: invasion1
-  Archipelago: AC
+  Archipelago: AO
 - Name: ashinacastle
   Text: Ashina Castle
   Req: ashinacastle_gate AND blazingbull
