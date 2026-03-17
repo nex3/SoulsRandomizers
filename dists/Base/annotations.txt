@@ -2560,9 +2560,10 @@ Slots:
 - Key: '02,0:51110972::'
   DebugText:
   - 'Scrap Magnetite - 11801000[Taro Troop (c1180_0002 #1110432) ashinacastle, Taro Troop (c1180_0003 #1110433) ashinacastle]'
-  Text: Guaranteed drop from either of the Taro Troop in the courtyard with the tall grass
-  Area: ashinacastle_gate
+  Text: Guaranteed drop from the Taro Troop outside of the building with the Abandoned Dungeon entrance
+  Area: ashinacastle
   Tags: enemy
+  Until: invasion2
 - Key: '02,0:51110973::'
   DebugText:
   - "Ungo's Spiritfall - 13400000[Underwater Headless (c1340_0000 #1110660) ashinacastle]"
