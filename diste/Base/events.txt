@@ -2,15 +2,15 @@ NewEvents:
 - ID: 9005890
   Name: scale
   Commands:
-  - c4_7(0, X0_4, 1, 1065353216)
-  - c2004_8(X0_4, X4_4)
-  - c4_7(0, X0_4, 0, 1065353216)
+  - c4_7(0, 0, 0, 0, X0_4, 1, 1065353216)
+  - SetSpEffect(X0_4, X4_4)
+  - c4_7(0, 0, 0, 0, X0_4, 0, 1065353216)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
 - ID: 9005891
   Name: scale2
   Commands:
-  - c2004_8(X0_4, X4_4)
+  - SetSpEffect(X0_4, X4_4)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
 - ID: 9005892
@@ -20,14 +20,14 @@ NewEvents:
 - ID: 9005893
   Name: musicflag
   Commands:
-  - c4_2(0, X0_4, 5, 1058642330, 0, 1065353216)
+  - c4_2(0, 0, 0, 0, X0_4, 5, 1058642330, 0, 1065353216)
   - SetEventFlag(0, X4_4, 1)
 - ID: 9005894
   Name: enemydrop
   Commands:
   - c1003_14(256)
   - IfEventFlag(1, 1, 0, X8_4)
-  - c1000_2(65792)
+  - EndIfConditionGroupStateUncompiled(0, 1, 1)
   - IfCharacterDeadalive(0, X0_4, 1, 0, 1)
   - c2003_36(X4_4)
 - ID: 9005895
@@ -37,7 +37,7 @@ NewEvents:
   - IfCharacterHasSpEffect(1, 20000, 416, 1, 0, 1)
   - IfEntityInoutsideRadiusOfEntity(1, 1, X0_4, 10000, 25, 1)
   - IfConditionGroup(0, 1, 1)
-  - c2004_8(20000, 14508)
+  - SetSpEffect(20000, 14508)
   - WaitFixedTimeSeconds(1)
   - c1000_4(1)
 - ID: 9005899
@@ -62,7 +62,7 @@ DefaultSegments:
   - DisplayBossHealthBar(1, 9999999, 0, 55555)
 - Type: end
   Commands:
-  - c4_2(0, 9999999, 5, 0, 0, 1065353216)
+  - c4_2(0, 0, 0, 0, 9999999, 5, 0, 0, 1065353216)
   - WaitFixedTimeSeconds(2)
   - PlaySE(9999999, 5, 888880000)
   - IfCharacterDeadalive(0, 9999999, 1, 0, 1)
@@ -80,12 +80,12 @@ EnemyEvents:
       - IfEventFlag(-2, 1, 0, 10000800)
     - Type: end
       Commands:
-      - c4_2(0, 10000800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 10000800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(10005810, 0)
       - ForceCharacterDeath(10005820, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(10000800, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 10000800, 1, 0, 1)
       - IfConditionGroup(-2, 1, 2)
       - IfConditionGroup(0, 1, -2)
@@ -95,6 +95,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 10000800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 10002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 10000800)
@@ -204,7 +206,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 10000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 10000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(10000850, 5, 77777777)
       - IfCharacterDeadalive(0, 10000850, 1, 0, 1)
@@ -215,6 +217,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 10000850
+    CondIdentity:
+    - IfEventFlag(10, 0, 0, 10000850)
+    - IfEventFlag(2, 1, 0, 10002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 10000850)
@@ -282,7 +287,7 @@ EnemyEvents:
     Entity: 10000850
     Add:
     - Cmd: IfEventFlag(0, 1, 0, 10000850)
-      After: IfConditionGroup(0, 1, 2)
+      Before: c2004_35(10000850, 0)
 - ID: 10003740
   Map: m10_00_00_00
   Template:
@@ -318,6 +323,8 @@ EnemyEvents:
     Dupe:
       Type: rewrite
       Condition: -2
+    CondIdentity:
+    - IfInoutsideArea(-2, 0, 10000, 10012031, 1)
 - ID: 10012800
   Map: m10_01_00_00
   Template:
@@ -326,7 +333,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 10010800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 10010800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(10018000, 5, 888880000)
       - IfCharacterDeadalive(0, 10010800, 1, 0, 1)
@@ -336,6 +343,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 10010800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 10010800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 10012805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 10010800)
@@ -399,7 +409,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 11000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 11000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(11008000, 5, 888880000)
       - IfCharacterDeadalive(0, 11000800, 1, 0, 1)
@@ -409,6 +419,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 11000800
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 11002805)
+    - IfEventFlag(2, 1, 0, 11002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 11000800)
@@ -489,7 +502,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 11000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 11000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(11008050, 5, 888880000)
       - IfCharacterDeadalive(0, 11000850, 1, 0, 1)
@@ -499,6 +512,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 11000850
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 10000850, 0, 0)
+    - IfEventFlag(2, 1, 0, 11002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 11000850)
@@ -558,10 +574,10 @@ EnemyEvents:
       - IfEventFlag(-2, 1, 0, 11050800)
     - Type: end
       Commands:
-      - c4_14(0, 11050800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 11050800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(11058000, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 11050800, 1, 0, 1)
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
       - IfConditionGroup(-2, 1, 2)
@@ -595,11 +611,14 @@ EnemyEvents:
       - ForceCharacterDeath(11050800, 0)
     - Type: remove
       Commands:
-      - c2004_10(11050800, 0)
+      - SetCharacterGravity(11050800, 0)
       - SetCharacterAnimationState(11050800, 0)
       - c2004_33(11050801, 11050800)
   - Type: segment
     Entity: 11050801
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 11052805)
+    - IfEventFlag(2, 1, 0, 11052805)
     Segments:
     - Type: dead
       IgnoreMatch: true
@@ -677,7 +696,7 @@ EnemyEvents:
     Segments:
     - Type: remove
       Commands:
-      - c2004_10(11050800, 1)
+      - SetCharacterGravity(11050800, 1)
     - Type: setup
       Commands:
       - ChangeCharacterEnableState(11050800, 1)
@@ -702,8 +721,7 @@ EnemyEvents:
       - ChangeCharacterEnableState(11050801, 0)
     - Type: endphase
       Commands:
-      - c4_14(1, 11050801, 5, 1, 0, 1065353216)
-      - c4_14(1, 11050801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 11050801, 5, 1, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - IfCharacterDeadalive(0, 11050801, 1, 0, 1)
@@ -714,25 +732,29 @@ EnemyEvents:
     Entity: 11050800
     DefeatFlag: 11050800
     StartFlag: 11052805
-    Removes:
-    - IfEventFlag(2, 1, 0, 11052806)
-    - IfConditionGroup(-3, 1, 2)
 - ID: 11052850
   Map: m11_05_00_00
   Template:
   - Type: segment
     Entity: 11050850
+    Add:
+    - Cmds:
+      - c2004_35(11050850, 1)
+      - WaitFixedTimeSeconds(30)
+      - c2004_35(11050850, 0)
+    Removes:
+    - c2004_35(11050850, 0)
     Segments:
     - Type: remove
       Commands:
       - IfEventFlag(-2, 1, 0, 11050850)
     - Type: end
       Commands:
-      - c4_14(0, 11050850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 11050850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(11058050, 5, 888880000)
-      - c2004_8(20000, 1899)
-      - c3_26(2)
+      - SetSpEffect(20000, 1899)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 11050850, 1, 0, 1)
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
       - IfConditionGroup(-2, 1, 2)
@@ -743,6 +765,10 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 11050850
+    CondIdentity:
+    - c3_23(-11, 0, 0, 0, 11050850, 0, 0)
+    - IfInoutsideArea(-12, 1, 10000, 11052850, 1)
+    - IfInoutsideArea(-12, 1, 10000, 11052855, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 11050850)
@@ -762,31 +788,31 @@ EnemyEvents:
       - IfEventFlag(8, 1, 0, 9120)
       - IfEventFlag(8, 1, 0, 9122)
       - IfEventFlag(8, 1, 0, 9112)
-      - c1000_101(524552)
+      - GotoIfConditionGroupStateUncompiled(8, 1, 8)
       - IfEventFlag(7, 0, 0, 9120)
       - IfEventFlag(7, 1, 0, 9122)
       - IfEventFlag(7, 1, 0, 9112)
-      - c1000_101(459015)
+      - GotoIfConditionGroupStateUncompiled(7, 1, 7)
       - IfEventFlag(6, 1, 0, 9120)
       - IfEventFlag(6, 0, 0, 9122)
       - IfEventFlag(6, 1, 0, 9112)
-      - c1000_101(393478)
+      - GotoIfConditionGroupStateUncompiled(6, 1, 6)
       - IfEventFlag(5, 1, 0, 9120)
       - IfEventFlag(5, 1, 0, 9122)
       - IfEventFlag(5, 0, 0, 9112)
-      - c1000_101(327941)
+      - GotoIfConditionGroupStateUncompiled(5, 1, 5)
       - IfEventFlag(4, 0, 0, 9120)
       - IfEventFlag(4, 0, 0, 9122)
       - IfEventFlag(4, 1, 0, 9112)
-      - c1000_101(262404)
+      - GotoIfConditionGroupStateUncompiled(4, 1, 4)
       - IfEventFlag(3, 1, 0, 9120)
       - IfEventFlag(3, 0, 0, 9122)
       - IfEventFlag(3, 0, 0, 9112)
-      - c1000_101(196867)
+      - GotoIfConditionGroupStateUncompiled(3, 1, 3)
       - IfEventFlag(2, 0, 0, 9120)
       - IfEventFlag(2, 1, 0, 9122)
       - IfEventFlag(2, 0, 0, 9112)
-      - c1000_101(131330)
+      - GotoIfConditionGroupStateUncompiled(2, 1, 2)
       - GotoUnconditionally(1)
       - Label2()
       - c2004_67(11050851, 11050850)
@@ -824,7 +850,7 @@ EnemyEvents:
       Start: IfConditionGroup(0, 1, -11)
       End: Label1()
       Commands:
-      - c2004_8(11050850, 9644)
+      - SetSpEffect(11050850, 9644)
     - Type: secondsetup
       IgnoreMatch: true
       PreSegment: firststart
@@ -878,7 +904,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 12010800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 12010800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(12010801, 0)
       - ForceCharacterDeath(12010802, 0)
       - WaitFixedTimeSeconds(4)
@@ -888,7 +914,7 @@ EnemyEvents:
   - Type: multichrbasic
     Entity: 12010800
     NewEvent:
-    - c4_14(0, 12010800, 5, 0, 0, 1065353216)
+    - c4_14(0, 0, 0, 0, 12010800, 5, 0, 0, 1065353216)
     - ForceCharacterDeath(12010801, 0)
     - ForceCharacterDeath(12010802, 0)
 - ID: 12012810
@@ -896,6 +922,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 12010800
+    CondIdentity:
+    - c3_23(-2, 0, 0, 0, 12010801, 0, 0)
+    - IfEventFlag(10, 1, 0, 12012805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 12010800)
@@ -922,13 +951,13 @@ EnemyEvents:
       - c2004_33(12010802, 12010800)
       - SetCharacterImmortality(12010801, 1)
       - SetCharacterImmortality(12010802, 1)
-      - c2004_10(12010800, 0)
+      - SetCharacterGravity(12010800, 0)
       - SetCharacterAnimationState(12010800, 0)
       - ChangeCharacterEnableState(12010802, 0)
       - c2003_18(12010801, 30002, 1, 1065353216)
     - Type: remove
       Commands:
-      - c4_7(1, 12010801, 1, 1065353216)
+      - c4_7(1, 0, 0, 0, 12010801, 1, 1065353216)
     - Type: firstsetup
       PreSegment: presetup
       Start: GotoIfEventFlag(1, 1, 0, 12010801)
@@ -942,12 +971,13 @@ EnemyEvents:
       Start: IfConditionGroup(0, 1, -2)
       End: Label1()
       Regions:
-      - event chrpoint-500 12012801
+      - event chrpoint-50 12012801
       MoveOnly:
       - c2004_41(12010800, 1, 12012801, -1)
       Commands:
       - ChangeCharacterEnableState(12010801, 1)
       - c2004_41(12010800, 1, 12012801, -1)
+      - SetSpEffect(12010800, 1450601)
       - ChangeCharacterEnableState(12010800, 1)
       - c2003_18(12010801, 20002, 0, 1065353216)
     - Type: secondsetup
@@ -963,12 +993,13 @@ EnemyEvents:
       Start: IfConditionGroup(0, 1, 10)
       End: Label2()
       Regions:
-      - event chrpoint-500 12012801
+      - event chrpoint-50 12012801
       MoveOnly:
       - c2004_41(12010800, 1, 12012801, -1)
       Commands:
       - c2003_18(12010801, 20002, 0, 1065353216)
       - c2004_41(12010800, 1, 12012801, -1)
+      - SetSpEffect(12010800, 1450601)
       - ChangeCharacterEnableState(12010800, 1)
     - Type: start
       Start: Label2()
@@ -979,17 +1010,18 @@ EnemyEvents:
   - Type: multichrbasic
     Entity: 12010800
     Regions:
-    - event chrpoint-500 12012801
+    - event chrpoint-50 12012801
     NewEvent:
     - c2004_35(12010800, 1)
     - c2004_33(12010801, 12010800)
     - c2004_33(12010802, 12010800)
     - SetCharacterImmortality(12010801, 1)
     - SetCharacterImmortality(12010802, 1)
-    - c2004_10(12010800, 0)
+    - SetCharacterGravity(12010800, 0)
     - SetCharacterAnimationState(12010800, 0)
     - ChangeCharacterEnableState(12010802, 0)
     - c2004_41(12010800, 1, 12012801, -1)
+    - SetSpEffect(12010800, 1450601)
 - ID: 12012811
   Map: m12_01_00_00
   Template:
@@ -1027,8 +1059,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 12020800, 5, 0, 0, 1065353216)
-      - c4_14(1, 12020801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12020800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12020801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(12020800, 5, 888880000)
@@ -1042,6 +1074,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 12020800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 12020800, 0, 0)
+    - IfEventFlag(2, 1, 0, 12022805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 12020800)
@@ -1145,8 +1180,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(255, 12020850, 5, 0, 0, 1065353216)
-      - c4_14(255, 12020860, 5, 0, 0, 1065353216)
+      - c4_14(-1, 0, 0, 0, 12020850, 5, 0, 0, 1065353216)
+      - c4_14(-1, 0, 0, 0, 12020860, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, -1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(12020850, 5, 888880000)
@@ -1161,6 +1196,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 12020850
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 12020860, 0, 0)
+    - IfEventFlag(2, 1, 0, 12022855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 12020850)
@@ -1235,7 +1273,7 @@ EnemyEvents:
       - SetCharacterAIState(12020860, 0)
       - SetCharacterAIState(12020850, 1)
       - IfCharacterDeadalive(8, 12020850, 1, 0, 1)
-      - c1000_1(524545)
+      - SkipIfConditionGroupStateUncompiled(1, 1, 8)
       - DisplayBossHealthBar(1, 12020850, 0, 903320000)
   - Type: multichronlybasic
     Entity: 12020850
@@ -1267,18 +1305,15 @@ EnemyEvents:
   Map: m12_03_00_00
   Template:
   - Type: segment
-    Entity: 12030814
+    Entity: 12030800
     Segments:
-    - Type: remove
-      Commands:
-      - HandleBossDefeatAndDisplayBanner(12030800, 17)
     - Type: end
       Commands:
-      - c4_14(1, 12030800, 5, 0, 0, 1065353216)
-      - c4_14(1, 12030810, 5, 0, 0, 1065353216)
-      - c4_14(1, 12030811, 5, 0, 0, 1065353216)
-      - c4_14(1, 12030812, 5, 0, 0, 1065353216)
-      - c4_14(1, 12030813, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12030800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12030810, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12030811, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12030812, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 12030813, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(1)
       - PlaySE(12030800, 5, 888880000)
@@ -1289,14 +1324,16 @@ EnemyEvents:
       - IfCharacterDeadalive(2, 12030812, 1, 0, 1)
       - IfCharacterDeadalive(2, 12030813, 1, 0, 1)
       - IfConditionGroup(0, 1, 2)
-      - HandleBossDefeatAndDisplayBanner(12030814, 17)
+      - HandleBossDefeatAndDisplayBanner(12030800, 17)
       - DisplayBossHealthBar(0, 12030813, 1, 137000)
       - DisplayBossHealthBar(0, 12030812, 2, 137100)
 - ID: 12032810
   Map: m12_03_00_00
   Template:
   - Type: segment
-    Entity: 12030814
+    Entity: 12030800
+    CondIdentity:
+    - IfInoutsideArea(2, 1, 10000, 12032801, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 12030800)
@@ -1374,7 +1411,7 @@ EnemyEvents:
       - ChangeCharacterEnableState(12030814, 1)
       - c2004_50(12030814, 220, 0)
       - c2004_30(12030814, 0)
-      - c2004_8(12030814, 297810)
+      - SetSpEffect(12030814, 297810)
       - c2004_34(12030814, 1)
       - WaitFixedTimeFrames(1)
       - c2003_18(12030800, 63010, 0, 1065353216)
@@ -1387,9 +1424,9 @@ EnemyEvents:
       Commands:
       - IfElapsedSeconds(0, 0)
       - IfCharacterDeadalive(-8, 12030810, 1, 0, 1)
-      - c1000_101(16253196)
+      - GotoIfConditionGroupStateUncompiled(12, 1, -8)
       - IfCharacterDeadalive(-9, 12030800, 1, 0, 1)
-      - c1000_101(16187659)
+      - GotoIfConditionGroupStateUncompiled(11, 1, -9)
       - DisplayBossHealthBar(1, 12030800, 0, 136100)
       - GotoUnconditionally(13)
       - Label11()
@@ -1407,7 +1444,7 @@ EnemyEvents:
       - DisplayBossHealthBar(0, 12030813, 1, 137000)
       - DisplayBossHealthBar(0, 12030812, 2, 137100)
   - Type: multichrbasic
-    Entity: 12030814
+    Entity: 12030800
     NewEvent:
     - SetCharacterAIState(12030810, 0)
     - SetCharacterAIState(12030811, 0)
@@ -1424,13 +1461,13 @@ EnemyEvents:
   Entities: 12030800 12030810
   Template:
   - Type: multichr
-    Entity: 12030814
+    Entity: 12030800
     DefeatFlag: 12030800
     StartFlag: 12032810
     EffectFlag: 0 12030814 12032811
     Name: 12030800 12030810
   - Type: locstay
-    Entity: 12030814
+    Entity: 12030800
     Name: 12030800 12030810
     Dupe:
       Type: none
@@ -1440,12 +1477,12 @@ EnemyEvents:
   Entities: 12030810 12030811 12030813 12030812
   Template:
   - Type: multichr
-    Entity: 12030814
+    Entity: 12030800
     DefeatFlag: 12030800
     EffectFlag: 0 12030814 12032811
     Name: 12030810 12030811 12030812 12030813
   - Type: locstay
-    Entity: 12030814
+    Entity: 12030800
     Name: 12030810 12030811 12030812 12030813
     Dupe:
       Type: none
@@ -1460,7 +1497,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(8, 12030850, 5, 0, 0, 1065353216)
+      - c4_14(8, 0, 0, 0, 12030850, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 8)
       - c2008_3(780)
       - WaitFixedTimeSeconds(4)
@@ -1535,7 +1572,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_2(0, 12040800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 12040800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(5)
       - PlaySE(12040800, 5, 77777777)
       - IfCharacterDeadalive(0, 12040800, 1, 0, 1)
@@ -1578,10 +1615,10 @@ EnemyEvents:
       - IfEventFlag(-2, 1, 0, 12050800)
     - Type: end
       Commands:
-      - c4_14(0, 12050800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 12050800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(12050800, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 12050800, 1, 0, 1)
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
       - IfConditionGroup(-2, 1, 2)
@@ -1592,6 +1629,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 12050800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 12050800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 12052805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 12050800)
@@ -1711,7 +1751,7 @@ EnemyEvents:
     ArgEntities: X0
     Add:
     - Cmd: IfEventFlag(0, 1, 0, 12050800)
-      After: IfConditionGroup(0, 1, -1)
+      Before: c2004_35(X0_4, 0)
 - ID: 12082800
   Map: m12_08_00_00
   Template:
@@ -1720,7 +1760,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_2(0, 12080800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 12080800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(12080800, 5, 77777777)
       - IfCharacterDeadalive(0, 12080800, 1, 0, 1)
@@ -1791,7 +1831,7 @@ EnemyEvents:
     - Type: end
       ProgressFlag: 12092907-12092909
       Commands:
-      - c4_2(0, 12090800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 12090800, 5, 0, 0, 1065353216)
       - SetEventFlag(0, 12092907, 0)
       - SetEventFlag(0, 12092908, 0)
       - SetEventFlag(0, 12092909, 0)
@@ -1849,6 +1889,18 @@ EnemyEvents:
     ProgressFlag: 12092850-12092853 12092855-12092857
     Regions:
     - arg chrgen 12093200 12093201 12093202 12093203 12093204 12093205 12093206 12093220 12093221 12093222 12093223 12093224 12093225 12093226 12093240 12093241 12093242 12093243 12093244 12093245 12093246 12093260 12093261 12093262 12093263 12093264 12093265 12093266
+    Add:
+    - Cmd: WaitFixedTimeFrames(1)
+      Before: start
+    - Cmd: GotoUnconditionally(19)
+      Before: start
+    - Cmd: Label19()
+      Before: IfEventFlag(0, 0, 0, X12_4)
+  - Type: multichronly
+    Entity: 12090800
+    ProgressFlag: 12092850-12092853 12092855-12092857
+    NewEvent:
+    - SetEventFlag(0, 12092853, 1)
 - ID: 12092860
   Map: m12_09_00_00
   Template:
@@ -1869,7 +1921,10 @@ EnemyEvents:
   - Type: multichr
     Entity: 12090800
     ArgEntities: X0 X4
+    ProgressFlag: 12092862
     MusicFlag: 12092802
+    Add:
+    - Cmd: SetEventFlag(0, 12092862, 1)
 - ID: 12092863
   Map: m12_09_00_00
   Template:
@@ -1877,7 +1932,9 @@ EnemyEvents:
     Entity: 12090800
     ArgEntities: X0 X4
     ArgFlags: X8
-    ProgressFlag: 12092862
+    ProgressFlag: 12092862 12092863
+    Add:
+    - Cmd: SetEventFlag(0, 12092863, 1)
 - ID: 12092864
   Map: m12_09_00_00
   Template:
@@ -1923,11 +1980,11 @@ EnemyEvents:
       - c2004_35(13000800, 1)
     - Type: end
       Commands:
-      - c4_14(0, 13000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 13000800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(13000800, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(13008000, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 13000800, 1, 0, 1)
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
       - IfConditionGroup(-2, 1, 2)
@@ -1957,13 +2014,16 @@ EnemyEvents:
       - SetCharacterAIState(13000800, 0)
       - c2004_30(13000800, 0)
       - ChangeCharacterEnableState(13000800, 0)
-      - c2004_10(13000800, 0)
+      - SetCharacterGravity(13000800, 0)
       - SetCharacterAnimationState(13000800, 0)
       - ChangeCharacterEnableState(13000800, 1)
       - c2004_34(13000800, 1)
       - c2004_33(13000801, 13000800)
   - Type: segment
     Entity: 13000801
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 13002805)
+    - IfEventFlag(2, 1, 0, 13002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 13000800)
@@ -2032,7 +2092,7 @@ EnemyEvents:
       - SetCharacterAIState(13000800, 0)
     - Type: remove
       Commands:
-      - c2004_10(13000800, 1)
+      - SetCharacterGravity(13000800, 1)
     - Type: start
       PreSegment: setup
       Regions:
@@ -2055,12 +2115,12 @@ EnemyEvents:
       IgnoreMatch: true
       Start: EndIfEventFlag(0, 1, 0, 13000800)
       Commands:
-      - c4_2(1, 13000801, 5, 0, 0, 1065353216)
+      - c4_2(1, 0, 0, 0, 13000801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - IfCharacterDeadalive(0, 13000801, 1, 0, 1)
     - Type: remove
       Commands:
-      - c4_2(1, 13000801, 5, 1057803469, 0, 1065353216)
+      - c4_2(1, 0, 0, 0, 13000801, 5, 1057803469, 0, 1065353216)
       - ChangeCharacterEnableState(13000801, 0)
       - SetCharacterAIState(13000801, 0)
       - c2004_34(13000801, 65280)
@@ -2100,18 +2160,27 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 13000830, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 13000830, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(13000830, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(13008000, 5, 888880000)
       - IfCharacterDeadalive(0, 13000830, 1, 0, 1)
       - HandleBossDefeatAndDisplayBanner(13000830, 15)
+- ID: 13002834
+  Map: m13_00_00_00
+  Template:
+  - Type: loc
+    Entity: 13000830
+    Removes:
+    - c2008_1(4525, 4520)
 - ID: 13002835
   Map: m13_00_00_00
   Template:
   - Type: segment
     Entity: 13000830
     MultiplayerBuff: 13005830
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 13000830, 0, 0)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(3, 0, 0, 13000830)
@@ -2164,15 +2233,15 @@ EnemyEvents:
   - Type: segment
     Entity: 13000850
     Segments:
-    - Type: remove
-      Commands:
-      - SetEventFlag(0, 13002854, 1)
     - Type: end
+      OriginalOnly:
+      - SetEventFlag(0, 13002854, 1)
       Commands:
-      - c4_14(0, 13000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 13000850, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(13000851, 0)
       - ForceCharacterDeath(13000852, 0)
-      - c2004_8(13000850, 6950)
+      - SetEventFlag(0, 13002854, 1)
+      - SetSpEffect(13000850, 6950)
       - WaitFixedTimeSeconds(4)
       - PlaySE(13000850, 5, 888880000)
       - IfCharacterDeadalive(0, 13000850, 1, 0, 1)
@@ -2182,18 +2251,20 @@ EnemyEvents:
   - Type: multichrbasic
     Entity: 13000850
     NewEvent:
-    - c4_14(0, 13000850, 5, 0, 0, 1065353216)
+    - c4_14(0, 0, 0, 0, 13000850, 5, 0, 0, 1065353216)
     - ForceCharacterDeath(13000851, 0)
     - ForceCharacterDeath(13000852, 0)
-    - c2004_8(13000850, 6950)
+    - SetSpEffect(13000850, 6950)
 - ID: 13002860
   Map: m13_00_00_00
   Template:
   - Type: segment
     Entity: 13000850
     Add:
-    - Cmd: c3_23(255, 13000850, 10000, 0)
-      Before: c3_23(255, 13000851, 10000, 0)
+    - Cmd: c3_23(-1, 0, 0, 0, 13000850, 10000, 0)
+      Before: c3_23(-1, 0, 0, 0, 13000851, 10000, 0)
+    CondIdentity:
+    - IfEventFlag(-2, 1, 0, 13002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(6, 0, 0, 13000850)
@@ -2215,7 +2286,7 @@ EnemyEvents:
       - SetCharacterAIState(13000851, 0)
       - SetCharacterAIState(13000852, 0)
       - ChangeCharacterEnableState(13000850, 0)
-      - c2004_10(13000850, 0)
+      - SetCharacterGravity(13000850, 0)
       - SetCharacterAnimationState(13000850, 0)
     - Type: remove
       PreSegment: presetup
@@ -2264,12 +2335,13 @@ EnemyEvents:
     - Type: start
       Start: Label8()
       Regions:
-      - event chrpoint-500 13002881
+      - event chrpoint-50 13002881
       MoveOnly:
       - c2004_41(13000850, 1, 13002881, -1)
       Commands:
       - SetCharacterAIState(13000850, 0)
       - c2004_41(13000850, 1, 13002881, -1)
+      - SetSpEffect(13000850, 1450601)
       - ChangeCharacterEnableState(13000850, 1)
       - SetCharacterAIState(13000851, 1)
       - SetCharacterAIState(13000852, 1)
@@ -2282,13 +2354,14 @@ EnemyEvents:
   - Type: multichrbasic
     Entity: 13000850
     Regions:
-    - event chrpoint-500 13002881
+    - event chrpoint-50 13002881
     NewEvent:
     - c2004_35(13000850, 1)
-    - c2004_10(13000850, 0)
+    - SetCharacterGravity(13000850, 0)
     - SetCharacterAnimationState(13000850, 0)
     - SetCharacterAIState(13000850, 0)
     - c2004_41(13000850, 1, 13002881, -1)
+    - SetSpEffect(13000850, 1450601)
     - c2004_33(13000851, 13000850)
     - c2004_33(13000852, 13000850)
 - ID: 13002861
@@ -2339,10 +2412,10 @@ EnemyEvents:
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
     - Type: end
       Commands:
-      - c4_14(0, 14000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 14000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(14008000, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 14000800, 1, 0, 1)
       - IfConditionGroup(-2, 1, 2)
       - IfConditionGroup(0, 1, -2)
@@ -2376,6 +2449,9 @@ EnemyEvents:
       - SetCharacterAnimationState(14000800, 0)
   - Type: segment
     Entity: 14000801
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 14000801, 10000, 0)
+    - IfEventFlag(2, 1, 0, 14002805)
     Segments:
     - Type: dead
       IgnoreMatch: true
@@ -2505,11 +2581,23 @@ EnemyEvents:
     Entity: 14000801
     Segments:
     - Type: endphase
+      Regions:
+      - event chrgenstudent 14003810 14003811 14003812 14003813 14003814 14003815 14003816 14003817 14003818
       Commands:
-      - c3_26(1)
+      - c3_26(1, 0, 0, 0)
       - IfCharacterDeadalive(1, 14000801, 1, 0, 1)
       - IfConditionGroup(0, 1, 1)
       - ForceCharacterDeath(14005810, 0)
+      - DeactivateGenerator(14003810, 0)
+      - DeactivateGenerator(14003811, 0)
+      - DeactivateGenerator(14003812, 0)
+      - DeactivateGenerator(14003813, 0)
+      - DeactivateGenerator(14003814, 0)
+      - DeactivateGenerator(14003815, 0)
+      - DeactivateGenerator(14003816, 0)
+      - DeactivateGenerator(14003817, 0)
+      - DeactivateGenerator(14003818, 0)
+      - IfElapsedFrames(0, 0)
 - ID: 14002850
   Map: m14_00_00_00
   Template:
@@ -2518,7 +2606,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_2(0, 14000850, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 14000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(14000850, 5, 77777777)
       - IfCharacterDeadalive(0, 14000850, 1, 0, 1)
@@ -2528,6 +2616,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 14000850
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 14002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 14000850)
@@ -2881,7 +2971,7 @@ EnemyEvents:
     Entity: 15000800
     Add:
     - Cmd: IfEventFlag(0, 1, 0, 15000800)
-      After: IfConditionGroup(0, 1, -1)
+      Before: c2004_35(15000800, 0)
 - ID: 15002800
   Map: m15_00_00_00
   Template:
@@ -2893,10 +2983,10 @@ EnemyEvents:
       - IfEventFlag(-2, 1, 0, 15000800)
     - Type: end
       Commands:
-      - c4_14(0, 15000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 15000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(15008000, 5, 888880000)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 15000800, 1, 0, 1)
       - IfCharacterHasSpEffect(2, 10000, 9646, 0, 0, 1)
       - IfConditionGroup(-2, 1, 2)
@@ -2907,6 +2997,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 15000800
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 15002805)
+    - IfEventFlag(2, 1, 0, 15002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 15000800)
@@ -2940,11 +3033,11 @@ EnemyEvents:
       Start: GotoIfEventFlag(1, 1, 0, 15000801)
       End: IfConditionGroup(0, 1, 1)
       Commands:
-      - c2004_8(15000800, 5402)
+      - SetSpEffect(15000800, 5402)
       - ChangeCharacterEnableState(15000800, 1)
       - SetCharacterAnimationState(15000800, 1)
       - SetCharacterAnimationState(15000800, 0)
-      - c2004_10(15000800, 0)
+      - SetCharacterGravity(15000800, 0)
       - c2004_26(15000800, 0)
       - c2004_26(15000800, 12)
       - c2004_26(15000800, 13)
@@ -2965,9 +3058,9 @@ EnemyEvents:
       NonMoveOnly:
       - c2004_41(15000800, 1, 15002812, -1)
       Commands:
-      - c2004_8(15000800, 5400)
+      - SetSpEffect(15000800, 5400)
       - c2004_41(15000800, 1, 15002812, -1)
-      - c2004_10(15000800, 1)
+      - SetCharacterGravity(15000800, 1)
       - SetCharacterAnimationState(15000800, 1)
       - c2004_26(15000800, 256)
       - c2004_26(15000800, 268)
@@ -3039,13 +3132,19 @@ EnemyEvents:
       After: IfConditionGroup(0, 1, 1)
     - Cmd: SetCharacterAIState(15000800, 1)
       Before: c2004_20(15000800)
-    - Cmd: c2004_8(15000800, 110)
+    - Cmds:
+      - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
+      - SkipIfConditionGroupStateUncompiled(1, 1, 5)
+      - SetSpEffect(15000800, 110)
       Before: c2004_20(15000800)
     Removes:
     - c2002_11(15000010, 0, 15002815, 15000000, 10000, 0, 0)
     - c2002_3(15000010, 0, 10000)
     - c2004_41(15000800, 1, 15002816, -1)
-    - c2008_1(2121, 2121)
+    - c2008_4(-1041760256, 1116314010)
+    CondIdentity:
+    - c4_14(1, 0, 0, 0, 15000800, 5, 1, 0, 1065353216)
+    - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
   - Type: multichr
     Entity: 15000800
     DefeatFlag: 15000800
@@ -3054,24 +3153,34 @@ EnemyEvents:
     Dupe:
       Type: none
     Add:
-    - Cmd: c2004_8(15000800, 110)
+    - Cmds:
+      - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
+      - SkipIfConditionGroupStateUncompiled(1, 1, 5)
+      - SetSpEffect(15000800, 110)
       Before: c2004_20(15000800)
     - Cmds:
       - SetEventFlag(0, 15002802, 0)
       - WaitFixedTimeFrames(1)
       Before: SetEventFlag(0, 15002802, 1)
+    CondIdentity:
+    - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
   - Type: locstay
     Entity: 15000800
     Name: 15000800
     Dupe:
       Type: none
     Add:
-    - Cmd: c2004_8(15000800, 110)
+    - Cmds:
+      - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
+      - SkipIfConditionGroupStateUncompiled(1, 1, 5)
+      - SetSpEffect(15000800, 110)
       Before: c2004_20(15000800)
     - Cmds:
       - SetEventFlag(0, 15002802, 0)
       - WaitFixedTimeFrames(1)
       Before: SetEventFlag(0, 15002802, 1)
+    CondIdentity:
+    - c4_2(5, 0, 0, 0, 15000800, 4, 1056964608, 0, 1065353216)
 - ID: 15002820
   Map: m15_00_00_00
   Template:
@@ -3091,12 +3200,10 @@ EnemyEvents:
   - Type: multichrboss
     Entity: 15000800
     DefeatFlag: 15000800
-    StartFlag: 15002805
+    StartFlag: 15002810
     Removes:
-    - IfEventFlag(2, 1, 0, 15002810)
-    - SkipIfPlayerIsNotInOwnWorld(2, 1)
-    - IfEventFlag(2, 1, 0, 15002806)
-    - IfEventFlag(1, 1, 0, 15002810)
+    - 15002805
+    - 15002806
 - ID: 15002850
   Map: m15_00_00_00
   Template:
@@ -3105,7 +3212,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 15000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 15000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(15000850, 5, 888880000)
       - IfCharacterDeadalive(0, 15000850, 1, 0, 1)
@@ -3115,6 +3222,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 15000850
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 15000850, 10000, 0)
+    - IfEventFlag(2, 1, 0, 15002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 15000850)
@@ -3164,7 +3274,7 @@ EnemyEvents:
       - c2003_18(15000850, 3005, 0, 1065353216)
       - SetCharacterAIState(15005850, 1)
       - c2004_34(15005800, 1)
-      - c2004_8(15000110, 9532)
+      - SetSpEffect(15000110, 9532)
       - WaitFixedTimeSeconds(2)
       - DisplayBossHealthBar(1, 15000850, 0, 903252000)
 - ID: 15002861
@@ -3184,26 +3294,30 @@ EnemyEvents:
     Add:
     - Cmd: IfEventFlag(1, 1, 0, 16002697)
       Before: IfConditionGroup(0, 1, 1)
-    - Cmd: c1000_2(16515328)
-      Before: c1000_1(16515329)
+    - Cmd: EndIfConditionGroupStateUncompiled(0, 1, -4)
+      Before: SkipIfConditionGroupStateUncompiled(1, 1, -4)
     - Cmd: SetEventFlag(0, 16007690, 0)
     - Cmd: c2003_4(16000690)
     Removes:
     - IfInoutsideArea(1, 1, 10000, 16002165, 1)
     - SetEventFlag(0, 16002696, 1)
+    CondIdentity:
+    - c3_16(-4, 0, 0, 0, 17030000, 1)
   - Type: chrboss
     Entity: 16000801
     DefeatFlag: 16000800
     Add:
     - Cmd: IfEventFlag(1, 1, 0, 16002697)
       Before: IfConditionGroup(0, 1, 1)
-    - Cmd: c1000_2(16515328)
-      Before: c1000_1(16515329)
+    - Cmd: EndIfConditionGroupStateUncompiled(0, 1, -4)
+      Before: SkipIfConditionGroupStateUncompiled(1, 1, -4)
     - Cmd: SetEventFlag(0, 16007690, 0)
     - Cmd: c2003_4(16000690)
     Removes:
     - IfInoutsideArea(1, 1, 10000, 16002165, 1)
     - SetEventFlag(0, 16002696, 1)
+    CondIdentity:
+    - c3_16(-4, 0, 0, 0, 17030000, 1)
 - ID: 16002800
   Map: m16_00_00_00
   Template:
@@ -3212,7 +3326,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 16000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 16000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(16008000, 5, 888880000)
       - IfCharacterDeadalive(0, 16000800, 1, 0, 1)
@@ -3262,10 +3376,10 @@ EnemyEvents:
     - Type: start
       Start: Label2()
       EncounterOnly:
-      - c2004_8(10000, 1908)
+      - SetSpEffect(10000, 1908)
       - SetEventFlag(0, 16002697, 1)
       Commands:
-      - c2004_8(10000, 1908)
+      - SetSpEffect(10000, 1908)
       - SetCharacterAIState(16000801, 1)
       - c2004_34(16000801, 1)
       - DisplayBossHealthBar(1, 16000801, 0, 904710000)
@@ -3285,14 +3399,14 @@ EnemyEvents:
     Segments:
     - Type: setup
       Commands:
-      - c2004_8(16000800, 11901)
+      - SetSpEffect(16000800, 11901)
       - ChangeCharacterEnableState(16000800, 1)
       - SetCharacterAIState(16000800, 0)
     - Type: start
       PreSegment: setup
       Start: c2004_42(16000800, 1, 16002831, 0, 16000801)
       EncounterOnly:
-      - c2004_8(10000, 1908)
+      - SetSpEffect(10000, 1908)
       Commands:
       - SetCharacterAnimationState(16000800, 1)
       - c2004_34(16000800, 1)
@@ -3302,7 +3416,7 @@ EnemyEvents:
       - c2004_50(16000800, 221, 1)
       - SetEventFlag(0, 16002697, 1)
       - c2003_18(16000800, 20002, 256, 1065353216)
-      - c2004_8(10000, 1908)
+      - SetSpEffect(10000, 1908)
   - Type: segment
     Entity: 16000801
     Segments:
@@ -3322,11 +3436,12 @@ EnemyEvents:
       - ChangeCharacterEnableState(16000801, 0)
       - SetCharacterAnimationState(16000801, 0)
       Commands:
-      - c4_2(1, 16000801, 5, 1008981770, 0, 1065353216)
+      - c4_2(1, 0, 0, 0, 16000801, 5, 1008981770, 0, 1065353216)
       - IfCharacterHasSpEffect(1, 16000801, 11955, 0, 0, 1)
+      - c3_26(1, 0, 0, 0)
       - IfConditionGroup(0, 1, 1)
       - c2003_18(16000801, 20001, 0, 1065353216)
-      - c3_26(2)
+      - c3_26(2, 0, 0, 0)
       - IfCharacterDeadalive(2, 10000, 0, 0, 1)
       - IfCharacterHasSpEffect(2, 16000801, 11920, 1, 0, 1)
       - IfConditionGroup(0, 1, 2)
@@ -3341,7 +3456,7 @@ EnemyEvents:
   - Type: chrbasic
     Entity: 16000801
     NewEvent:
-    - c4_2(0, 16000801, 5, 1008981770, 0, 1065353216)
+    - c4_2(0, 0, 0, 0, 16000801, 5, 1008981770, 0, 1065353216)
     - ForceCharacterDeath(16000801, 1)
 - ID: 16002812
   Map: m16_00_00_00
@@ -3394,37 +3509,47 @@ EnemyEvents:
     - c2006_1(16002811, 1)
     - c2006_1(16002812, 1)
     - c2006_1(16002813, 1)
+- ID: 16002836
+  Map: m16_00_00_00
+  Template:
+  - Type: remove
+    Entity: 16000801
+- ID: 16002838
+  Map: m16_00_00_00
+  Template:
+  - Type: remove
+    Entity: 16000800
 - ID: 16002840
   Map: m16_00_00_00
   Template:
   - Type: chrbossmove
     Entity: 16000800
-    DefeatFlag: 16000800
     DefeatFlagLabel: on 9
-    Add:
-    - Cmds:
-      - IfCharacterAIState(1, 16000800, 3, 0, 1)
-      - IfEntityInoutsideRadiusOfEntity(1, 1, 16000800, 10000, 50, 1)
-      Before: c1000_101(65793)
-    - Cmds:
-      - Label9()
-      - c2004_21(10000, 1908)
-    Removes:
-    - IfInoutsideArea(1, 1, 10000, 16002164, 1)
+    NewEvent:
+    - c2000_2(0)
+    - IfCharacterAIState(1, 16000800, 3, 0, 1)
+    - IfEntityInoutsideRadiusOfEntity(1, 1, 16000800, 10000, 50, 1)
+    - GotoIfConditionGroupStateUncompiled(0, 0, 1)
+    - SetSpEffect(10000, 1908)
+    - Label0()
+    - WaitFixedTimeSeconds(1)
+    - c1000_4(1)
+    - Label9()
+    - c2004_21(10000, 1908)
   - Type: chrbossmove
     Entity: 16000801
-    DefeatFlag: 16000800
     DefeatFlagLabel: on 9
-    Add:
-    - Cmds:
-      - IfCharacterAIState(1, 16000801, 3, 0, 1)
-      - IfEntityInoutsideRadiusOfEntity(1, 1, 16000801, 10000, 50, 1)
-      Before: c1000_101(65793)
-    - Cmds:
-      - Label9()
-      - c2004_21(10000, 1908)
-    Removes:
-    - IfInoutsideArea(1, 1, 10000, 16002164, 1)
+    NewEvent:
+    - c2000_2(0)
+    - IfCharacterAIState(1, 16000801, 3, 0, 1)
+    - IfEntityInoutsideRadiusOfEntity(1, 1, 16000801, 10000, 50, 1)
+    - GotoIfConditionGroupStateUncompiled(0, 0, 1)
+    - SetSpEffect(10000, 1908)
+    - Label0()
+    - WaitFixedTimeSeconds(1)
+    - c1000_4(1)
+    - Label9()
+    - c2004_21(10000, 1908)
 - ID: 16002842
   Map: m16_00_00_00
   Template:
@@ -3450,7 +3575,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 16000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 16000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(16008000, 5, 888880000)
       - IfCharacterDeadalive(0, 16000850, 1, 0, 1)
@@ -3460,6 +3585,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 16000850
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 16000850, 10000, 0)
+    - IfEventFlag(2, 1, 0, 16002855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 16000850)
@@ -3528,6 +3656,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 16000860
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 16002865)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 16000860)
@@ -3566,7 +3696,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 18000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 18000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(18000800, 5, 888880000)
       - IfCharacterDeadalive(0, 18000800, 1, 0, 1)
@@ -3605,7 +3735,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 18000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 18000850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(18000850, 5, 888880000)
       - IfCharacterDeadalive(0, 18000850, 1, 0, 1)
@@ -3651,7 +3781,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 19000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 19000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(19008000, 5, 888880000)
       - c2008_1(-1, -1)
@@ -3762,7 +3892,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30008000, 5, 888880000)
       - IfCharacterDeadalive(0, 30000800, 1, 0, 1)
@@ -3772,6 +3902,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30000800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30000800)
@@ -3808,7 +3940,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30010800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30010800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(30015800, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30010800, 5, 888880000)
@@ -3839,6 +3971,7 @@ EnemyEvents:
       Start: Label2()
       Commands:
       - SetCharacterAIState(30010800, 1)
+      - SetCharacterAIState(30015800, 1)
       - c2004_34(30010800, 1)
       - DisplayBossHealthBar(1, 30010800, 0, 904260301)
 - ID: 30012811
@@ -3856,7 +3989,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30020800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30020800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30020800, 5, 888880000)
       - IfCharacterDeadalive(0, 30020800, 1, 0, 1)
@@ -3904,7 +4037,7 @@ EnemyEvents:
       Regions:
       - event chrgen 30033801 30033802 30033803 30033804 30033805 30033806
       Commands:
-      - c4_14(0, 30030800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30030800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(30030801, 0)
       - ForceCharacterDeath(30030802, 0)
       - ForceCharacterDeath(30030803, 0)
@@ -3930,6 +4063,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30030800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30032805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30030800)
@@ -4042,7 +4177,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30040800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30040800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30040800, 5, 888880000)
       - IfCharacterDeadalive(0, 30040800, 1, 0, 1)
@@ -4088,7 +4223,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30050800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30050800, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(30055800, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30050800, 5, 888880000)
@@ -4102,6 +4237,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30050800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30052805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30050800)
@@ -4143,7 +4280,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30050850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30050850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30050850, 5, 888880000)
       - IfCharacterDeadalive(0, 30050850, 1, 0, 1)
@@ -4153,6 +4290,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30050850
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30052855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30050850)
@@ -4189,7 +4328,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30060800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30060800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30060800, 5, 888880000)
       - IfCharacterDeadalive(0, 30060800, 1, 0, 1)
@@ -4199,6 +4338,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30060800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30062805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30060800)
@@ -4235,7 +4376,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30070800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30070800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30070800, 5, 888880000)
       - IfCharacterDeadalive(0, 30070800, 1, 0, 1)
@@ -4281,7 +4422,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30080800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30080800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30080800, 5, 888880000)
       - IfCharacterDeadalive(0, 30080800, 1, 0, 1)
@@ -4327,7 +4468,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30090800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30090800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30090800, 5, 888880000)
       - IfCharacterDeadalive(0, 30090800, 1, 0, 1)
@@ -4373,8 +4514,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 30100800, 5, 0, 0, 1065353216)
-      - c4_14(1, 30100801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30100800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30100801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30100800, 5, 888880000)
@@ -4433,7 +4574,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30110800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30110800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30110800, 5, 888880000)
       - IfCharacterDeadalive(0, 30110800, 1, 0, 1)
@@ -4465,7 +4606,7 @@ EnemyEvents:
       Commands:
       - SetCharacterAIState(30110800, 1)
       - c2004_34(30110800, 1)
-      - c2004_8(30110800, 4404)
+      - SetSpEffect(30110800, 4404)
       - WaitFixedTimeSeconds(1)
       - DisplayBossHealthBar(1, 30110800, 0, 902100300)
       - WaitFixedTimeSeconds(0.7)
@@ -4488,8 +4629,8 @@ EnemyEvents:
       - PlaySE(30100800, 5, 888880000)
     - Type: end
       Commands:
-      - c4_14(1, 30120800, 5, 0, 0, 1065353216)
-      - c4_14(1, 30120801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30120800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30120801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30120800, 5, 888880000)
@@ -4550,7 +4691,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30130800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30130800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30130800, 5, 888880000)
       - IfCharacterDeadalive(0, 30130800, 1, 0, 1)
@@ -4628,8 +4769,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 30140800, 5, 0, 0, 1065353216)
-      - c4_14(1, 30140801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30140800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 30140801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30140800, 5, 888880000)
@@ -4688,7 +4829,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30150800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30150800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30150800, 5, 888880000)
       - IfCharacterDeadalive(0, 30150800, 1, 0, 1)
@@ -4735,7 +4876,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30160800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30160800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30160800, 5, 888880000)
       - IfCharacterDeadalive(0, 30160800, 1, 0, 1)
@@ -4745,6 +4886,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30160800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30162805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30160800)
@@ -4792,7 +4935,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30170800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30170800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30170800, 5, 888880000)
       - IfCharacterDeadalive(0, 30170800, 1, 0, 1)
@@ -4831,7 +4974,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30180800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30180800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30180800, 5, 888880000)
       - IfCharacterDeadalive(0, 30180800, 1, 0, 1)
@@ -4841,6 +4984,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30180800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 30180800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 30182805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30180800)
@@ -4905,7 +5051,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30190800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30190800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30190800, 5, 888880000)
       - IfCharacterDeadalive(0, 30190800, 1, 0, 1)
@@ -4951,7 +5097,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 30200800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 30200800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(30208000, 5, 888880000)
       - IfCharacterDeadalive(0, 30200800, 1, 0, 1)
@@ -4961,6 +5107,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 30200800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 30202805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 30200800)
@@ -5044,7 +5192,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31010800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31010800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31010800, 5, 888880000)
       - IfCharacterDeadalive(0, 31010800, 1, 0, 1)
@@ -5054,6 +5202,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 31010800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 31010800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 31012805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31010800)
@@ -5118,7 +5269,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31020800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31020800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31020800, 5, 888880000)
       - IfCharacterDeadalive(0, 31020800, 1, 0, 1)
@@ -5174,7 +5325,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31030800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31030800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31030800, 5, 888880000)
       - IfCharacterDeadalive(0, 31030800, 1, 0, 1)
@@ -5224,7 +5375,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31040800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31040800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31040800, 5, 888880000)
       - IfCharacterDeadalive(0, 31040800, 1, 0, 1)
@@ -5249,7 +5400,7 @@ EnemyEvents:
       - SetCharacterAIState(31040800, 0)
       - ChangeCharacterEnableState(31040800, 1)
       - SetCharacterAnimationState(31040800, 1)
-      - c2004_8(31040800, 90000)
+      - SetSpEffect(31040800, 90000)
       - c2003_18(31040800, 30001, 0, 1065353216)
     - Type: start
       Start: Label2()
@@ -5274,7 +5425,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31050800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31050800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31050800, 5, 888880000)
       - IfCharacterDeadalive(0, 31050800, 1, 0, 1)
@@ -5284,6 +5435,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 31050800
+    CondIdentity:
+    - IfInoutsideArea(1, 1, 10000, 31052801, 1)
+    - IfInoutsideArea(2, 1, 10000, 31052800, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31050800)
@@ -5447,8 +5601,8 @@ EnemyEvents:
       - SetCharacterAnimationState(31070801, 1)
       - SetCharacterAIState(31070800, 0)
       - SetCharacterAIState(31070801, 0)
-      - c2004_8(31070800, 8092)
-      - c2004_8(31070801, 8092)
+      - SetSpEffect(31070800, 8092)
+      - SetSpEffect(31070801, 8092)
     - Type: start
       Start: Label2()
       SpecificHelperOnly:
@@ -5502,7 +5656,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31090800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31090800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31090800, 5, 888880000)
       - IfCharacterDeadalive(0, 31090800, 1, 0, 1)
@@ -5527,7 +5681,7 @@ EnemyEvents:
       - SetCharacterAIState(31090800, 0)
       - ChangeCharacterEnableState(31090800, 1)
       - SetCharacterAnimationState(31090800, 1)
-      - c2004_8(31090800, 8092)
+      - SetSpEffect(31090800, 8092)
     - Type: start
       Start: Label2()
       Commands:
@@ -5575,6 +5729,11 @@ EnemyEvents:
     Removes:
     - IfConditionGroup(2, 1, -2)
     - IfConditionGroup(1, 1, -1)
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 31100800, 10000, 0)
+    - IfInoutsideArea(1, 1, 10000, 31102805, 1)
+    - c3_23(-2, 0, 0, 0, 31100800, 10000, 0)
+    - IfInoutsideArea(2, 1, 10000, 31102805, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31100800)
@@ -5754,7 +5913,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31120800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31120800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31120800, 5, 888880000)
       - IfCharacterDeadalive(0, 31120800, 1, 0, 1)
@@ -5820,6 +5979,8 @@ EnemyEvents:
       After: Label0()
     - Cmd: SetEventFlag(0, 31150815, 1)
     - Cmd: SetEventFlag(0, 31152815, 1)
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 31152805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31150800)
@@ -5884,7 +6045,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31170800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31170800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31170800, 5, 888880000)
       - IfCharacterDeadalive(0, 31170800, 1, 0, 1)
@@ -6006,7 +6167,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31190800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31190800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31190800, 5, 888880000)
       - IfCharacterDeadalive(0, 31190800, 1, 0, 1)
@@ -6057,7 +6218,7 @@ EnemyEvents:
       Regions:
       - event chrgen 31193820 31193821
       Commands:
-      - c4_14(0, 31190850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31190850, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31190850, 5, 888880000)
       - IfCharacterDeadalive(0, 31190850, 1, 0, 1)
@@ -6079,6 +6240,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 31190850
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 31192855)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31190850)
@@ -6215,9 +6378,9 @@ EnemyEvents:
       - WaitFixedTimeSeconds(5)
       - SetCharacterAIState(31200801, 1)
       - c2004_34(31200801, 1)
-      - c3_23(241, 31200801, 0, 0)
+      - c3_23(-15, 0, 0, 0, 31200801, 0, 0)
       - IfElapsedSeconds(-15, 7)
-      - c1000_0(61697)
+      - WaitForConditionGroupState(1, -15)
       - DisplayBossHealthBar(1, 31200801, 1, 903800312)
 - ID: 31202811
   Map: m31_20_00_00
@@ -6234,7 +6397,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31210800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31210800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31210800, 5, 888880000)
       - IfCharacterDeadalive(0, 31210800, 1, 0, 1)
@@ -6244,9 +6407,10 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 31210800
-    Removes:
-    - IfConditionGroup(1, 1, -1)
-    - IfConditionGroup(2, 1, -2)
+    CondOrder: -1 -5 -2 -6
+    CondIdentity:
+    - IfInoutsideArea(-5, 1, 10000, 31212801, 1)
+    - IfInoutsideArea(-6, 1, 10000, 31212801, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31210800)
@@ -6289,6 +6453,12 @@ EnemyEvents:
       Start: IfConditionGroup(0, 1, -6)
       End: Label2()
       Commands: []
+    - Type: remove
+      Commands:
+      - c3_23(-1, 0, 0, 0, 31210800, 10000, 0)
+      - IfCharacterAIState(-1, 31210800, 3, 0, 1)
+      - c3_23(-2, 0, 0, 0, 31210800, 10000, 0)
+      - IfCharacterAIState(-2, 31210800, 3, 0, 1)
     - Type: start
       Start: Label2()
       Commands:
@@ -6310,7 +6480,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 31220800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 31220800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(31220800, 5, 888880000)
       - IfCharacterDeadalive(0, 31220800, 1, 0, 1)
@@ -6323,6 +6493,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 31220800
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 31222805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 31220800)
@@ -6362,7 +6534,7 @@ EnemyEvents:
       - DisplayBossHealthBar(1, 31220801, 0, 903560310)
       - WaitFixedTimeSeconds(1.5)
       - SetCharacterAIState(31220801, 1)
-      - c2004_8(31220803, 297810)
+      - SetSpEffect(31220803, 297810)
       - SetCharacterAnimationState(31220803, 0)
       - c2004_34(31220803, 1)
     - Type: althealthbar
@@ -6408,8 +6580,8 @@ EnemyEvents:
     - event chrgen 31223308
     Add:
     - Cmds:
-      - c2004_8(31220800, 6950)
-      - c2004_8(31220800, 6951)
+      - SetSpEffect(31220800, 6950)
+      - SetSpEffect(31220800, 6951)
       After: DeactivateGenerator
   - Type: locstay
     Entity: 31220800
@@ -6432,7 +6604,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32000800, 5, 888880000)
       - IfCharacterDeadalive(0, 32000800, 1, 0, 1)
@@ -6442,6 +6614,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32000800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 32000800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 32002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32000800)
@@ -6489,7 +6664,7 @@ EnemyEvents:
       - SetCharacterAIState(32000800, 1)
       - c2004_34(32000800, 1)
       - DisplayBossHealthBar(1, 32000800, 0, 903451320)
-      - c2004_8(32000800, 8089)
+      - SetSpEffect(32000800, 8089)
 - ID: 32002811
   Map: m32_00_00_00
   Template:
@@ -6505,16 +6680,19 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32010800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32010800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32018000, 5, 888880000)
-      - c4_14(0, 32010800, 0, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32010800, 0, 0, 0, 1065353216)
       - HandleBossDefeatAndDisplayBanner(32010800, 18)
 - ID: 32012810
   Map: m32_01_00_00
   Template:
   - Type: segment
     Entity: 32010800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 32010800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 32012805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32010800)
@@ -6577,7 +6755,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32020800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32020800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32028000, 5, 888880000)
       - IfCharacterDeadalive(0, 32020800, 1, 0, 1)
@@ -6587,6 +6765,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32020800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 32022805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32020800)
@@ -6606,7 +6786,7 @@ EnemyEvents:
       - SetCharacterAIState(32020800, 0)
       - ChangeCharacterEnableState(32020800, 1)
       - SetCharacterAnimationState(32020800, 1)
-      - c2004_8(32020800, 8090)
+      - SetSpEffect(32020800, 8090)
       - c2004_50(32020800, 220, 0)
       - c2003_18(32020800, 30001, 1, 1065353216)
     - Type: start
@@ -6632,7 +6812,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32040800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32040800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32048000, 5, 888880000)
       - IfCharacterDeadalive(0, 32040800, 1, 0, 1)
@@ -6642,6 +6822,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32040800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 32042805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32040800)
@@ -6680,13 +6862,13 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 32050800, 5, 0, 0, 1065353216)
-      - c4_14(1, 32050801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 32050800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 32050801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32050800, 5, 888880000)
-      - c4_14(2, 32050800, 0, 0, 0, 1065353216)
-      - c4_14(2, 32050801, 0, 0, 0, 1065353216)
+      - c4_14(2, 0, 0, 0, 32050800, 0, 0, 0, 1065353216)
+      - c4_14(2, 0, 0, 0, 32050801, 0, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 2)
       - HandleBossDefeatAndDisplayBanner(32050800, 18)
       - DisplayBossHealthBar(0, 32050801, 1, 903350322)
@@ -6695,6 +6877,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32050800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 32050800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 32052805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32050800)
@@ -6780,7 +6965,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32070800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32070800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32048000, 5, 888880000)
       - IfCharacterDeadalive(0, 32070800, 1, 0, 1)
@@ -6790,6 +6975,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32070800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 32070800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 32072805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32070800)
@@ -6852,7 +7040,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32080800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32080800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32048000, 5, 888880000)
       - IfCharacterDeadalive(0, 32080800, 1, 0, 1)
@@ -6862,6 +7050,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32080800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 32082805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32080800)
@@ -6928,7 +7118,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 32110800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 32110800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(32048000, 5, 888880000)
       - IfCharacterDeadalive(0, 32110800, 1, 0, 1)
@@ -6938,6 +7128,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 32110800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 32110800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 32112805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 32110800)
@@ -7018,7 +7211,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 34120800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 34120800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(34128500, 5, 888880000)
       - IfCharacterDeadalive(0, 34120800, 1, 0, 1)
@@ -7028,6 +7221,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 34120800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 34120800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 34122805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 34120800)
@@ -7091,7 +7287,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 34130800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 34130800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(34130800, 5, 888880000)
       - IfCharacterDeadalive(0, 34130800, 1, 0, 1)
@@ -7101,6 +7297,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 34130800
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 34132805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 34130800)
@@ -7128,6 +7326,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 34140850
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 34140850, 10000, 0)
+    - IfInoutsideArea(2, 1, 10000, 34142856, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 34140850)
@@ -7194,8 +7395,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 34140850, 5, 0, 0, 1065353216)
-      - c4_14(1, 34140851, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 34140850, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 34140851, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(34140850, 5, 888880000)
@@ -7214,7 +7415,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 35000800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 35000800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(35000800, 5, 888880000)
       - IfCharacterDeadalive(0, 35000800, 1, 0, 1)
@@ -7228,11 +7429,14 @@ EnemyEvents:
     MusicFlag: 35002802
     NewEvent:
     - EndIfEventFlag(0, 1, 0, 35000800)
-    - c4_2(1, 35000800, 5, 1058642330, 0, 1065353216)
+    - c4_2(1, 0, 0, 0, 35000800, 5, 1058642330, 0, 1065353216)
     - IfConditionGroup(0, 1, 1)
     - SetEventFlag(0, 35002802, 1)
   - Type: segment
     Entity: 35000800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 35000800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 35002805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 35000800)
@@ -7290,7 +7494,7 @@ EnemyEvents:
       Start: Label2()
       Commands:
       - EndIfEventFlag(0, 1, 0, 35000800)
-      - c4_2(1, 35000800, 5, 1058642330, 0, 1065353216)
+      - c4_2(1, 0, 0, 0, 35000800, 5, 1058642330, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - SetEventFlag(0, 35002802, 1)
 - ID: 35002850
@@ -7301,7 +7505,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 35000850, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 35000850, 5, 0, 0, 1065353216)
       - ForceCharacterDeath(35005850, 0)
       - WaitFixedTimeSeconds(4)
       - PlaySE(35000850, 5, 888880000)
@@ -7343,16 +7547,19 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 39200800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 39200800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(39200800, 5, 888880000)
-      - c4_14(0, 39200800, 0, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 39200800, 0, 0, 0, 1065353216)
       - HandleBossDefeatAndDisplayBanner(39200800, 17)
 - ID: 39202810
   Map: m39_20_00_00
   Template:
   - Type: segment
     Entity: 39200800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 39200800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 39202805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 39200800)
@@ -7411,7 +7618,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1034480800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1034480800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1034480800, 5, 888880000)
       - IfCharacterDeadalive(0, 1034480800, 1, 0, 1)
@@ -7452,7 +7659,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1035500800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1035500800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1035500800, 5, 888880000)
       - IfCharacterDeadalive(0, 1035500800, 1, 0, 1)
@@ -7462,6 +7669,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1035500800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 1035500800, 10000, 0)
+    - IfEventFlag(2, 1, 0, 1035502805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1035500800)
@@ -7534,7 +7744,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1038510800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1038510800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1038510800, 5, 888880000)
       - IfCharacterDeadalive(0, 1038510800, 1, 0, 1)
@@ -7575,7 +7785,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_2(0, 1039540800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 1039540800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1039540800, 5, 888880000)
       - IfCharacterDeadalive(0, 1039540800, 1, 0, 1)
@@ -7585,6 +7795,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1039540800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 1039542805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1039540800)
@@ -7622,7 +7834,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1040530800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1040530800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1040530800, 5, 888880000)
       - IfCharacterDeadalive(0, 1040530800, 1, 0, 1)
@@ -7664,7 +7876,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1043300800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1043300800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1043300800, 5, 888880000)
       - IfCharacterDeadalive(0, 1043300800, 1, 0, 1)
@@ -7676,6 +7888,9 @@ EnemyEvents:
     Entity: 1043300800
     Removes:
     - IfConditionGroup(1, 1, -1)
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 1043302805)
+    - c3_23(-1, 0, 0, 0, 1043300800, 10000, 0)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1043300800)
@@ -7699,7 +7914,7 @@ EnemyEvents:
       - c2004_34(1043300800, 1)
       - DisplayBossHealthBar(1, 1043300800, 0, 903460500)
       - c2004_50(1043300800, 220, 1)
-      - c2004_8(1043300800, 8089)
+      - SetSpEffect(1043300800, 8089)
 - ID: 1044362800
   Map: m60_44_36_00
   Template:
@@ -7708,7 +7923,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1044360800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1044360800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1044360800, 5, 888880000)
       - IfCharacterDeadalive(0, 1044360800, 1, 0, 1)
@@ -7747,8 +7962,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 1048400800, 5, 0, 0, 1065353216)
-      - c4_14(1, 1048400801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1048400800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1048400801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1048400800, 5, 888880000)
@@ -7762,6 +7977,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1048400800
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 1048402805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1048400800)
@@ -7806,8 +8023,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 1049390800, 5, 0, 0, 1065353216)
-      - c4_14(1, 1049390801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1049390800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1049390801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1049390800, 5, 888880000)
@@ -7819,6 +8036,8 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1049390800
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 1049392805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1049390800)
@@ -7857,8 +8076,8 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 1051360800, 5, 0, 0, 1065353216)
-      - c4_14(1, 1051360801, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1051360800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1051360801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1051360800, 5, 888880000)
@@ -7880,10 +8099,10 @@ EnemyEvents:
     NewEvent:
     - EndIfEventFlag(0, 1, 0, 1051360800)
     - IfEventFlag(0, 1, 0, 1051362805)
-    - c4_2(255, 1051360801, 3, 1056964608, 0, 1065353216)
+    - c4_2(-1, 0, 0, 0, 1051360801, 3, 1056964608, 0, 1065353216)
     - IfCharacterDeadalive(-1, 1051360801, 1, 0, 1)
     - IfElapsedSeconds(-1, 30)
-    - c3_23(255, 1051360800, 10000, 0)
+    - c3_23(-1, 0, 0, 0, 1051360800, 10000, 0)
     - IfConditionGroup(0, 1, -1)
     - SetCharacterAIState(1051360800, 1)
     - c2004_34(1051360800, 1)
@@ -7896,6 +8115,8 @@ EnemyEvents:
       After: GotoIfEventFlag(0, 0, 0, 1051360800)
     - Cmd: SkipIfEventFlag(2, 1, 0, 1051360800)
       Before: GotoIfEventFlag(5, 0, 0, 9410)
+    CondIdentity:
+    - IfEventFlag(2, 1, 0, 1051362805)
     Segments:
     - Type: disable
       Start: GotoIfEventFlag(5, 1, 0, 9413)
@@ -7920,10 +8141,10 @@ EnemyEvents:
     - Type: start
       Start: IfConditionGroup(0, 1, 2)
       NonMoveOnly:
-      - c4_2(255, 1051360801, 3, 1056964608, 0, 1065353216)
+      - c4_2(-1, 0, 0, 0, 1051360801, 3, 1056964608, 0, 1065353216)
       - IfCharacterDeadalive(-1, 1051360801, 1, 0, 1)
       - IfElapsedSeconds(-1, 30)
-      - c3_23(255, 1051360800, 10000, 0)
+      - c3_23(-1, 0, 0, 0, 1051360800, 10000, 0)
       - IfConditionGroup(0, 1, -1)
       - c2003_18(1051360800, 20011, 0, 1065353216)
       - SetCharacterAIState(1051360800, 1)
@@ -7934,10 +8155,10 @@ EnemyEvents:
       - SetCharacterAIState(1051360801, 1)
       - c2004_34(1051360801, 1)
       - DisplayBossHealthBar(1, 1051360801, 0, 903460501)
-      - c4_2(255, 1051360801, 3, 1056964608, 0, 1065353216)
+      - c4_2(-1, 0, 0, 0, 1051360801, 3, 1056964608, 0, 1065353216)
       - IfCharacterDeadalive(-1, 1051360801, 1, 0, 1)
       - IfElapsedSeconds(-1, 30)
-      - c3_23(255, 1051360800, 10000, 0)
+      - c3_23(-1, 0, 0, 0, 1051360800, 10000, 0)
       - IfConditionGroup(0, 1, -1)
       - c2003_18(1051360800, 20011, 0, 1065353216)
       - SetCharacterAIState(1051360800, 1)
@@ -7952,7 +8173,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_2(0, 1051570800, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 1051570800, 5, 0, 0, 1065353216)
       - IfCharacterDeadalive(0, 1051570800, 1, 0, 1)
       - HandleBossDefeatAndDisplayBanner(1051570800, 17)
 - ID: 1051572810
@@ -7960,6 +8181,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1051570800
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 1051570800, 0, 0)
+    - IfEventFlag(2, 1, 0, 1051572805)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1051570800)
@@ -8053,7 +8277,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(1, 1052380800, 5, 0, 0, 1065353216)
+      - c4_14(1, 0, 0, 0, 1052380800, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 1)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1052380800, 5, 888880000)
@@ -8069,6 +8293,9 @@ EnemyEvents:
   Template:
   - Type: segment
     Entity: 1052380800
+    CondIdentity:
+    - IfEntityInoutsideRadiusOfEntity(1, 1, 10000, 1052380800, 220, 1)
+    - IfCharacterDeadalive(1, 1052380800, 0, 0, 1)
     Segments:
     - Type: dead
       Start: GotoIfEventFlag(0, 0, 0, 1252380800)
@@ -8094,7 +8321,7 @@ EnemyEvents:
       - ChangeCharacterEnableState(1052380800, 1)
       - SetCharacterAnimationState(1052380800, 1)
       - ChangeCharacterEnableState(1052380899, 1)
-      - c2004_10(1052380899, 0)
+      - SetCharacterGravity(1052380899, 0)
       - c2004_50(1052380899, 220, 0)
       - c2004_2(1052380899, 0)
       - SetCharacterAIState(1052380899, 0)
@@ -8109,10 +8336,10 @@ EnemyEvents:
       - c2004_34(1052380899, 1)
       - c2004_34(1052380800, 1)
       - SetCharacterAIState(1052380800, 1)
-      - c2004_8(10000, 13925)
-      - c2004_8(1052380800, 13918)
+      - SetSpEffect(10000, 13925)
+      - SetSpEffect(1052380800, 13918)
       - IfCharacterDeadalive(5, 1052380800, 0, 0, 1)
-      - c4_7(5, 1052380800, 1, 1065353216)
+      - c4_7(5, 0, 0, 0, 1052380800, 1, 1065353216)
       - IfCharacterAIState(5, 1052380800, 3, 0, 1)
       - IfConditionGroup(0, 1, 5)
       - DisplayBossHealthBar(1, 1052380800, 0, 904730000)
@@ -8144,7 +8371,7 @@ EnemyEvents:
     Segments:
     - Type: end
       Commands:
-      - c4_14(0, 1052520800, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, 1052520800, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - PlaySE(1052520800, 5, 888880000)
       - IfCharacterDeadalive(0, 1052520800, 1, 0, 1)
@@ -8182,7 +8409,7 @@ EnemyEvents:
       Start: Label0()
       End: GotoIfEventFlag(1, 1, 0, 1252520801)
       Commands:
-      - c2004_10(1052520800, 0)
+      - SetCharacterGravity(1052520800, 0)
       - SetCharacterAnimationState(1052520800, 0)
       - SetCharacterAIState(1052520800, 0)
       - c2004_50(1052520800, 221, 0)
@@ -8196,6 +8423,8 @@ EnemyEvents:
       - c2004_33(1052520801, 1052520800)
   - Type: segment
     Entity: 1052520801
+    CondIdentity:
+    - c3_23(-1, 0, 0, 0, 1052520801, 0, 0)
     Segments:
     - Type: dead
       IgnoreMatch: true
@@ -8275,7 +8504,7 @@ EnemyEvents:
       IgnoreMatch: true
       Start: c2004_42(1052520800, 1, 1052522815, -1, 1052520801)
       Commands:
-      - c2004_10(1052520800, 1)
+      - SetCharacterGravity(1052520800, 1)
       - SetCharacterAIState(1052520800, 0)
       - c2004_50(1052520800, 221, 0)
       - c2004_50(1052520800, 222, 0)
@@ -8302,7 +8531,7 @@ EnemyEvents:
     - Type: endphase
       End: c2002_3(60520010, 0, 10000)
       Commands:
-      - c4_2(0, 1052520801, 5, 0, 0, 1065353216)
+      - c4_2(0, 0, 0, 0, 1052520801, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(4)
       - IfCharacterDeadalive(0, 1052520801, 1, 0, 1)
       - c2004_2(1052520801, 30)
@@ -8320,7 +8549,7 @@ EnemyEvents:
     DefeatFlag: 1252520800
     StartFlag: 1252522802
     Removes:
-    - c2004_8(1052520800, 12780)
+    - SetSpEffect(1052520800, 12780)
 - ID: 1052522815
   Map: m60_52_52_00
   Template:
@@ -8341,6 +8570,23 @@ EnemyEvents:
   - Type: chrpart
     Entity: 1052520801
     DefeatFlag: 1252520800
+- ID: 90005300
+  Map: common_func
+  Dupe: manual
+  Entities: X4
+  Template:
+  - Type: removearg
+    Entities: 35000800
+    ArgEntities: X4
+  - Type: locarg
+    Dupe:
+      Type: none
+      Entity: X4 X20
+  - Type: common
+    Dupe:
+      Type: rewrite
+      Entity: X4 X20
+      Condition: IfCharacterRatioDeadalive and
 - ID: 1034452800
   Map: m60_34_45_00
   Template:
@@ -8394,7 +8640,7 @@ EnemyEvents:
     ArgEntities: X0
     Replaces:
     - From: IfCharacterHasSpEffect(0, X0_4, 14887, 1, 0, 1)
-      To: c4_2(0, X0_4, 3, 1058642330, 0, 1065353216)
+      To: c4_2(0, 0, 0, 0, X0_4, 3, 1058642330, 0, 1065353216)
 - ID: 1037512350
   Map: m60_37_51_00
   Dupe: copy
@@ -8420,7 +8666,7 @@ EnemyEvents:
     Regions:
     - arg chrpoint 1038522340 1038522341 1038522342
     Add:
-    - Cmd: c2004_8(X0_4, 15347)
+    - Cmd: SetSpEffect(X0_4, 15347)
       Before: start
 - ID: 1038522344
   Map: m60_38_52_00
@@ -8503,7 +8749,7 @@ EnemyEvents:
     Regions:
     - arg chrpoint 1039442800 1039442801 1039442802
     Add:
-    - Cmd: c2004_8(X0_4, 15347)
+    - Cmd: SetSpEffect(X0_4, 15347)
       Before: start
 - ID: 1039442344
   Map: m60_39_44_00
@@ -8586,7 +8832,7 @@ EnemyEvents:
       PreSegment: quickstart
       Start: Label0()
       Commands:
-      - c4_14(15, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 15)
       - WaitFixedTimeSeconds(2)
       - IfCharacterDeadalive(14, X8_4, 1, 0, 1)
@@ -8625,7 +8871,7 @@ EnemyEvents:
       PreSegment: quickstart
       Start: Label0()
       Commands:
-      - c4_14(15, X20_4, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, X20_4, 5, 0, 0, 1065353216)
       - IfCharacterDeadalive(14, X20_4, 1, 0, 1)
   - Type: segmentcopy
     Entity: 1041510801
@@ -8638,7 +8884,7 @@ EnemyEvents:
       IgnoreMatch: true
       Start: Label10()
       Commands:
-      - c4_14(15, 1041510801, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, 1041510801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 15)
       - WaitFixedTimeSeconds(2)
       - IfCharacterDeadalive(14, 1041510801, 1, 0, 1)
@@ -8665,8 +8911,11 @@ EnemyEvents:
     DefeatFlagLabel: on 19
     Name: X0 X4 X8
     Removes:
-    - c2004_8(X0_4, 4401)
+    - SetSpEffect(X0_4, 4401)
     - c3_33
+    CondOrder: <1
+    CondIdentity:
+    - IfCharacterDeadalive(-3, X0_4, 1, 0, 1)
     Segments:
     - Type: healthbarcheck
       Params: X0
@@ -8744,7 +8993,7 @@ EnemyEvents:
     Regions:
     - arg chrrel 1045392340 1045392341 1045392342
     Add:
-    - Cmd: c2004_8(X0_4, 15347)
+    - Cmd: SetSpEffect(X0_4, 15347)
       Before: start
 - ID: 1045392345
   Map: m60_45_39_00
@@ -8810,7 +9059,7 @@ EnemyEvents:
       Params: X8 X12
       Start: Label0()
       Commands:
-      - c4_14(0, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(X8_4, 5, 888880000)
       - IfCharacterDeadalive(0, X8_4, 1, 0, 1)
@@ -8873,7 +9122,7 @@ EnemyEvents:
       Params: X8
       Start: Label0()
       Commands:
-      - c4_14(15, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 15)
       - WaitFixedTimeSeconds(2)
       - IfCharacterDeadalive(14, X8_4, 1, 0, 1)
@@ -8917,7 +9166,7 @@ EnemyEvents:
     - Type: remove
       Start: Label0()
       Commands:
-      - c4_14(15, X20_4, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, X20_4, 5, 0, 0, 1065353216)
       - IfCharacterDeadalive(14, X20_4, 1, 0, 1)
   - Type: segmentcopy
     Entity: 1248550801
@@ -8930,7 +9179,7 @@ EnemyEvents:
       IgnoreMatch: true
       Start: Label10()
       Commands:
-      - c4_14(15, 1248550801, 5, 0, 0, 1065353216)
+      - c4_14(15, 0, 0, 0, 1248550801, 5, 0, 0, 1065353216)
       - IfConditionGroup(0, 1, 15)
       - WaitFixedTimeSeconds(2)
       - IfCharacterDeadalive(14, 1248550801, 1, 0, 1)
@@ -8945,8 +9194,8 @@ EnemyEvents:
     ArgEntities: X0
     Removes:
     - IfCharacterHasSpEffect(2, X0_4, 11825, 1, 0, 1)
-    - c2004_8(X0_4, 11825)
-    - c2004_8(X0_4, 11826)
+    - SetSpEffect(X0_4, 11825)
+    - SetSpEffect(X0_4, 11826)
 - ID: 1248552830
   Map: m60_48_55_00
   Template:
@@ -9006,6 +9255,11 @@ EnemyEvents:
     Name: X0 X4 X8
     Removes:
     - c3_33
+    CondOrder: <1 -15 1 -14 2
+    CondIdentity:
+    - c3_33(1, 0, 0, 0, X8_4, 1)
+    - c3_33(2, 0, 0, 0, X8_4, 1)
+    - IfCharacterDeadalive(-3, X0_4, 1, 0, 1)
     Segments:
     - Type: healthbarcheck
       Params: X0
@@ -9043,8 +9297,8 @@ EnemyEvents:
     - Cmds:
       - SetCharacterAnimationState(1052560801, 0)
       - SetCharacterAnimationState(1052560802, 0)
-      - c2004_10(1052560801, 0)
-      - c2004_10(1052560802, 0)
+      - SetCharacterGravity(1052560801, 0)
+      - SetCharacterGravity(1052560802, 0)
       - SetCharacterAIState(1052560801, 0)
       - SetCharacterAIState(1052560802, 0)
       - c2004_41(1052560801, 1, 1052562800, -1)
@@ -9131,7 +9385,7 @@ EnemyEvents:
       Params: X8 X12
       Start: Label0()
       Commands:
-      - c4_14(0, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(X8_4, 5, 888880000)
       - IfCharacterDeadalive(0, X8_4, 1, 0, 1)
@@ -9176,7 +9430,7 @@ EnemyEvents:
       Params: X8 X12
       Start: Label0()
       Commands:
-      - c4_14(0, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(X8_4, 5, 888880000)
       - IfCharacterDeadalive(0, X8_4, 1, 0, 1)
@@ -9226,7 +9480,7 @@ EnemyEvents:
       Params: X8 X12
       Start: Label0()
       Commands:
-      - c4_14(0, X8_4, 5, 0, 0, 1065353216)
+      - c4_14(0, 0, 0, 0, X8_4, 5, 0, 0, 1065353216)
       - WaitFixedTimeSeconds(2)
       - PlaySE(X8_4, 5, 888880000)
       - IfCharacterDeadalive(0, X8_4, 1, 0, 1)
@@ -9254,6 +9508,9 @@ EnemyEvents:
     Removes:
     - c3_33
     - GotoIfEventFlag(1, 0, 0, 9291)
+    CondOrder: <1
+    CondIdentity:
+    - IfCharacterDeadalive(-3, X0_4, 1, 0, 1)
     Segments:
     - Type: healthbarcheck
       Params: X0
@@ -9290,6 +9547,9 @@ EnemyEvents:
     Removes:
     - c3_33
     - GotoIfEventFlag(1, 0, 0, 9291)
+    CondOrder: <1
+    CondIdentity:
+    - IfCharacterDeadalive(-3, X0_4, 1, 0, 1)
     Segments:
     - Type: healthbarcheck
       Params: X0
@@ -9338,6 +9598,8 @@ EnemyEvents:
     Entities: 1033420800 1033420810 1033450800 1033450810 1036500800 1036500810 1038410800 1038410810 1039500800 1039500810 1042330800 1042330810 1042370800 1042370810 1044350800 1044350810 1049390850 1049390860 1053560800 1053560810
     ArgEntities: X12 X28
     Name: X12 X36
+    CondIdentity:
+    - IfEntityInoutsideRadiusOfEntity(-1, 0, 10000, X24_4, 12, 1)
     Segments:
     - Type: dead
       Params: X12
@@ -9414,6 +9676,8 @@ EnemyEvents:
     - IfConditionGroup(-2, 1, 2)
     - c2004_17(X12_4, -1, 0)
     - c2004_17(X12_4, -1, 1)
+    CondIdentity:
+    - c3_23(-2, 0, 0, 0, X12_4, 10000, 0)
 - ID: 1002200
   Map: m10_00_00_00
   Dupe: copy
@@ -9471,7 +9735,7 @@ EnemyEvents:
     Entities: 10000470 10000471 10000472 10000473
     ArgEntities: X0
     Removes:
-    - c5_0(256, X4_4, 0, 1065353216)
+    - c5_0(0, 1, 0, 0, X4_4, 0, 1065353216)
 - ID: 11002291
   Map: m10_00_00_00
   Dupe: copy
@@ -9557,6 +9821,8 @@ EnemyEvents:
     Dupe:
       Type: rewrite
       Condition: -1
+    CondIdentity:
+    - IfCharacterDeadalive(-1, 12010715, 1, 0, 1)
 - ID: 12010707
   Map: m12_01_00_00
   Dupe: manual
@@ -9567,6 +9833,8 @@ EnemyEvents:
     Dupe:
       Type: rewrite
       Condition: 1
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, 12012715)
 - ID: 12012231
   Map: m12_01_00_00
   Dupe: copy
@@ -9710,7 +9978,7 @@ EnemyEvents:
     Entities: 12030240 12030241 12030242 12030243 12030244 12030245 12030246 12030247 12030248 12030249 12030250 12030251 12030252 12030253 12030254 12030255 12030256 12030257
     ArgEntities: X0
     Removes:
-    - c2004_8(X0_4, 10949)
+    - SetSpEffect(X0_4, 10949)
 - ID: 12032830
   Map: m12_03_00_00
   Entities: ''
@@ -10508,7 +10776,7 @@ EnemyEvents:
   - Type: loc
     Entities: 35000208
     Removes:
-    - c2004_8(35000208, 17153)
+    - SetSpEffect(35000208, 17153)
 - ID: 35002215
   Map: m35_00_00_00
   Dupe: copy
@@ -10663,6 +10931,8 @@ EnemyEvents:
     Dupe:
       Type: rewrite
       Condition: 1
+    CondIdentity:
+    - IfInoutsideArea(1, 1, 10000, 39202350, 1)
 - ID: 1033452200
   Map: m60_33_45_00
   Dupe: copy
@@ -10692,21 +10962,27 @@ EnemyEvents:
   Entities: X0 X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1034472262
   Map: m60_34_47_00
   Dupe: copy
   Entities: X0 X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1034482262
   Map: m60_34_48_00
   Dupe: copy
   Entities: X0 X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1035472205
   Map: m60_35_47_00
   Template:
@@ -10772,7 +11048,9 @@ EnemyEvents:
   Entities: X0 X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1035492220
   Map: m60_35_49_00
   Dupe: copy
@@ -10936,7 +11214,9 @@ EnemyEvents:
   Entities: X0 X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1038462340
   Map: m60_38_46_00
   Template:
@@ -11044,11 +11324,11 @@ EnemyEvents:
   - Type: loc
     Entities: 1041540200
     Removes:
-    - c2004_8(1041540200, 12054)
+    - SetSpEffect(1041540200, 12054)
   - Type: chr
     Entity: 1041540200
     Removes:
-    - c2004_8(1041540200, 8092)
+    - SetSpEffect(1041540200, 8092)
 - ID: 1041542230
   Map: m60_41_54_00
   Dupe: copy
@@ -11103,7 +11383,7 @@ EnemyEvents:
     Add:
     - Cmd: c2004_21(1042360800, 5080)
       Before: start
-    - Cmd: c2004_8(1042360800, 5080)
+    - Cmd: SetSpEffect(1042360800, 5080)
       Before: ChangeCharacterEnableState(X0_4, 1)
 - ID: 1042360712
   Map: m60_42_36_00
@@ -11122,7 +11402,7 @@ EnemyEvents:
     Add:
     - Cmd: c2004_21(1042360800, 5080)
     Removes:
-    - c4_28(254, 1, 31, 3)
+    - c4_28(-2, 0, 0, 0, 1, 31, 3)
 - ID: 1042382350
   Map: m60_42_38_00
   Dupe: copy
@@ -11173,6 +11453,8 @@ EnemyEvents:
       Type: rewrite
       Entity: X0 X20
       Condition: -2
+    CondIdentity:
+    - IfInoutsideArea(-2, 1, 10000, X12_4, 1)
 - ID: 1043402200
   Map: m60_43_40_00
   Template:
@@ -11427,7 +11709,7 @@ EnemyEvents:
     - Cmd: GotoUnconditionally(1)
       Before: start
     Removes:
-    - c2004_10(X12_4, 0)
+    - SetCharacterGravity(X12_4, 0)
     - SetCharacterAIState(X12_4, 0)
     - c2003_69(0, X4_4, 1)
 - ID: 1049552410
@@ -11643,8 +11925,6 @@ EnemyEvents:
   - Type: loc
     Entities: 1051570421 1051570430 1051570431 1051570432 1051570433 1051570436 1051570437 1050570320
     ArgEntities: X0 X4
-    Removes:
-    - IfCharacterHasSpEffect(1, X4_4, X8_4, 1, 0, 1)
 - ID: 1052412200
   Map: m60_52_41_00
   Dupe: copy
@@ -11687,7 +11967,9 @@ EnemyEvents:
   Entities: X8 X16
   Template:
   - Type: locarg
-    Animation: pose X16 X20 X24
+    Animation: gravity X16 X20 X24
+  - Type: loc
+    Animation: suspendgravity X16 X20 X24
 - ID: 1053572200
   Map: m60_53_57_00
   Entities: ''
@@ -11709,6 +11991,7 @@ EnemyEvents:
   Template:
   - Type: locarg
     MusicFlagArg: X20
+    BossBgmArg: X0 X4
   - Type: common
     Dupe:
       Type: none
@@ -11721,6 +12004,11 @@ EnemyEvents:
       Before: IfConditionGroup(0, 1, -3)
     - Cmd: EndIfEventFlag(1, 0, 0, X20_4)
       After: IfConditionGroup(0, 1, -3)
+    CondIdentity:
+    - IfEventFlag(1, 1, 0, X8_4)
+    - IfEventFlag(-2, 1, 0, X20_4)
+    - IfEventFlag(-2, 1, 0, X0_4)
+    - IfEventFlag(-3, 1, 0, X0_4)
 - ID: 90005200
   Map: common_func
   Dupe: copyinit
@@ -11770,7 +12058,7 @@ EnemyEvents:
     Entities: 15000203 15000204
     ArgEntities: X0 X40
     Removes:
-    - c4_35(11, X40_4, 1)
+    - c4_35(11, 0, 0, 0, X40_4, 1)
 - ID: 90005220
   Map: common_func
   Dupe: copyinit
@@ -11824,21 +12112,6 @@ EnemyEvents:
   Template:
   - Type: locarg
     Animation: wakeup X0 X8
-- ID: 90005300
-  Map: common_func
-  Dupe: manual
-  Entities: X4
-  Template:
-  - Type: default
-  - Type: locarg
-    Dupe:
-      Type: none
-      Entity: X4 X20
-  - Type: common
-    Dupe:
-      Type: rewrite
-      Entity: X4 X20
-      Condition: IfCharacterRatioDeadalive and
 - ID: 90005390
   Map: common_func
   Dupe: manual
@@ -11995,6 +12268,10 @@ ValueTypes:
   Length: 8
   Alias: IfElapsedSeconds SByte Single
 - Bank: 1
+  ID: 1
+  Length: 8
+  Alias: IfElapsedFrames SByte Int32
+- Bank: 1
   ID: 5
   Length: 8
 - Bank: 3
@@ -12036,6 +12313,7 @@ ValueTypes:
 - Bank: 3
   ID: 8
   Length: 8
+  Alias: IfPlayerInoutMap SByte Byte SByte SByte SByte SByte
 - Bank: 3
   ID: 9
   Length: 8
@@ -12094,6 +12372,21 @@ ValueTypes:
   Length: 12
 - Bank: 3
   ID: 38
+  Length: 4
+- Bank: 3
+  ID: 39
+  Length: 4
+- Bank: 3
+  ID: 40
+  Length: 4
+- Bank: 3
+  ID: 41
+  Length: 8
+- Bank: 3
+  ID: 42
+  Length: 4
+- Bank: 3
+  ID: 45
   Length: 4
 - Bank: 4
   Length: 16
@@ -12201,12 +12494,15 @@ ValueTypes:
     4: Collision
 - Bank: 1000
   Length: 4
+  Alias: WaitForConditionGroupState Byte SByte
 - Bank: 1000
   ID: 1
   Length: 4
+  Alias: SkipIfConditionGroupStateUncompiled Byte Byte SByte
 - Bank: 1000
   ID: 2
   Length: 4
+  Alias: EndIfConditionGroupStateUncompiled Byte Byte SByte
 - Bank: 1000
   ID: 3
   Length: 4
@@ -12224,9 +12520,11 @@ ValueTypes:
 - Bank: 1000
   ID: 7
   Length: 4
+  Alias: SkipIfConditionGroupStateCompiled Byte Byte SByte
 - Bank: 1000
   ID: 8
   Length: 4
+  Alias: EndIfConditionGroupStateCompiled Byte Byte SByte
 - Bank: 1000
   ID: 10
   Length: 12
@@ -12237,6 +12535,7 @@ ValueTypes:
 - Bank: 1000
   ID: 101
   Length: 4
+  Alias: GotoIfConditionGroupStateUncompiled Byte Byte SByte
 - Bank: 1000
   ID: 103
   Length: 4
@@ -12247,6 +12546,7 @@ ValueTypes:
 - Bank: 1000
   ID: 107
   Length: 4
+  Alias: GotoIfConditionGroupStateCompiled Byte Byte SByte
 - Bank: 1000
   ID: 108
   Length: 12
@@ -12266,6 +12566,9 @@ ValueTypes:
   Alias: c1001_05 Byte Byte Byte Byte Byte Byte
 - Bank: 1001
   ID: 6
+  Length: 4
+- Bank: 1001
+  ID: 8
   Length: 4
 - Bank: 1003
   Length: 8
@@ -12304,6 +12607,7 @@ ValueTypes:
 - Bank: 1003
   ID: 8
   Length: 8
+  Alias: EndIfPlayerInoutMap Byte Byte SByte SByte SByte SByte
 - Bank: 1003
   ID: 9
   Length: 4
@@ -12362,6 +12666,15 @@ ValueTypes:
 - Bank: 1003
   ID: 208
   Length: 8
+- Bank: 1003
+  ID: 212
+  Length: 4
+- Bank: 1003
+  ID: 213
+  Length: 4
+- Bank: 1003
+  ID: 214
+  Length: 4
 - Bank: 1004
   Length: 20
   Args:
@@ -12702,6 +13015,9 @@ ValueTypes:
   Length: 4
   Args:
     0: Enemy
+- Bank: 2003
+  ID: 83
+  Length: 4
 - Bank: 2004
   ID: 1
   Length: 8
@@ -12738,12 +13054,14 @@ ValueTypes:
 - Bank: 2004
   ID: 8
   Length: 8
+  Alias: SetSpEffect UInt32 Int32
   Args:
     0: Entity
     4: Speffect
 - Bank: 2004
   ID: 10
   Length: 8
+  Alias: SetCharacterGravity UInt32 Byte
   Args:
     0: Enemy
 - Bank: 2004
@@ -12851,6 +13169,7 @@ ValueTypes:
 - Bank: 2004
   ID: 31
   Length: 8
+  Alias: SetCharacterMaphit UInt32 Byte
   Args:
     0: Enemy
 - Bank: 2004
@@ -13204,6 +13523,9 @@ ValueTypes:
   Length: 4
 - Bank: 2009
   ID: 11
+  Length: 4
+- Bank: 2009
+  ID: 12
   Length: 4
 - Bank: 2010
   ID: 2

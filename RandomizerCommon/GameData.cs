@@ -17,19 +17,22 @@ namespace RandomizerCommon
     {
         private static readonly List<string> itemParams = new List<string>()
         {
-            "EquipParamWeapon", "EquipParamProtector", "EquipParamAccessory", "EquipParamGoods", "EquipParamGem",
+            "EquipParamWeapon", "EquipParamProtector", "EquipParamAccessory", "EquipParamGoods", "EquipParamGem", null, "EquipParamCustomWeapon",
         };
 
         public static readonly ISerializer Serializer = new SerializerBuilder()
             .DisableAliases()
             .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
             .Build();
+        public static readonly int EldenRingBase = 1032500000;
 
         public readonly GameEditor Editor;
         public FromGame Type => Editor.Spec.Game;
         public bool Sekiro => Type == FromGame.SDT;
         public bool DS3 => Type == FromGame.DS3;
         public bool EldenRing => Type == FromGame.ER;
+        public bool AC6 => Type == FromGame.AC6;
+        public bool HasMods => Mods != null && Mods.Count > 0;
 
         /// <summary>Returns the path to the installation directory for the current game.</summary>
         public string InstallPath
@@ -252,7 +255,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         }
 
         public readonly string Dir;
-        private string ModDir;
+        private MergedMods Mods { get; set; }
 
         // Informational data
         // TODO: Perhaps have this data in configs
@@ -341,7 +344,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             [3] = ItemType.ARMOR,
             [4] = ItemType.RING,
             [5] = ItemType.GEM,
-            [6] = ItemType.EQUIP,
+            [6] = ItemType.CUSTOM,
         };
 
         // echo $(ls | grep -E '_[1][0-2].msb') | sed -e 's/.msb[^ ]* /", "/g'
@@ -360,7 +363,6 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             "m60_47_36_10", "m60_47_37_10", "m60_47_38_10", "m60_47_39_10",
             "m60_47_52_10", "m60_47_53_10", "m60_47_54_10", "m60_47_55_10",
         };
-        private static readonly Regex MapRe = new Regex(@"m\d\d_\d\d_\d\d_\d\d");
         private Dictionary<string, string> MapDupes { get; set; }
 
         public Dictionary<string, string> Locations;
@@ -434,96 +436,11 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         public ParamDictionary Params = new ParamDictionary();
         public Dictionary<string, IMsb> Maps = new Dictionary<string, IMsb>();
         public Dictionary<string, EMEVD> Emevds = new Dictionary<string, EMEVD>();
-        public FMGDictionary ItemFMGs = new FMGDictionary();
-        public FMGDictionary MenuFMGs = new FMGDictionary();
-        public Dictionary<string, FMGDictionary> OtherItemFMGs = new Dictionary<string, FMGDictionary>();
-        public Dictionary<string, FMGDictionary> OtherMenuFMGs = new Dictionary<string, FMGDictionary>();
+        public FMGDictionary ItemFMGs => AllItemFMGs["engus"];
+        public FMGDictionary MenuFMGs => AllMenuFMGs["engus"];
+        public Dictionary<string, FMGDictionary> AllItemFMGs = new Dictionary<string, FMGDictionary>();
+        public Dictionary<string, FMGDictionary> AllMenuFMGs = new Dictionary<string, FMGDictionary>();
         public Dictionary<string, Dictionary<string, ESD>> Talk = new Dictionary<string, Dictionary<string, ESD>>();
-
-        // Lazily applies paramdefs
-        public class ParamDictionary
-        {
-            public Dictionary<string, PARAM> Inner = new Dictionary<string, PARAM>();
-            public Dictionary<string, PARAM.Layout> Layouts { get; set; }
-            public Dictionary<string, PARAMDEF> Defs { get; set; }
-
-            public PARAM this[string key]
-            {
-                get
-                {
-                    if (!Inner.TryGetValue(key, out PARAM param)) throw new Exception($"Internal error: Param {key} not found");
-                    if (param.AppliedParamdef == null)
-                    {
-                        if (Defs != null && ApplyParamdefAggressively(param, Defs.Values))
-                        {
-                            // It worked
-                        }
-                        else if (Layouts != null && Layouts.TryGetValue(param.ParamType, out PARAM.Layout layout))
-                        {
-                            param.ApplyParamdef(layout.ToParamdef(param.ParamType, out _));
-                        }
-                        else throw new Exception($"Internal error: Param {key} has no def file");
-                    }
-                    return param;
-                }
-            }
-            public bool ContainsKey(string key) => Inner.ContainsKey(key);
-            public IEnumerable<string> Keys => Inner.Keys;
-        }
-
-        public static bool ApplyParamdefAggressively(PARAM param, IEnumerable<PARAMDEF> paramdefs)
-        {
-            foreach (PARAMDEF paramdef in paramdefs)
-            {
-                if (ApplyParamdefAggressively(param, paramdef))
-                    return true;
-            }
-            return false;
-        }
-
-        private static bool ApplyParamdefAggressively(PARAM param, PARAMDEF paramdef)
-        {
-            // ApplyParamdefCarefully does not include enough info to diagnose failed cases.
-            // For now, require that paramdef ParamType instances are unique, as there is no
-            // naming convention for supporting multiple versions.
-            if (param.ParamType == paramdef.ParamType)
-            {
-                if (param.ParamdefDataVersion == paramdef.DataVersion
-                    && (param.DetectedSize == -1 || param.DetectedSize == paramdef.GetRowSize()))
-                {
-                    param.ApplyParamdef(paramdef);
-                    return true;
-                }
-                else
-                {
-                    throw new Exception($"Error: {param.ParamType} cannot be applied (paramdef data version {paramdef.DataVersion} vs {param.ParamdefDataVersion}, paramdef size {paramdef.GetRowSize()} vs {param.DetectedSize})");
-                }
-            }
-            return false;
-        }
-
-        // Lazily read FMGs
-        // This could also be an IReadOnlyDictionary but it's ultimately still a randomizer-internal type
-        public class FMGDictionary
-        {
-            public Dictionary<string, FMG> FMGs = new Dictionary<string, FMG>();
-            public Dictionary<string, byte[]> Inner { get; set; }
-
-            public FMG this[string key]
-            {
-                get
-                {
-                    if (!Inner.TryGetValue(key, out byte[] data)) throw new Exception($"Internal error: FMG {key} not found");
-                    if (!FMGs.TryGetValue(key, out FMG fmg))
-                    {
-                        FMGs[key] = fmg = FMG.Read(data);
-                    }
-                    return fmg;
-                }
-            }
-            public bool ContainsKey(string key) => Inner.ContainsKey(key);
-            public IEnumerable<string> Keys => Inner.Keys;
-        }
 
         // Names
         public SortedDictionary<ItemKey, string> ItemNames = new SortedDictionary<ItemKey, string>();
@@ -542,7 +459,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             Editor = new GameEditor(game);
             Editor.Spec.GameDir = $@"{dir}";
             Editor.Spec.NameDir = $@"{dir}\Names";
-            if (EldenRing)
+            if (EldenRing || AC6)
             {
                 Editor.Spec.DefDir = $@"{dir}\Defs";
                 // Editor.Spec.DefDir = $@"..\ParamdexNew\ER\Defs";
@@ -560,10 +477,17 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         public Dictionary<string, MSBS> SekiroMaps => Maps.ToDictionary(e => e.Key, e => e.Value as MSBS);
         public Dictionary<string, MSBE> EldenMaps =>
             Maps.Where(e => e.Value is MSBE).ToDictionary(e => e.Key, e => e.Value as MSBE);
+#if DEV
+        public Dictionary<string, MSBAC6> AC6Maps => Maps.ToDictionary(e => e.Key, e => e.Value as MSBAC6);
+#endif
 
-        public void Load(string modDir = null)
+        public void Load(MergedMods mods = null)
         {
-            ModDir = modDir;
+            Mods = mods ?? new MergedMods();
+            foreach (string dir in Mods.Dirs)
+            {
+                Console.WriteLine($"Checking other mod directory {dir}");
+            }
             LoadNames();
             LoadParams();
             LoadMapData();
@@ -597,29 +521,29 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return Params[name];
         }
 
-        public PARAM Param(ItemType type)
-        {
-            if (type == ItemType.EQUIP) return null;
-            return Params[itemParams[(int) type]];
-        }
+        public PARAM Param(ItemType type) => Params[itemParams[(int) type]];
 
         public PARAM.Row Item(ItemKey key)
         {
             if (!Sekiro) key = NormalizeWeapon(key);
-            if (key.Type == ItemType.EQUIP) return null;
-            return Param(key.Type)[key.ID];
+            return Params[itemParams[(int)key.Type]][key.ID];
         }
 
         public PARAM.Row AddRow(string name, int id, int oldId = -1)
         {
             PARAM param = Params[name];
-            if (param[id] != null)
+            PARAM.Row row = param[id];
+            if (row == null)
             {
-                // This can get quadratic? But eh good to check
+                row = new PARAM.Row(id, "", param.AppliedParamdef);
+                param.Rows.Add(row);
+            }
+            else if (oldId < 0)
+            {
+                // This can get quadratic, but good to check
+                // If the contents are getting overwritten anyway, probably fine not to throw on this.
                 throw new Exception($"Trying to add id {id} in {name} but already exists");
             }
-            PARAM.Row row = new PARAM.Row(id, "", param.AppliedParamdef);
-            param.Rows.Add(row);
             if (oldId >= 0)
             {
                 GameEditor.CopyRow(param[oldId], row);
@@ -627,7 +551,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return row;
         }
 
-        private static ItemKey NormalizeWeapon(ItemKey key)
+        public ItemKey NormalizeWeapon(ItemKey key)
         {
             // Maybe can put this logic in ItemKey itself
             if (key.Type == ItemType.WEAPON && key.ID % 100 != 0)
@@ -637,9 +561,26 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return key;
         }
 
+        public ItemKey FromCustomWeapon(ItemKey key)
+        {
+            if (key.Type == ItemType.CUSTOM)
+            {
+                PARAM.Row wepRow = Item(key);
+                if (wepRow != null)
+                {
+                    return new ItemKey(ItemType.WEAPON, (int)wepRow["baseWepId"].Value + (byte)wepRow["reinforceLv"].Value);
+                }
+            }
+            return key;
+        }
+
         public string Name(ItemKey key)
         {
             string suffix = "";
+            if (key.Type == ItemType.CUSTOM)
+            {
+                key = FromCustomWeapon(key);
+            }
             if (key.Type == ItemType.WEAPON && key.ID % 100 != 0)
             {
                 suffix = $" +{key.ID % 100}";
@@ -686,10 +627,6 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             {
                 return name;
             }
-            if (key.Type == ItemType.EQUIP)
-            {
-                return "NPC Equipment";
-            }
             string quantityStr = quantity <= 1 ? "" : $" {quantity}x";
             return Name(key) + quantityStr;
         }
@@ -718,7 +655,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         public string CharacterName(int id)
         {
-            if (EldenRing)
+            if (EldenRing || AC6)
             {
                 return characterSplits.TryGetValue(id, out string n) ? n : null;
             }
@@ -767,6 +704,18 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             return true;
         }
 
+        public string AC6NpcName(int accountId)
+        {
+            // Skip AccountParam and assume the name for the time being
+            FMG fmg = ItemFMGs["NPC名"];
+            string type = fmg[accountId];
+            string name = fmg[accountId + 1];
+            if (name == "<?null?>") name = null;
+            if (string.IsNullOrEmpty(name)) return type;
+            if (string.IsNullOrEmpty(type)) return name;
+            return $"{type} / {name}";
+        }
+
         public string EntityName(EntityId entity, bool detail = false, bool mapName = false)
         {
             string mapSuffix = mapName && !string.IsNullOrEmpty(entity.MapName)
@@ -805,10 +754,10 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
             if (entity.NameID > 0)
             {
-                string fmgName = ItemFMGs["NpcName"][entity.NameID];
+                string fmgName = AC6 ? AC6NpcName(entity.NameID) : ItemFMGs[EldenRing ? "NpcName" : "NPC名"][entity.NameID];
                 if (!string.IsNullOrEmpty(fmgName))
                 {
-                    details.Add($"<{fmgName}>");
+                    details.Add($"[{fmgName}]");
                 }
             }
             return (entity.Type == null ? "" : $"{entity.Type} ")
@@ -847,7 +796,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             {
                 // Mainly academy and redmane have confirmed issues
                 "m10_00_00_00", "m12_05_00_00", "m14_00_00_00", "m15_00_00_00", "m16_00_00_00",
-                "m18_00_00_00", "m35_00_00_00",
+                "m18_00_00_00", "m35_00_00_00", "m39_20_00_00",
                 "m60_39_54_00", // Shaded Castle
                 "m60_43_31_00", // Morne
                 "m60_51_36_00", // Redmane
@@ -898,8 +847,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             WriteModDependentBnd(outPath, $@"{Dir}\Base\gameparam.parambnd.dcx", $@"param\gameparam\gameparam.parambnd.dcx", Params.Inner);
             WriteModDependentBnd(outPath, $@"{Dir}\Base\item.msgbnd.dcx", $@"msg\engus\item.msgbnd.dcx", ItemFMGs.FMGs);
             WriteModDependentBnd(outPath, $@"{Dir}\Base\menu.msgbnd.dcx", $@"msg\engus\menu.msgbnd.dcx", MenuFMGs.FMGs);
-            foreach (KeyValuePair<string, FMGDictionary> entry in OtherItemFMGs)
+            foreach (KeyValuePair<string, FMGDictionary> entry in AllItemFMGs)
             {
+                if (entry.Key == "engus") continue;
                 WriteModDependentBnd(outPath, $@"{Dir}\Base\msg\{entry.Key}\item.msgbnd.dcx", $@"msg\{entry.Key}\item.msgbnd.dcx", entry.Value.FMGs);
             }
 
@@ -980,10 +930,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             {
                 string basePath = $@"{Dir}\Vanilla\regulation.bin";
                 string path = $@"{outPath}\regulation.bin";
-                if (ModDir != null)
+                if (Mods.Resolve("regulation.bin", out string modPath))
                 {
-                    string modPath = $@"{ModDir}\regulation.bin";
-                    if (File.Exists(modPath)) basePath = modPath;
+                    basePath = modPath;
                 }
                 AddModFile(path);
                 if (uxm) Backup(path);
@@ -1075,10 +1024,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 if (WriteFMGs)
                 {
                     string basePath = $@"{Dir}\Vanilla\msg\{lang}\{type}.msgbnd.dcx";
-                    if (ModDir != null)
+                    if (Mods.Resolve($@"msg\{lang}\{type}.msgbnd.dcx", out string modPath))
                     {
-                        string modPath = $@"{ModDir}\msg\{lang}\{type}.msgbnd.dcx";
-                        if (File.Exists(modPath)) basePath = modPath;
+                        basePath = modPath;
                     }
                     Editor.OverrideBndRel(basePath, path, fmgs.FMGs, f => f.Write(), dcx: overrideDcx);
                 }
@@ -1087,14 +1035,11 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             // Text
             // Early on (as modengine can't reload it), but after events
             {
-                // Just menu for now, and no override for now. Also other languages
-                updateFmg("engus", "menu", MenuFMGs);
-                foreach (KeyValuePair<string, FMGDictionary> entry in OtherMenuFMGs)
+                foreach (KeyValuePair<string, FMGDictionary> entry in AllMenuFMGs)
                 {
                     updateFmg(entry.Key, "menu", entry.Value);
                 }
-                updateFmg("engus", "item", ItemFMGs);
-                foreach (KeyValuePair<string, FMGDictionary> entry in OtherItemFMGs)
+                foreach (KeyValuePair<string, FMGDictionary> entry in AllItemFMGs)
                 {
                     updateFmg(entry.Key, "item", entry.Value);
                 }
@@ -1108,10 +1053,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 AddBackupOrRestoreFile(path, write, uxm);
                 if (!write) continue;
                 string basePath = $@"{Dir}\Vanilla\{entry.Key}.talkesdbnd.dcx";
-                if (ModDir != null)
+                if (Mods.Resolve($@"script\talk\{entry.Key}.talkesdbnd.dcx", out string modPath))
                 {
-                    string modPath = $@"{ModDir}\script\talk\{entry.Key}.talkesdbnd.dcx";
-                    if (File.Exists(modPath)) basePath = modPath;
+                    basePath = modPath;
                 }
                 Editor.OverrideBndRel(basePath, path, entry.Value, f => f.Write(), dcx: overrideDcx);
             }
@@ -1200,12 +1144,13 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             // This is complicated enough (and probably also a bit wrong) such that WriteModDependentBnd is too simple.
             {
                 string basePath = $@"{Dir}\Base\Data0.bdt";
-                if (ModDir != null)
+                if (Mods.Resolve($@"param\gameparam\gameparam.parambnd.dcx", out string modPath))
                 {
-                    string modPath1 = $@"{ModDir}\param\gameparam\gameparam.parambnd.dcx";
-                    string modPath2 = $@"{ModDir}\Data0.bdt";
-                    if (File.Exists(modPath1)) basePath = modPath1;
-                    else if (File.Exists(modPath2)) basePath = modPath2;
+                    basePath = modPath;
+                }
+                else if (Mods.Resolve($@"Data0.bdt", out modPath))
+                {
+                    basePath = modPath;
                 }
                 string path = encrypted ? $@"{outPath}\Data0.bdt" : $@"{outPath}\param\gameparam\gameparam.parambnd.dcx";
                 AddModFile(path);
@@ -1213,8 +1158,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
 
             // Messages
-            WriteModDependentBnd(outPath, $@"{Dir}\Base\msg\engus\item_dlc2.msgbnd.dcx", $@"msg\engus\item_dlc2.msgbnd.dcx", ItemFMGs.FMGs);
-            foreach (KeyValuePair<string, FMGDictionary> entry in OtherItemFMGs)
+            foreach (KeyValuePair<string, FMGDictionary> entry in AllItemFMGs)
             {
                 WriteModDependentBnd(outPath, $@"{Dir}\Base\msg\{entry.Key}\item_dlc2.msgbnd.dcx", $@"msg\{entry.Key}\item_dlc2.msgbnd.dcx", entry.Value.FMGs);
             }
@@ -1258,10 +1202,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         void WriteModDependentBnd<T>(string outPath, string basePath, string relOutputPath, Dictionary<string, T> diffData)
             where T : SoulsFile<T>, new()
         {
-            if (ModDir != null)
+            if (Mods.Resolve(relOutputPath, out string modPath))
             {
-                string modPath = $@"{ModDir}\{relOutputPath}";
-                if (File.Exists(modPath)) basePath = modPath;
+                basePath = modPath;
             }
             string path = $@"{outPath}\{relOutputPath}";
             AddModFile(path);
@@ -1272,11 +1215,13 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         {
             Console.WriteLine("Processing extra mod files...");
             bool work = false;
-            if (ModDir != null)
+            // If using this feature, assume a single mod dir for now
+            string modDir = Mods.Dirs.FirstOrDefault();
+            if (modDir != null)
             {
-                foreach (string gameFile in MiscSetup.GetGameFiles(ModDir, Sekiro))
+                foreach (string gameFile in MiscSetup.GetGameFiles(modDir, Sekiro))
                 {
-                    string source = FullName($@"{ModDir}\{gameFile}");
+                    string source = FullName($@"{modDir}\{gameFile}");
                     string target = FullName($@"{outPath}\{gameFile}");
                     if (writtenFiles.Contains(target)) continue;
                     Console.WriteLine($"Copying {source}");
@@ -1315,7 +1260,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             {
                 characterSplits[0] = "UNUSED";
             }
-            if (EldenRing)
+            if (EldenRing || AC6)
             {
                 LocationNames = Editor.LoadNames("MapName", n => n, false);
                 // For now, don't have special location names, but we can maybe do this for legacy dungeons or have prefixes
@@ -1360,17 +1305,15 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             if (DS3)
             {
                 path = $@"{Dir}\Base\Data0.bdt";
-                string modPath1 = $@"{ModDir}\param\gameparam\gameparam.parambnd.dcx";
-                string modPath2 = $@"{ModDir}\Data0.bdt";
-                if (ModDir != null && File.Exists(modPath1))
+                if (Mods.Resolve(@"param\gameparam\gameparam.parambnd.dcx", out string modPath))
                 {
-                    Console.WriteLine($"Using modded file {modPath1}");
-                    path = modPath1;
+                    Console.WriteLine($"Using modded file {modPath}");
+                    path = modPath;
                 }
-                else if (ModDir != null && File.Exists(modPath2))
+                else if (Mods.Resolve("Data0.bdt", out modPath))
                 {
-                    Console.WriteLine($"Using modded file {modPath2}");
-                    path = modPath2;
+                    Console.WriteLine($"Using modded file {modPath}");
+                    path = modPath;
                 }
                 if (!File.Exists(path))
                 {
@@ -1381,8 +1324,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             else if (Sekiro)
             {
                 path = $@"{Dir}\Base\gameparam.parambnd.dcx";
-                string modPath = $@"{ModDir}\param\gameparam\gameparam.parambnd.dcx";
-                if (ModDir != null && File.Exists(modPath))
+                if (Mods.Resolve(@"param\gameparam\gameparam.parambnd.dcx", out string modPath))
                 {
                     Console.WriteLine($"Using modded file {modPath}");
                     path = modPath;
@@ -1393,18 +1335,17 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 }
                 dict = Editor.LoadParams(path, layouts: Layouts, allowError: false);
             }
-            else if (EldenRing)
+            else if (EldenRing || AC6)
             {
                 path = $@"{Dir}\Vanilla\regulation.bin";
-                string modPath = $@"{ModDir}\regulation.bin";
-                if (ModDir != null && File.Exists(modPath))
+                if (Mods.Resolve(@"regulation.bin", out string modPath))
                 {
                     Console.WriteLine($"Using modded file {modPath}");
                     path = modPath;
                 }
                 if (!File.Exists(path))
                 {
-                    throw new Exception($"Missing param file: {path}");
+                    throw new Exception($"Missing param file {path} - make sure to completely extract *all* files from the randomizer zip");
                 }
                 dict = Editor.LoadParams(path, defs: Defs);
             }
@@ -1437,6 +1378,12 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 List<string> missing = Locations.Keys.Except(Maps.Keys).ToList();
                 if (missing.Count != 0) throw new Exception($@"Missing msbs in dist\Base: {string.Join(", ", missing)}");
             }
+            else if (AC6)
+            {
+#if DEV
+                Maps = Editor.Load("Vanilla", path => (IMsb)MSBAC6.Read(path), "*.msb.dcx");
+#endif
+            }
             else
             {
                 Maps = Editor.Load("Vanilla", path => (IMsb)MSBE.Read(path), "*.msb.dcx");
@@ -1454,11 +1401,13 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
         }
 
+        private bool UseVanilla => EldenRing || AC6;
+
         private void LoadTalk()
         {
-            if (!DS3)
+            if (!DS3 && !AC6)
             {
-                Talk = Editor.LoadBnds(EldenRing ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
+                Talk = Editor.LoadBnds(UseVanilla ? "Vanilla" : "Base", (data, path) => ESD.Read(data), "*.talkesdbnd.dcx");
                 MaybeOverrideFromModDir(Talk, name => $@"script\talk\{name}.talkesdbnd.dcx", path => Editor.LoadBnd(path, (data, path2) => ESD.Read(data)));
                 if (Sekiro)
                 {
@@ -1470,9 +1419,9 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         private void LoadScripts()
         {
-            Emevds = Editor.Load(EldenRing ? "Vanilla" : "Base", path => EMEVD.Read(path), "*.emevd.dcx");
+            Emevds = Editor.Load(UseVanilla ? "Vanilla" : "Base", path => EMEVD.Read(path), "*.emevd.dcx");
             MaybeOverrideFromModDir(Emevds, name => $@"event\{name}.emevd.dcx", path => EMEVD.Read(path));
-            if (!EldenRing)
+            if (!EldenRing && !AC6)
             {
                 List<string> missing = Locations.Keys.Concat(new[] { "common", "common_func" }).Except(Emevds.Keys).ToList();
                 if (missing.Count != 0) throw new Exception($@"Missing emevds in dist\Base: {string.Join(", ", missing)}");
@@ -1508,41 +1457,39 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
             if (Sekiro)
             {
-                ItemFMGs = read($@"{Dir}\Base\item.msgbnd.dcx");
-                ItemFMGs = MaybeOverrideFromModDir(ItemFMGs, @"msg\engus\item.msgbnd.dcx", read);
-                MenuFMGs = read($@"{Dir}\Base\menu.msgbnd.dcx");
-                MenuFMGs = MaybeOverrideFromModDir(MenuFMGs, @"msg\engus\menu.msgbnd.dcx", read);
+                // Sekiro has a different location for English fmgs
+                FMGDictionary itemFmgs = read($@"{Dir}\Base\item.msgbnd.dcx");
+                itemFmgs = MaybeOverrideFromModDir(itemFmgs, @"msg\engus\item.msgbnd.dcx", read);
+                AllItemFMGs["engus"] = itemFmgs;
+                FMGDictionary menuFmgs = read($@"{Dir}\Base\menu.msgbnd.dcx");
+                menuFmgs = MaybeOverrideFromModDir(menuFmgs, @"msg\engus\menu.msgbnd.dcx", read);
+                AllMenuFMGs["engus"] = menuFmgs;
                 foreach (string lang in MiscSetup.Langs.Keys)
                 {
                     if (lang == "engus") continue;
-                    OtherItemFMGs[lang] = read($@"{Dir}\Base\msg\{lang}\item.msgbnd.dcx");
-                    OtherItemFMGs[lang] = MaybeOverrideFromModDir(OtherItemFMGs[lang], $@"msg\{lang}\item.msgbnd.dcx", read);
+                    AllItemFMGs[lang] = read($@"{Dir}\Base\msg\{lang}\item.msgbnd.dcx");
+                    AllItemFMGs[lang] = MaybeOverrideFromModDir(AllItemFMGs[lang], $@"msg\{lang}\item.msgbnd.dcx", read);
                 }
             }
             else if (DS3)
             {
-                ItemFMGs = read($@"{Dir}\Base\msg\engus\item_dlc2.msgbnd.dcx");
-                ItemFMGs = MaybeOverrideFromModDir(ItemFMGs, @"msg\engus\item_dlc2.msgbnd.dcx", read);
                 foreach (string lang in MiscSetup.Langs.Keys)
                 {
-                    if (lang == "engus" || MiscSetup.NoDS3Langs.Contains(lang)) continue;
-                    OtherItemFMGs[lang] = read($@"{Dir}\Base\msg\{lang}\item_dlc2.msgbnd.dcx");
-                    OtherItemFMGs[lang] = MaybeOverrideFromModDir(OtherItemFMGs[lang], $@"msg\{lang}\item_dlc2.msgbnd.dcx", read);
+                    if (MiscSetup.NoDS3Langs.Contains(lang)) continue;
+                    AllItemFMGs[lang] = read($@"{Dir}\Base\msg\{lang}\item_dlc2.msgbnd.dcx");
+                    AllItemFMGs[lang] = MaybeOverrideFromModDir(AllItemFMGs[lang], $@"msg\{lang}\item_dlc2.msgbnd.dcx", read);
                 }
             }
-            else if (EldenRing)
+            else if (EldenRing || AC6)
             {
-                ItemFMGs = read($@"{Dir}\Vanilla\msg\engus\item.msgbnd.dcx");
-                ItemFMGs = MaybeOverrideFromModDir(ItemFMGs, @"msg\engus\item.msgbnd.dcx", read);
-                MenuFMGs = read($@"{Dir}\Vanilla\msg\engus\menu.msgbnd.dcx");
-                MenuFMGs = MaybeOverrideFromModDir(MenuFMGs, @"msg\engus\menu.msgbnd.dcx", read);
                 foreach (string lang in MiscSetup.Langs.Keys)
                 {
-                    if (lang == "engus") continue;
-                    OtherMenuFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\menu.msgbnd.dcx");
-                    OtherMenuFMGs[lang] = MaybeOverrideFromModDir(OtherMenuFMGs[lang], $@"msg\{lang}\menu.msgbnd.dcx", read);
-                    OtherItemFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\item.msgbnd.dcx");
-                    OtherItemFMGs[lang] = MaybeOverrideFromModDir(OtherItemFMGs[lang], $@"msg\{lang}\item.msgbnd.dcx", read);
+                    // TODO: Multilang if needed
+                    if (AC6 && lang != "engus") continue;
+                    AllMenuFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\menu.msgbnd.dcx");
+                    AllMenuFMGs[lang] = MaybeOverrideFromModDir(AllMenuFMGs[lang], $@"msg\{lang}\menu.msgbnd.dcx", read);
+                    AllItemFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\item.msgbnd.dcx");
+                    AllItemFMGs[lang] = MaybeOverrideFromModDir(AllItemFMGs[lang], $@"msg\{lang}\item.msgbnd.dcx", read);
                 }
             }
         }
@@ -1550,9 +1497,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         // TODO: Instead of doing this, make the paths themselves more editable?
         private T MaybeOverrideFromModDir<T>(T original, string path, Func<string, T> parser)
         {
-            if (ModDir == null) return original;
-            string modPath = $@"{ModDir}\{path}";
-            if (File.Exists(modPath))
+            if (Mods.Resolve(path, out string modPath))
             {
                 Console.WriteLine($"Using modded file {modPath}");
                 return parser(modPath);
@@ -1562,7 +1507,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
 
         private void MaybeOverrideFromModDir<T>(Dictionary<string, T> files, Func<string, string> relpath, Func<string, T> parser)
         {
-            if (ModDir == null) return;
+            if (Mods.Count == 0) return;
             foreach (string key in files.Keys.ToList())
             {
                 files[key] = MaybeOverrideFromModDir(files[key], relpath(key), parser);

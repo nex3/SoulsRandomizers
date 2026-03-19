@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -73,6 +74,12 @@ namespace RandomizerCommon
                 }
             }
             dungeonOffsets["m11_71_00_00"] = dungeonOffsets["m11_05_00_00"];
+            dungeonOffsets["m45_00_00_00"] = (
+                dungeonOffsets["m11_00_00_00"].Item1,
+                dungeonOffsets["m11_00_00_00"].Item2,
+                dungeonOffsets["m11_00_00_00"].Item3 + new Vector3(-359.44f, 32.74f, -492.72f));
+            dungeonOffsets["m45_01_00_00"] = (47, 42, new Vector3(-2.34f, 150.4f, -43.36f));
+            dungeonOffsets["m45_02_00_00"] = (42, 40, new Vector3(-24.47f, 208.82f, -66.69f));
 
             // Landmarks
             // Map from map id to all inaccessible maps from there
@@ -300,6 +307,13 @@ namespace RandomizerCommon
             int tileX = mapId[1];
             int tileZ = mapId[2];
             return global - new Vector3((tileX - 16) * 256, 0, (tileZ - 16) * 256);
+        }
+
+        public Vector3 RelocationOffset(string fromArea, string toArea)
+        {
+            Vector3 originCoord = ToGlobalCoords(fromArea, Vector3.Zero).Item1;
+            Vector3 mapCoord = ToGlobalCoords(toArea, Vector3.Zero).Item1;
+            return originCoord - mapCoord;
         }
 
         public enum MarkerType

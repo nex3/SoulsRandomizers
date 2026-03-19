@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using static RandomizerCommon.Util;
+using static SoulsIds.GameSpec;
 
 namespace RandomizerCommon
 {
@@ -49,7 +50,8 @@ namespace RandomizerCommon
         public void AddLocationlessItem(ItemKey item)
         {
             ItemScope scope = new ItemScope(ItemScope.ScopeType.SPECIAL, -1);
-            LocationScope locScope = new LocationScope(ItemScope.ScopeType.SPECIAL, -1, new SortedSet<int>(), new SortedSet<int>(), false);
+            // Use FromGame.ER for now as this only determines the serialization format, but these locations will not be serialized.
+            LocationScope locScope = new LocationScope(FromGame.ER, ItemScope.ScopeType.SPECIAL, -1, new SortedSet<int>(), new SortedSet<int>(), false);
             if (!Data.ContainsKey(item))
             {
                 Data[item] = new ItemLocations();
@@ -117,7 +119,7 @@ namespace RandomizerCommon
             RING = 2,
             GOOD = 3,
             GEM = 4,
-            EQUIP = 6,
+            CUSTOM = 6,
         }
 
         public class ItemKey : IComparable<ItemKey>
@@ -199,7 +201,7 @@ namespace RandomizerCommon
             // Additional info
             public readonly bool OnlyShops;
             private string IdStr;
-            public LocationScope(ItemScope.ScopeType Type, int UniqueId, SortedSet<int> ShopIds, SortedSet<int> ModelLots, bool OnlyShops)
+            public LocationScope(FromGame game, ItemScope.ScopeType Type, int UniqueId, SortedSet<int> ShopIds, SortedSet<int> ModelLots, bool OnlyShops)
             {
                 this.Type = Type;
                 this.UniqueId = UniqueId;
@@ -208,13 +210,14 @@ namespace RandomizerCommon
                 this.OnlyShops = OnlyShops;
                 // Group shops together as much as possible, removing events
                 int id = UniqueId;
+                // TODO: Migrate to Elden Ring format as it has better ordering
                 if (OnlyShops)
                 {
-                    // id = -1;
-                    id = 0;
+                    id = game == FromGame.ER ? 0 : -1;
                 }
-                // this.IdStr = $"{(int)Type}:{id}:{string.Join(",", ShopIds)}:{string.Join(",", ModelLots)}";
-                this.IdStr = $"{(int)Type}:{id.ToString("0000000000")}:{string.Join(",", ShopIds)}:{string.Join(",", ModelLots)}";
+                IdStr = game == FromGame.ER
+                    ? $"{(int)Type}:{id.ToString("0000000000")}:{string.Join(",", ShopIds)}:{string.Join(",", ModelLots)}"
+                    : $"{(int)Type}:{id}:{string.Join(",", ShopIds)}:{string.Join(",", ModelLots)}";
             }
             public override string ToString()
             {
@@ -363,10 +366,8 @@ namespace RandomizerCommon
                 this.Item = Item;
                 this.Scope = Scope;
             }
-            public override string ToString()
-            {
-                return $"({Item},{Scope})";
-            }
+            public override string ToString() => $"({Item},{Scope})";
+
             public override bool Equals(object obj) => obj is SlotKey o && Equals(o);
             public bool Equals(SlotKey o) => Item == o.Item && Scope == o.Scope;
             public override int GetHashCode() => Item.GetHashCode() ^ Scope.GetHashCode();

@@ -52,8 +52,6 @@ namespace RandomizerCommon
         [Localize]
         private static readonly Text createNewText = new Text("Create new...", "PresetEditForm_createNew");
 
-        // [Localize]
-        // private static readonly Text poolTitleFullText = new Text("{0} Configuration", "PresetEditForm_poolTitleFull");
         [Localize]
         private static readonly Text dontRandomizeText = new Text("Not randomized:", "PresetEditForm_dontRandomize");
         [Localize]
@@ -72,6 +70,8 @@ namespace RandomizerCommon
         [Localize]
         private static readonly Text poolDefaultText = new Text("Self", "PresetEditForm_poolDefault");
         [Localize]
+        private static readonly Text poolDefaultExplainText = new Text("Same category ({0})", "PresetEditForm_poolDefaultExplain");
+        [Localize]
         private static readonly Text poolEnemiesText = new Text("%", "PresetEditForm_poolEnemies");
 
         private readonly Dictionary<string, string> toInternal = new Dictionary<string, string>();
@@ -81,6 +81,7 @@ namespace RandomizerCommon
 
         private readonly List<string> enemyOptions;
         private readonly List<string> enemyPoolOptions;
+        private readonly HashSet<string> allEnemyPoolOptions;
         private readonly List<string> oopsAllOptions;
 
         // 5 seems the limit of stability, if not past it
@@ -123,8 +124,6 @@ namespace RandomizerCommon
                 if (ClassGroupNames.TryGetValue(clg, out Text t)) text = messages.Get(t);
                 mapName(clg.ToString(), text);
             }
-            string defaultText = messages.Get(poolDefaultText);
-            mapName("default", defaultText);
             // Blank needed at start to prevent autofill
             oopsAllOptions = new List<string> { "" };
             enemyOptions = new List<string> { "" };
@@ -146,7 +145,19 @@ namespace RandomizerCommon
             }
             enemyPoolOptions = enemyOptions.ToList();
             // Same thing but with Self
-            enemyPoolOptions.Insert(1, defaultText);
+            // This is rewritten in AddEnemyEntry per-category
+            string defaultText = messages.Get(poolDefaultText);
+            string norandomText = messages.Get(poolNorandomText);
+            mapName("default", defaultText);
+            mapName("norandom", norandomText);
+            enemyPoolOptions.InsertRange(1, new[] { defaultText, norandomText });
+            allEnemyPoolOptions = new HashSet<string>(enemyPoolOptions);
+            foreach (EnemyClass cl in (EnemyClass[])Enum.GetValues(typeof(EnemyClass)))
+            {
+                string text = GetSelfName(cl);
+                toInternal[text] = "default";
+                allEnemyPoolOptions.Add(text);
+            }
 
             oopsAllBox.GotFocus += (sender, e) =>
             {
@@ -155,12 +166,24 @@ namespace RandomizerCommon
                     oopsAllBox.DataSource = oopsAllOptions;
                 }
             };
-            oopsAllBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            oopsAllBox.AutoCompleteMode = AutoCompleteMode.Suggest;
             oopsAllBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             oopsAllBox.DropDownStyle = ComboBoxStyle.DropDownList;
 
             multiplyBox.DataSource = multipliers.Select(n => messages.Get(multiplyOptionText, n)).ToList();
             classMultiplyBox.DataSource = multipliers.Select(n => messages.Get(multiplyOptionText, n)).ToList();
+
+            // TODO: Prevent these from getting localized separately
+            // Their check state is checked in LoadPreset
+            foreach (KeyValuePair<string, Text> entry in OptionsText)
+            {
+                CheckBox check = new CheckBox();
+                check.Name = "custom_" + entry.Key;
+                check.Text = messages.Get(entry.Value);
+                check.AutoSize = true;
+                check.CheckedChanged += customOpt_Changed;
+                globalPanel.Controls.Add(check);
+            }
 
             InitializeClasses();
 
@@ -175,7 +198,7 @@ namespace RandomizerCommon
                         initTags = "default";
                     }
                     classControls.Add(
-                        AddEnemyEntry(customPanel, poolEnemiesText, true, initTags, full ? 1000 : 0));
+                        AddEnemyEntry(customPanel, poolEnemiesText, currentClass, initTags, full ? 1000 : 0));
                     Modified = true;
                 }
             };
@@ -184,6 +207,8 @@ namespace RandomizerCommon
             // Disable Apply (hopefully)
             Modified = false;
         }
+
+        private string GetSelfName(EnemyClass cl) => messages.Get(poolDefaultExplainText, toDisplayClass[cl]);
 
         private void PresetEditForm_Load(object sender, EventArgs e)
         {
@@ -223,16 +248,31 @@ namespace RandomizerCommon
                 multiplyBox.SelectedIndex = 1;
             }
             description.Text = preset.Description ?? "";
+
+            foreach (string opt in OptionsText.Keys)
+            {
+                if (globalPanel.Controls[$"custom_{opt}"] is not CheckBox check) continue;
+                // Options. null means unset, "none" means no options enabled
+                if (preset.Options == null)
+                {
+                    check.Checked = DefaultOptions.Contains(opt);
+                }
+                else
+                {
+                    check.Checked = preset[opt];
+                }
+            }
+
             simultaneousUpdate = false;
 
             // Overall, clear everything, then initialize everything
             if (dontRandomize != null) RemoveEnemyEntry(globalPanel, dontRandomize);
 
             dontRandomize =
-                AddEnemyEntry(globalPanel, dontRandomizeText, false, preset.DontRandomize, null);
+                AddEnemyEntry(globalPanel, dontRandomizeText, null, preset.DontRandomize, null);
             if (removeSource != null) RemoveEnemyEntry(globalPanel, removeSource);
             removeSource =
-                AddEnemyEntry(globalPanel, removeSourceText, false, preset.RemoveSource, null);
+                AddEnemyEntry(globalPanel, removeSourceText, null, preset.RemoveSource, null);
 
             if (classesView.Nodes.Count > 0)
             {
@@ -270,7 +310,17 @@ namespace RandomizerCommon
             {
                 dir.Create();
             }
-            Process.Start(dir.FullName);
+            Process.Start(new ProcessStartInfo(dir.FullName) { UseShellExecute = true });
+        }
+
+        [Localize]
+        private static readonly Text customHelpText = new Text(@"Enemy randomizer works by swapping out enemies with other enemies taken from elsewhere in the game. It does this independently for each enemy category. Here you can configure a custom list of source enemies which can replace enemies in this category. You can also merge some categories together, by selecting ""Merge with"" in subcategories, or clicking on ""Quick edit"" links below to do this automatically.
+
+When configuring source enemies, you can click the + button to add a new source group. The % probability across all groups in a category must add up to 100%. If you want 10% of enemies in this category to become any boss, use a 90% group with ""Same category"" and a 10% group with ""All Bosses"". If you want only 50% of enemies in this category to be randomized, use a 50% group with ""Same category"" and a 50% group with ""Not randomized"".", "PresetEditForm_customHelpText");
+
+        private void classCustomHelp_LinkClicked(object sender, EventArgs e)
+        {
+            ScrollDialog.Show(this, messages.Get(customHelpText));
         }
 
         [Localize]
@@ -293,6 +343,8 @@ namespace RandomizerCommon
         internal static readonly Text confirmLeaveText = new Text("Save changes before exiting?", "PresetEditForm_confirmLeave");
         [Localize]
         internal static readonly Text confirmResetText = new Text("Reset this preset to default?", "PresetEditForm_confirmReset");
+        [Localize]
+        private static readonly Text confirmNorandomText = new Text("\"Not randomized\" can't be added to this source group because other enemies are already configured. Would you like to create a new group to set a percentage for non-random enemies?", "PresetEditForm_confirmNorandom");
 
         private void saveAsButton_Click(object sender, EventArgs e)
         {
@@ -573,6 +625,11 @@ namespace RandomizerCommon
             Preset.RemoveSource = GetEnemyLabelString(removeSource);
             Preset.DontRandomize = GetEnemyLabelString(dontRandomize);
             Preset.Description = string.IsNullOrWhiteSpace(description.Text) ? null : description.Text;
+            foreach (string opt in OptionsText.Keys)
+            {
+                if (globalPanel.Controls[$"custom_{opt}"] is not CheckBox check) continue;
+                Preset[opt] = check.Checked;
+            }
         }
 
         private void InitializeClass(EnemyClass? maybeCl)
@@ -707,6 +764,7 @@ namespace RandomizerCommon
                 // Adjust source
                 classInherit.Visible = false;
                 classMerge.Visible = false;
+                classMerge2.Visible = false;
                 classNorandom.Visible = false;
                 classRandom.Visible = false;
                 classCustom.Visible = false;
@@ -732,6 +790,7 @@ namespace RandomizerCommon
                     }
                 }
             }
+            classCustomHelp.Visible = classCustom.Visible;
             if (classRemoveSource != null)
             {
                 RemoveEnemyEntry(customPanel, classRemoveSource);
@@ -746,7 +805,7 @@ namespace RandomizerCommon
             if (isPool)
             {
                 classRemoveSource = AddEnemyEntry(
-                    customPanel, classRemoveSourceText, false, removeSource, null);
+                    customPanel, classRemoveSourceText, null, removeSource, null);
             }
             if (sources != null)
             {
@@ -754,7 +813,7 @@ namespace RandomizerCommon
                 foreach (PoolAssignment assign in sources)
                 {
                     classControls.Add(AddEnemyEntry(
-                        customPanel, enemyText, true, assign.Pool, assign.Weight));
+                        customPanel, enemyText, currentClass, assign.Pool, assign.Weight));
                 }
             }
             AdjustPercentages();
@@ -994,9 +1053,23 @@ namespace RandomizerCommon
         }
 
         private PresetEnemyControl AddEnemyEntry(
-            FlowLayoutPanel panel, Text label, bool isPool, string init, int? initVal)
+            FlowLayoutPanel panel, Text label, EnemyClass? maybeCl, string init, int? initVal)
         {
-            List<string> opts = isPool ? enemyPoolOptions.ToList() : enemyOptions.ToList();
+            // This list may need to be copied for use as a DataSource? Edit it based on the category, though.
+            bool isPool = false;
+            string defaultDisplay = null;
+            List<string> opts;
+            if (maybeCl is EnemyClass cl)
+            {
+                isPool = true;
+                opts = enemyPoolOptions.ToList();
+                // Indices set up in constructor
+                opts[1] = defaultDisplay = GetSelfName(cl);
+            }
+            else
+            {
+                opts = enemyOptions.ToList();
+            }
             PresetEnemyControl enemy = new PresetEnemyControl(
                 label == null ? "" : messages.Get(label),
                 opts,
@@ -1031,7 +1104,7 @@ namespace RandomizerCommon
             panel.SetFlowBreak(enemy, true);
             enemy.Dropdown.SelectedIndexChanged += (sender, e) =>
             {
-                AddEnemyLabel(panel, enemy);
+                AddEnemyLabel(panel, enemy, interactive: true);
                 Modified = true;
             };
             UpdatePlusButton(panel);
@@ -1043,6 +1116,11 @@ namespace RandomizerCommon
                     if (tag == "none") continue;
                     toDisplay.TryGetValue(tag, out string text);
                     text = text ?? tag;
+                    // Hardcode "default" conversion here so it finds something present in opts above
+                    if (tag == "default" && defaultDisplay != null)
+                    {
+                        text = defaultDisplay;
+                    }
                     if (opts.Contains(text))
                     {
                         AddEnemyLabel(panel, enemy, text);
@@ -1074,18 +1152,21 @@ namespace RandomizerCommon
             foreach (LinkLabel tagLabel in enemy.Tags)
             {
                 string tag = TagText(tagLabel);
-                if (string.IsNullOrWhiteSpace(tag) || !enemyPoolOptions.Contains(tag)) continue;
+                if (string.IsNullOrWhiteSpace(tag) || !allEnemyPoolOptions.Contains(tag)) continue;
                 toInternal.TryGetValue(tag, out string value);
                 value = value ?? tag;
+                // Avoid mixed norandom here, as otherwise the preset will error out (or silently ignore)
+                if (value == "norandom" && enemy.Tags.Count > 1) continue;
                 tags.Add(value);
             }
             return tags.Count > 0 ? string.Join("; ", tags) : null;
         }
 
-        private void AddEnemyLabel(FlowLayoutPanel panel, PresetEnemyControl enemy, string text = null)
+        private void AddEnemyLabel(FlowLayoutPanel panel, PresetEnemyControl enemy, string text = null, bool interactive = false)
         {
             if (text == null)
             {
+                // Autoselect from adjacent dropdown
                 if (enemy.Dropdown.SelectedIndex == 0
                     || !(enemy.Dropdown.SelectedValue is string value))
                 {
@@ -1100,6 +1181,7 @@ namespace RandomizerCommon
             int panelIndex = panel.Controls.IndexOf(enemy.Dropdown);
             if (panelIndex == -1) return;
             panelIndex++;
+            int linkIndex = 0;
             while (panelIndex < panel.Controls.Count)
             {
                 Control nextCon = panel.Controls[panelIndex];
@@ -1108,7 +1190,23 @@ namespace RandomizerCommon
                     if (TagText(existLabel) == text) return;
                 }
                 else break;
+                linkIndex++;
                 panelIndex++;
+            }
+            // Helper confirmation for norandom
+            if (interactive
+                && linkIndex > 0
+                && toInternal.TryGetValue(text, out string internalText) && internalText == "norandom")
+            {
+                DialogResult result = MessageBox.Show(
+                    messages.Get(confirmNorandomText), messages.Get(confirmTitleText), MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    classControls.Add(
+                        AddEnemyEntry(customPanel, poolEnemiesText, currentClass, "norandom", 0));
+                }
+                // There's no harm in adding it here, since it's filtered later, but it may be confusing.
+                return;
             }
             LinkLabel label = new LinkLabel();
             label.AutoSize = true;
@@ -1165,6 +1263,12 @@ namespace RandomizerCommon
         }
 
         private void opt_Changed(object sender, EventArgs e)
+        {
+            if (simultaneousUpdate) return;
+            Modified = true;
+        }
+
+        private void customOpt_Changed(object sender, EventArgs e)
         {
             if (simultaneousUpdate) return;
             Modified = true;
