@@ -94,8 +94,8 @@ Global
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Debug|x64.Build.0 = Debug|Any CPU
-		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.ActiveCfg = Release|Any CPU
-		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.Build.0 = Release|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.ActiveCfg = Release (Archipelago)|Any CPU
+		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|Any CPU.Build.0 = Release (Archipelago)|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|x64.ActiveCfg = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release (Archipelago)|x64.Build.0 = Release|Any CPU
 		{17F220BA-034B-4BA3-97E2-32763D9F61A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
