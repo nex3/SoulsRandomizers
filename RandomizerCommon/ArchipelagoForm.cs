@@ -761,7 +761,7 @@ namespace RandomizerCommon
         /// </summary>
         private static (string, string) ParseArchipelagoLocation(string locationName)
         {
-            var rx = new Regex(@"^([A-Z0-9]+): (.*?)(?: - .*)?$", RegexOptions.Compiled);
+            var rx = new Regex(@"^([A-Z0-9/]+): (.*?)(?: - .*)?$", RegexOptions.Compiled);
             var match = rx.Match(locationName);
             if (!match.Success)
             {
