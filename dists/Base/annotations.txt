@@ -1847,7 +1847,7 @@ Slots:
   - Prayer Bead - 1110000[Dungeon Memorial Mob (1) for 1400 Sen - event 71111000], 1110050[Dungeon Memorial Mob (1) for 1260 Sen - event 71111000]
   - 'Mask Fragment: Dragon - 1110001[Dungeon Memorial Mob (1) for 5000 Sen - event 71111010], 1110051[Dungeon Memorial Mob (1) for 4500 Sen - event 71111010]'
   Text: Unique item sold by Dungeon Memorial Mob
-  Area: dungeon
+  Area: ashinacastle
   Tags: racemode norandom:lightcoinpurse norandom:heavycoinpurse
 - Key: '02,0:-1:1111400:'
   DebugText:
@@ -1866,7 +1866,7 @@ Slots:
   - Dragon's Blood Droplet - 1110007[Dungeon Memorial Mob until purchased and Dragonrot restoration occurs (1) for 180 Sen - event 71111070], 1110057[Dungeon Memorial Mob until purchased and Dragonrot restoration occurs (1) for 162 Sen - event 71111070]
   - Dragon's Blood Droplet - 1110013[Dungeon Memorial Mob after sold out of the first droplet and Dragonrot restoration occurs (1) for 240 Sen - event 71111130], 1110063[Dungeon Memorial Mob after sold out of the first droplet and Dragonrot restoration occurs (1) for 216 Sen - event 71111130]
   Text: Sold by Dungeon Memorial Mob and restocked when Dragonrot is healed
-  Area: dungeon
+  Area: ashinacastle
   Tags: norandom
 - Key: '02,0:-1:9400,1111400:'
   DebugText:
@@ -2106,7 +2106,7 @@ Slots:
   DebugText:
   - Heavy Coin Purse - 1110110[Treasure (o000100_0011) ashinacastle]
   Text: Behind a wagon in Abandoned Dungeon Entrance
-  Area: dungeon
+  Area: ashinacastle
 - Key: '02,0:51110120::'
   DebugText:
   - Pellet - 1110120[o005390 (o005390_0000) ashinacastle]
