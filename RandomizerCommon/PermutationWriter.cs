@@ -54,6 +54,41 @@ namespace RandomizerCommon
         /// </summary>
         private readonly Dictionary<ItemKey, ItemKey> syntheticToOriginal = new();
 
+        // AP location id per synthetic item (set in AddSyntheticCopy), used to record which
+        // in-game event flag each AP location ends up behind. The runtime client polls these
+        // flags to detect checks that bypass the AddItemFunc detour (shop purchases, NPC gifts,
+        // offline pickups). Exposed to ArchipelagoForm for apconfig.json.
+        private readonly Dictionary<ItemKey, long> syntheticApLocations = new();
+        public readonly Dictionary<long, int> ApLocationFlags = new();
+
+        // DIAGNOSTIC (ER boot-crash bisect): the AP_SYNTH_DIAG env var neutralizes individual
+        // synthetic-row field writes at RUNTIME — no rebuild needed, just re-run the randomizer.
+        // Comma-separated tokens: novagrant, nosort, noicon, noprice, inert (= all of them).
+        // Unset/empty = normal behaviour. Lets us pinpoint which written value ER rejects on boot.
+        private static readonly HashSet<string> SynthDiag = BuildSynthDiag();
+        private static HashSet<string> BuildSynthDiag()
+        {
+            var h = new HashSet<string>();
+            var v = System.Environment.GetEnvironmentVariable("AP_SYNTH_DIAG");
+            if (v != null)
+                foreach (var s in v.Split(','))
+                {
+                    var t = s.Trim().ToLowerInvariant();
+                    if (t.Length > 0) h.Add(t);
+                }
+            if (h.Count > 0) System.Console.WriteLine("AP_SYNTH_DIAG active: " + string.Join(",", h));
+            return h;
+        }
+        private static bool Diag(string token) => SynthDiag.Contains(token) || SynthDiag.Contains("inert");
+
+        // BRIEF #12 (AP-check pickup glow): synthetic AP-check items are tagged with the
+        // legendary rarity tier so they show the gold pickup aura / world light pillar and a
+        // legendary frame in shops & inventory, distinguishing real checks from the many
+        // non-check world pickups under location_pool:lean. ER item-rarity enum is 0..3 where
+        // 3 == legendary (the gold tier); the lot-rarity field uses the same tier values with
+        // -1 meaning "derive from the item". Disable both halves with AP_SYNTH_DIAG=noglow.
+        private const int ApGlowRarity = 3;
+
         private static readonly Dictionary<int, float> DEFAULT_CHANCES = new Dictionary<int, float> { { 1, 0.05f } };
 
         [Localize]
@@ -163,7 +198,10 @@ namespace RandomizerCommon
                 {
                     ItemKey item = entry.Key;
                     // Only Elden Ring has custom weapons, where itemValueCells is not used
-                    PARAM.Row row = game.Item(item);
+                    PARAM.Row row;
+                    try { row = game.Item(item); }
+                    catch (Exception) { continue; } // item type with no param mapping (skip)
+                    if (row == null) continue;
                     int price = game.EldenRing ? -1 : (int)row[itemValueCells[(int)item.Type]].Value;
                     // int sellPrice = (int)row["sellValue"].Value;
                     PriceCategory cat = GetPriceCategory(item);
@@ -333,6 +371,22 @@ namespace RandomizerCommon
                     if (flag >= minimumGoodFlag)
                     {
                         // Scan for an unused flag
+                        while (allEventFlags.Contains(flag))
+                        {
+                            flag += searchStep;
+                        }
+                        allEventFlags.Add(flag);
+                        return flag;
+                    }
+                }
+                // Forward scan exhausted: this lot sits at the tail of the sorted list (DLC m61_*
+                // lot ids are the highest in the game, e.g. LOT 2054400000). Scan backwards for the
+                // nearest eligible donor flag instead; the unused-flag bump below keeps it unique.
+                for (int i = Math.Min(index, flagList.Count - 1); i >= 0; i--)
+                {
+                    (int newLot, int flag) = flagList[i];
+                    if (flag >= minimumGoodFlag)
+                    {
                         while (allEventFlags.Contains(flag))
                         {
                             flag += searchStep;
@@ -533,6 +587,25 @@ namespace RandomizerCommon
                         {
                             item = syntheticUniqueItems[0];
                         }
+                        // BRIEF #12: does this placement carry an AP check? Used to glow its lot.
+                        bool isApCheckGlow = game.EldenRing && syntheticApLocations.ContainsKey(item);
+                        // Record the event flag guarding this AP location (lots/world pickups:
+                        // the scope's event id). Shop placements overwrite this below with the
+                        // final shop stock flag. Consumed by the runtime client's flag polling.
+                        if (game.EldenRing && eventFlag > 0
+                            && syntheticApLocations.TryGetValue(item, out long apLocId))
+                        {
+                            ApLocationFlags[apLocId] = eventFlag;
+                        }
+                        // Phantom-item provenance diagnostic: a non-GOOD item with no param row
+                        // (after custom-weapon resolution) will fail pricing/writing downstream
+                        // (seen live as WEAPON:7520). Dump exactly which source slot produced it
+                        // so the root cause is identifiable from one bake log.
+                        if (game.EldenRing && item.Type != ItemType.GOOD
+                            && game.Item(game.FromCustomWeapon(item)) == null)
+                        {
+                            Console.WriteLine($"WARNING: phantom item {item} from source {sourceKey}");
+                        }
                         int quantity = data.Location(sourceKey).Quantity;
                         string quantityStr = quantity == 1 ? "" : $" {quantity}x";
                         string desc = ann.GetLocationDescription(targetKey, excludeTags: defaultFilter, coord: coord);
@@ -658,7 +731,7 @@ namespace RandomizerCommon
                                 }
                                 setEventFlag = lotCells.EventFlag;
                                 // Crow sources are special items so they won't be removed, they must be overwritten
-                                AddLot(target.ParamName, target.BaseID, lotCells, itemRarity, siloType == RandomSilo.CROW);
+                                AddLot(target.ParamName, target.BaseID, lotCells, itemRarity, siloType == RandomSilo.CROW, isApCheckGlow);
                             }
                             else
                             {
@@ -707,6 +780,13 @@ namespace RandomizerCommon
                                 }
                                 shopCells.EventFlag = infiniteMixed ? -1 : shopEventFlag;
                                 setEventFlag = shopCells.EventFlag;
+                                // Shop placements: the stock flag is the one the game sets on
+                                // purchase; it supersedes the scope event id recorded above.
+                                if (game.EldenRing && setEventFlag > 0
+                                    && syntheticApLocations.TryGetValue(item, out long apLocShopId))
+                                {
+                                    ApLocationFlags[apLocShopId] = setEventFlag;
+                                }
                                 int baseShop = target.ID / 100;
                                 if (price == -1)
                                 {
@@ -2084,6 +2164,27 @@ namespace RandomizerCommon
                         row["eventFlag_forRelease"].Value = (uint)0;
                     }
                 }
+                // Soft-consumable shop: sell Stonesword Keys + Dragon Hearts in unlimited
+                // supply at the Twin Maiden Husks (Roundtable). Clone 101802 (Spirit Calling
+                // Bell -- a goods row that's always stocked) so equipType/costType are correct,
+                // then override item/price/stock. Pairs with apworld soft_consumable_shop, which
+                // pulls these from the pool + makes _has_enough_keys/_has_enough_hearts True.
+                if (opt["soft_consumable_shop"])
+                {
+                    void AddTwinMaidenInfinite(int newId, int goodsId, int price)
+                    {
+                        PARAM.Row r = game.AddRow("ShopLineupParam", newId, 101802);
+                        r["equipId"].Value = goodsId;
+                        r["value"].Value = price;
+                        r["mtrlId"].Value = -1;                  // no material cost
+                        r["sellQuantity"].Value = (short)-1;     // -1 = infinite stock
+                        r["eventFlag_forStock"].Value = (uint)0; // always stocked
+                        r["eventFlag_forRelease"].Value = (uint)0;
+                    }
+                    AddTwinMaidenInfinite(101882, 8000, 2000);    // Stonesword Key @ 2000 runes
+                    AddTwinMaidenInfinite(101883, 10060, 5000);   // Dragon Heart   @ 5000 runes
+                    AddTwinMaidenInfinite(101884, 8186, 3000);    // Imbued Sword Key @ 3000 runes
+                }
                 // End Elden Ring edits
             }
 
@@ -2123,6 +2224,16 @@ namespace RandomizerCommon
                     {
                         FromGame.DS3 => 2005, // Small Doll
                         FromGame.SDT => 2501, // Shelter Stone
+                        // ER: Sliver of Meat — a plain crafting material with NO references
+                        // (refId_default = -1, refCategory = 0, no use animation, no sfx, no Magic
+                        // entry), so cloning it en masse is fully inert. Telescope (2040) was the
+                        // previous base, but it is the ONLY vanilla good with refCategory 2 +
+                        // refId_default 3240 (a unique goods->arts reference); cloning that 1245x
+                        // crashed ER on boot. The synthetic id range (>3,780,000) is set by
+                        // AddSyntheticCopy; the runtime client detects synthetics by that id range,
+                        // not by base item, so the base only needs to be a safe inert good.
+                        // See [[er-apworld-key-mismatch]].
+                        FromGame.ER => 15000, // Sliver of Meat (inert crafting material)
                         var g => throw UnsupportedGame(g),
                     }
                 ),
@@ -2131,19 +2242,39 @@ namespace RandomizerCommon
                 replaceWithQuantity: replaceWithQuantity
             );
 
-            row["iconId"].Value = iconId;
-            row["sortId"].Value = sortId; // Sort external items last of all
+            if (!Diag("noicon"))
+            {
+                // ER: the legacy default (42) and the old foreign-item pick (7039) aren't valid
+                // ER atlas ids — the game shows a big empty "ICON" frame. Borrow the Telescope's
+                // icon ("peer into another world"), read from params so it's always a real id
+                // for this regulation. Callers can still force a specific ER icon by passing
+                // anything other than the sentinels.
+                if (game.EldenRing && (iconId == null || iconId == 42 || iconId == 7039))
+                {
+                    iconId = Convert.ToUInt32(game.Param(ItemType.GOOD)[2040]["iconId"].Value);
+                }
+                row["iconId"].Value = iconId;
+            }
+            // sortId int.MaxValue sorts external items last; "nosort" leaves the base item's value.
+            if (!Diag("nosort")) row["sortId"].Value = sortId;
 
-            // Get rid of any old small doll text.
+            // Get rid of any old small doll text. Blank, not "[missing text]": ER shows
+            // unset auxiliary FMGs (e.g. the "Obtained" flavor line) right in the item
+            // details, and vanilla items leave unused entries empty.
             foreach (var fmgKey in game.ItemFMGs.Keys)
             {
-                game.ItemFMGs[fmgKey][row.ID] = "[missing text]";
+                game.ItemFMGs[fmgKey][row.ID] = "";
             }
-            game.ItemFMGs["アイテム名"][row.ID] = name;
+            // FMG names differ by game: DS3/SDT use the Japanese keys, ER uses English ones
+            // (GoodsName/GoodsInfo/GoodsCaption).
+            string nameFmg = game.EldenRing ? "GoodsName" : "アイテム名";
+            string infoFmg = game.EldenRing ? "GoodsInfo" : "アイテム説明";
+            string captionFmg = game.EldenRing ? "GoodsCaption" : "アイテムうんちく";
+            game.ItemFMGs[nameFmg][row.ID] = name;
             if (shortDescription != null)
             {
-                game.ItemFMGs["アイテム説明"][row.ID] = shortDescription;
-                game.ItemFMGs["アイテムうんちく"][row.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
+                game.ItemFMGs[infoFmg][row.ID] = shortDescription;
+                game.ItemFMGs[captionFmg][row.ID] = shortDescription + (longDescription == null ? "" : $"\n\n{longDescription}");
             }
 
             return key;
@@ -2195,20 +2326,39 @@ namespace RandomizerCommon
 
             // An Archipelago ID can be up to 53 bits, so we have to store each one in two different
             // 32-bit parameter fields that aren't relevant to key items.
-            if (archipelagoLocationId != null)
+            if (archipelagoLocationId != null && !Diag("novagrant"))
             {
                 // The specific capitalization of these rows varies between params.
-                (
-                    row["VagrantItemLotId"] ?? row["vagrantItemLotId"]
-                ).Value = (int)((ulong)archipelagoLocationId & 0xffffffffUL);
-                (
+                var vagrantLow = row["VagrantItemLotId"] ?? row["vagrantItemLotId"];
+                var vagrantHigh =
                     row["VagrantBonusEneDropItemLotId"] ??
                     row["vagrantBonusEneDropItemLotId"] ??
-                    row["vagrantBonuseneDropItemLotId"]
-                ).Value = (int)((ulong)archipelagoLocationId >> 32);
+                    row["vagrantBonuseneDropItemLotId"];
+                if (vagrantLow == null || vagrantHigh == null)
+                {
+                    // In ER only EquipParamGoods/EquipParamAccessory still have these fields;
+                    // weapon/armor/gem params dropped them. Callers must route those item types
+                    // through AddSyntheticItem (goods placeholder token) instead.
+                    throw new Exception(
+                        $"AddSyntheticCopy: param for {original} has no Vagrant*ItemLotId fields " +
+                        "to carry the Archipelago location id; use the goods placeholder path for " +
+                        "this item type.");
+                }
+                vagrantLow.Value = (int)((ulong)archipelagoLocationId & 0xffffffffUL);
+                vagrantHigh.Value = (int)((ulong)archipelagoLocationId >> 32);
             }
 
             param.Rows.Add(row);
+
+            // BRIEF #12: every synthetic carrying an archipelagoLocationId IS an AP check
+            // (world treasure, enemy drop, shop entry, foreign-world item, NPC gift). Tag it
+            // with the legendary rarity tier so it glows. `rarity` exists on all ER item params
+            // (Goods/Weapon/Protector/Accessory/Gem); null-guard keeps non-ER games untouched.
+            if (game.EldenRing && archipelagoLocationId != null && !Diag("noglow"))
+            {
+                var rarityCell = row["rarity"];
+                if (rarityCell != null) rarityCell.Value = ApGlowRarity;
+            }
 
             // If a spell gets duplicated, duplicate its corresponding Magic entry as well so that
             // it has proper stat requirements and so on.
@@ -2230,6 +2380,8 @@ namespace RandomizerCommon
             var key = new ItemKey(original.Type, row.ID + upgrades);
             if (replaceWithInArchipelago != null)
             {
+                // "noprice" leaves basicPrice/sellValue at the base item's values for the boot bisect.
+                if (!Diag("noprice"))
                 switch (this.game.Type)
                 {
                     case FromGame.DS3:
@@ -2242,6 +2394,15 @@ namespace RandomizerCommon
                         row["sellValue"].Value = replaceWithQuantity;
                         break;
 
+                    // ER frozen contract: the local item to grant on pickup is stored in
+                    // basicPrice (item FullID) + sellValue (quantity); the runtime client reads
+                    // these back. (Same fields as DS3.) AP location id is in the vagrant*ItemLotId
+                    // fields set above.
+                    case FromGame.ER:
+                        row["basicPrice"].Value = replaceWithInArchipelago.FullID;
+                        row["sellValue"].Value = replaceWithQuantity;
+                        break;
+
                     case var g: throw UnsupportedGame(g);
                 }
                 syntheticToOriginal[key] = replaceWithInArchipelago;
@@ -2249,6 +2410,10 @@ namespace RandomizerCommon
             else
             {
                 syntheticToOriginal[key] = original;
+            }
+            if (archipelagoLocationId != null)
+            {
+                syntheticApLocations[key] = archipelagoLocationId.Value;
             }
 
             data.AddLocationlessItem(key);
@@ -2403,6 +2568,14 @@ namespace RandomizerCommon
                 int sellPrice = 0;
                 if (rowKey.Type != ItemType.CUSTOM)
                 {
+                    if (row == null && game.EldenRing)
+                    {
+                        // Live-run hardening: don't kill the whole bake over one unpriceable
+                        // (phantom) item. The provenance is dumped to ap_phantom_items.txt by the
+                        // placement loop; charge a generic price here and keep going.
+                        Console.WriteLine($"WARNING: {item} has no param row for pricing; using fallback price 3000");
+                        return 3000;
+                    }
                     if (row == null)
                     {
                         throw new Exception($"{item} was randomized but it doesn't exist in params, likely due to a merged mod");
@@ -2412,8 +2585,10 @@ namespace RandomizerCommon
                         sellPrice = (int)row["sellValue"].Value;
                     }
                 }
-                // If it's a soul, make it cost a more than the soul cost.
-                if (cat == PriceCategory.FINITE_GOOD && sellPrice >= 2000)
+                // If it's a soul, make it cost a more than the soul cost. (Not ER: Golden Rune
+                // sellValue == its rune yield, so this made every big rune item cost more runes
+                // than it gives; the finite-slot floor exemption below covers the same ground.)
+                if (cat == PriceCategory.FINITE_GOOD && sellPrice >= 2000 && !game.EldenRing)
                 {
                     return sellPrice + 1000;
                 }
@@ -2439,7 +2614,14 @@ namespace RandomizerCommon
                 }
                 if (price < sellPrice)
                 {
-                    price = sellPrice;
+                    // ER finite (one-stock) slots: skip the sellValue floor. Rune items' sellValue
+                    // equals their rune yield, so the floor priced every rune-giving item at >= the
+                    // runes it grants. Buy-low/sell-back arbitrage on a one-time slot is bounded
+                    // and harmless; the floor stays for INFINITE slots (real rune-printing exploit).
+                    if (!(game.EldenRing && siloType == RandomSilo.FINITE))
+                    {
+                        price = sellPrice;
+                    }
                 }
                 if (isTranspose && random.NextDouble() < 0.4)
                 {
@@ -2450,7 +2632,7 @@ namespace RandomizerCommon
             }
         }
 
-        private void AddLot(string paramName, int baseLot, LotCells cells, Dictionary<int, byte> itemRarity, bool overwrite)
+        private void AddLot(string paramName, int baseLot, LotCells cells, Dictionary<int, byte> itemRarity, bool overwrite, bool apCheckGlow = false)
         {
             PARAM itemLots = game.Param(paramName);
             int targetLot = baseLot;
@@ -2479,6 +2661,13 @@ namespace RandomizerCommon
             if (itemRarity.ContainsKey(baseLot))
             {
                 row["LotItemRarity"].Value = itemRarity[baseLot];
+            }
+            // BRIEF #12: AP-check lots get the legendary pillar even when the vanilla lot
+            // carried an explicit (non -1) rarity that would otherwise override the item tier.
+            if (apCheckGlow && !Diag("noglow"))
+            {
+                var lotRarityCell = row["LotItemRarity"];
+                if (lotRarityCell != null) lotRarityCell.Value = ApGlowRarity;
             }
         }
 

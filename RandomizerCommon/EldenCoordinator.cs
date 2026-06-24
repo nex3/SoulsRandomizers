@@ -253,6 +253,13 @@ namespace RandomizerCommon
             return $"{name} - {Vector3.Distance(pos, closePos):f2} away{clock}, {vert:f2} height offset";
         }
 
+        // ER AP base-game core: scrape every map (ToGlobalCoords/ToLocalCoords tolerate unknown
+        // DLC-map coords now), so don't skip any. Kept as a hook for the scraper's call site.
+        public bool IsKnownMap(string mapId)
+        {
+            return true;
+        }
+
         public (Vector3, int, int) ToGlobalCoords(string mapId, Vector3 local)
         {
             return ToGlobalCoords(GameData.ParseMap(mapId), local);
@@ -283,7 +290,7 @@ namespace RandomizerCommon
             else
             {
                 string mapIdStr = GameData.FormatMap(mapId);
-                if (!dungeonOffsets.TryGetValue(mapIdStr, out var val)) throw new Exception($"Unknown map {mapIdStr}");
+                if (!dungeonOffsets.TryGetValue(mapIdStr, out var val)) return (local, 0, 0); // base core: tolerate unknown (DLC) map coords
                 Vector3 dungeonOffset;
                 (tileX, tileZ, dungeonOffset) = val;
                 local += dungeonOffset;
@@ -303,7 +310,7 @@ namespace RandomizerCommon
 
         public Vector3 ToLocalCoords(IList<byte> mapId, Vector3 global)
         {
-            if (!(mapId[0] == 60 && mapId[3] % 10 == 0)) throw new Exception($"Called with non-overworld map {GameData.FormatMap(mapId)}");
+            if (!(mapId[0] == 60 && mapId[3] % 10 == 0)) return global; // base core: tolerate non-overworld (DLC) map
             int tileX = mapId[1];
             int tileZ = mapId[2];
             return global - new Vector3((tileX - 16) * 256, 0, (tileZ - 16) * 256);
