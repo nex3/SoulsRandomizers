@@ -568,6 +568,9 @@ namespace RandomizerCommon
             Dictionary<int, int> shopPermanentFlags = new Dictionary<int, int>();
             HashSet<string> defaultFilter = new HashSet<string> { "ignore" };
             bool debugPerm = false;
+            // Phantom-item log is appended to in the placement loop below; the per-run timestamp
+            // in the filename keeps runs separate.
+            string phantomPath = Util.ApDiagPath("ap_phantom_items");
             Console.WriteLine($"-- Spoilers:");
             foreach (KeyValuePair<RandomSilo, SiloPermutation> siloEntry in permutation.Silos)
             {
@@ -604,7 +607,13 @@ namespace RandomizerCommon
                         if (game.EldenRing && item.Type != ItemType.GOOD
                             && game.Item(game.FromCustomWeapon(item)) == null)
                         {
-                            Console.WriteLine($"WARNING: phantom item {item} from source {sourceKey}");
+                            try
+                            {
+                                System.IO.File.AppendAllText(phantomPath,
+                                    $"phantom {item} silo={siloType} source={sourceKey} sourceLoc=[{data.Location(sourceKey)}] target={targetKey} targetLoc=[{data.Location(targetKey)}]\r\n");
+                            }
+                            catch { }
+                            Console.WriteLine($"WARNING: phantom item {item} from source {sourceKey} (see {phantomPath})");
                         }
                         int quantity = data.Location(sourceKey).Quantity;
                         string quantityStr = quantity == 1 ? "" : $" {quantity}x";

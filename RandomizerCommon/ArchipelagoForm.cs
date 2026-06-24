@@ -262,6 +262,7 @@ namespace RandomizerCommon
                 // shows ex.Message otherwise).
                 Console.WriteLine("=== RandomizeForArchipelago FAILED ===");
                 Console.WriteLine(ex.ToString());
+                try { File.WriteAllText(Util.ApDiagPath("ap_error"), ex.ToString()); } catch { }
                 ShowFailure(ex.Message);
                 return;
             }
@@ -278,9 +279,40 @@ namespace RandomizerCommon
         /// Runs the randomizer and saves its results.
         /// </summary>
         /// <returns>True if randomization succeeded, false if it was canceled.</returns>
+        // Full-bake log (tee): mirror Console.Out/Error to a timestamped ap_bake_<stamp>.log so the
+        // ENTIRE bake is persisted (RegionFogGates, CompletionScaling diag, ap_* echoes, and the
+        // FAILED stack from submit_Click's catch). Installed once at bake start; deliberately NOT
+        // restored, so output that happens after RandomizeForArchipelago unwinds is still captured.
+        private sealed class TeeTextWriter : System.IO.TextWriter
+        {
+            private readonly System.IO.TextWriter _a, _b;
+            public TeeTextWriter(System.IO.TextWriter a, System.IO.TextWriter b) { _a = a; _b = b; }
+            public override System.Text.Encoding Encoding => _a.Encoding;
+            public override void Write(char c) { _a.Write(c); _b.Write(c); }
+            public override void Write(string s) { _a.Write(s); _b.Write(s); }
+            public override void Flush() { _a.Flush(); _b.Flush(); }
+        }
+        private static System.IO.TextWriter _bakeRealOut, _bakeRealErr;
+        private static System.IO.StreamWriter _bakeLogWriter;
+        private static string StartBakeLog()
+        {
+            try
+            {
+                if (_bakeRealOut == null) { _bakeRealOut = Console.Out; _bakeRealErr = Console.Error; }
+                try { _bakeLogWriter?.Flush(); _bakeLogWriter?.Dispose(); } catch { }
+                string path = Util.ApDiagPath("ap_bake").Replace(".txt", ".log");
+                _bakeLogWriter = new System.IO.StreamWriter(path, false) { AutoFlush = true };
+                _bakeLogWriter.WriteLine($"=== ER AP bake log {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+                Console.SetOut(new TeeTextWriter(_bakeRealOut, _bakeLogWriter));
+                Console.SetError(new TeeTextWriter(_bakeRealErr, _bakeLogWriter));
+                return path;
+            }
+            catch (Exception e) { try { Console.WriteLine("StartBakeLog failed: " + e.Message); } catch { } return null; }
+        }
         private void RandomizeForArchipelago(ArchipelagoSession session, Dictionary<string, object> slotData)
         {
             SetStatusText("Downloading item data...");
+            string bakeLogPath = StartBakeLog(); Console.WriteLine($"Bake log -> {bakeLogPath}");
             var locations = session.Locations
                 .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
                 .Result
@@ -453,6 +485,11 @@ namespace RandomizerCommon
             var itemsToRemove = new Dictionary<SlotKey, List<SlotKey>>();
 
             int skippedUnresolvedItems = 0;
+            var droppedLocationNames = new List<string>();
+            var droppedItemNames = new List<string>();
+            // GOOD items whose er_code has no EquipParamGoods row (bad apworld id / wrong
+            // category nibble). Logged + skipped (location keeps vanilla item) instead of NPEing.
+            var badParamRowItems = new List<string>();
             foreach (var info in locations)
             {
                 // Locations whose slot keys weren't in this (base-game-only) scrape were dropped
@@ -460,6 +497,7 @@ namespace RandomizerCommon
                 if (!apLocationsToScopes.TryGetValue(info.LocationId, out var targetScope))
                 {
                     skippedUnresolvedItems++;
+                    droppedLocationNames.Add(info.LocationName ?? $"<id {info.LocationId}>");
                     continue;
                 }
                 var targetSlotKey = FindMatchingSlotKey(
@@ -512,6 +550,7 @@ namespace RandomizerCommon
                     // (apworld slot_data completeness issue.) Skip placing it rather than throwing
                     // KeyNotFoundException; the location keeps its vanilla item.
                     skippedUnresolvedItems++;
+                    droppedItemNames.Add($"{info.ItemName} (id {info.ItemId})");
                 }
                 else if (
                     (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
@@ -561,6 +600,8 @@ namespace RandomizerCommon
                     // DS3 weapons need the upgrade-digit math.)
                     if (type == FromGame.ER && game.Param(original.Type)[original.ID] == null)
                     {
+                        badParamRowItems.Add(
+                            $"{info.ItemName} (ap {info.ItemId}) -> {original.Type}:{original.ID} (no param row; placed as placeholder token)");
                         AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                             $"[Placeholder] {info.ItemName}",
                             $"A logic-only token ({info.ItemName}). Acquiring it reports the check; "
@@ -580,6 +621,34 @@ namespace RandomizerCommon
                 }
             }
 
+            // ===== DIAGNOSTIC DUMP: quantify how much of the server's seed we failed to resolve,
+            // and sample the names so we can tell base-game vs DLC mismatch. =====
+            try
+            {
+                var diag = new System.Text.StringBuilder();
+                diag.AppendLine($"server scouted locations:            {locations.Count}");
+                diag.AppendLine($"resolved to scopes:                  {apLocationsToScopes.Count}");
+                diag.AppendLine($"dropped (location not in scrape):    {droppedLocationNames.Count}");
+                diag.AppendLine($"dropped (item id not in apIdsToItemIds): {droppedItemNames.Count}");
+                diag.AppendLine($"locations with placed items:         {items.Count}");
+                diag.AppendLine($"apIdsToItemIds entries:              {apIdsToItemIds.Count}");
+                diag.AppendLine($"ann.SlotsByAnnotationsKey:           {ann.SlotsByAnnotationsKey.Count}");
+                diag.AppendLine($"ann.Slots:                           {ann.Slots.Count}");
+                diag.AppendLine($"ann.Areas:                           {ann.Areas.Count}");
+                diag.AppendLine($"game.Maps (after DLC strip):         {game.Maps.Count}");
+                diag.AppendLine();
+                diag.AppendLine("== sample dropped location names (first 40) ==");
+                foreach (var n in droppedLocationNames.Take(40)) diag.AppendLine("  " + n);
+                diag.AppendLine();
+                diag.AppendLine("== sample dropped item names (first 40) ==");
+                foreach (var n in droppedItemNames.Take(40)) diag.AppendLine("  " + n);
+                diag.AppendLine();
+                diag.AppendLine($"== items with NO PARAM ROW (bad apworld er_code/category): {badParamRowItems.Count} ==");
+                foreach (var n in badParamRowItems.Take(100)) diag.AppendLine("  " + n);
+                File.WriteAllText(Util.ApDiagPath("ap_diag"), diag.ToString());
+                Console.WriteLine(diag.ToString());
+            }
+            catch (Exception diagEx) { Console.WriteLine("diag dump failed: " + diagEx); }
 
             SetStatusText("Randomizing locations...");
 

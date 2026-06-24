@@ -9,6 +9,8 @@ namespace RandomizerCommon
     // No business logic allowed
     public static class Util
     {
+        public static readonly string ApRunStamp = System.DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        public static string ApDiagPath(string baseName) => $"{baseName}_{ApRunStamp}.txt";
         public static void Warn(string text)
         {
 #if DEBUG

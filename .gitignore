@@ -410,3 +410,25 @@ FodyWeavers.xsd
 *.sln.iml
 
 launchSettings.json
+
+# Provisioned game data (junctions / local build inputs)
+/diste/
+/dist/
+/dists/
+/event/
+/msg/
+/script/
+/regulation.bin
+/regulation.bin.bak
+/image-source/
+
+# AP bake run artifacts
+ap_bake_*.log
+ap_error_*.txt
+ap_diag_*.txt
+ap_keys_*.txt
+ap_grace_flags_*.txt
+ap_location_coords_*.txt
+ap_phantom_items_*.txt
+ap_sweep_diag_*.txt
+apconfig_*.json
