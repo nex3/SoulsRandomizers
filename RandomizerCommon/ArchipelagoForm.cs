@@ -211,7 +211,7 @@ namespace RandomizerCommon
                     {
                         FromGame.DS3 => "Dark Souls III",
                         FromGame.SDT => "Sekiro: Shadows Die Twice",
-                        // Frozen contract Decision A: exact AP connection string, no space.
+                        // exact AP connection string, no space.
                         FromGame.ER => "EldenRing",
                         var g => throw UnsupportedGame(g)
                     },
@@ -380,7 +380,7 @@ namespace RandomizerCommon
             var game = new GameData(distDir, type);
             if (type == FromGame.ER)
             {
-                // Full-DLC spec (docs/er/er-ap-3-full-dlc.md) WI-1: keep SOTE maps loaded when the
+                // keep SOTE maps loaded when the
                 // seed includes DLC locations (enable_dlc) or the enemy randomizer will run (the
                 // v0.11.4-ported enemy config includes DLC enemies). With both off, the original
                 // base-game-only strip applies and behavior is unchanged.
@@ -462,7 +462,7 @@ namespace RandomizerCommon
             // uses the GUI defaults (two-hand allowed, stat adjustments allowed).
             // NB: ER's slot_data encodes toggles as 0/1 INTS, so they're excluded from the
             // bool-only `options` dict above — read random_start straight from slotData.
-            // KNOWN BROKEN (2026-06-11): ER CharacterWriter corrupts the regulation -> game
+            // KNOWN ISSUE: ER CharacterWriter corrupts the regulation -> game
             // crashes on boot. Root cause: this fork's ER CharacterWriter predates the DLC-era
             // CharaInitParam def (public randomizer source is ~3 years stale), so its writes are
             // misaligned against regulation 1.16. Fix = audit CharacterWriter's ER writes against
@@ -562,7 +562,7 @@ namespace RandomizerCommon
                     // this, the first weapon placed in a shop NPE'd AddSyntheticCopy (Vagrant
                     // field lookup) the moment the expanded scope made shops resolvable.
                     || (type == FromGame.ER && new ItemKey(localItemId).Type != ItemType.GOOD)
-                    // BRIEF #6: own-world GOODS sold in SHOPS were the last case still using the
+                    // own-world GOODS sold in SHOPS were the last case still using the
                     // functional copy (AddSyntheticCopy) in the else-branch below: buying granted
                     // the real item AND the purchase flag tripped flag-polling, echoing it a
                     // second time (double-grant). Route shop GOODS through the placeholder token
@@ -795,7 +795,7 @@ namespace RandomizerCommon
                 configData["location_flags"] = flagMap;
                 Console.WriteLine($"location_flags: {writer.ApLocationFlags.Count} AP locations mapped to event flags");
 
-                // Groundwork for grace warp rando (SPEC-grace-warp-rando.md): dump every
+                // Groundwork for grace warp rando: dump every
                 // grace's warp-unlock flag so the apworld's grace data table can be built
                 // from real ids. Diag-only; harmless if unused.
                 try
@@ -817,7 +817,7 @@ namespace RandomizerCommon
                     Console.WriteLine($"ap_grace_flags: dumped {lines.Count - 1} BonfireWarpParam rows");
                 } catch (Exception graceEx) { Console.WriteLine("grace flag dump failed: " + graceEx); }
 
-                // Boss attribution (SPEC-boss-attribution.md): ENTIRELY gated on dungeon_sweep == bosses
+                // Boss attribution: ENTIRELY gated on dungeon_sweep == bosses
                 // (option value 3). When off, nothing below collects or computes -- no behaviour change
                 // and no extra work for other seeds. Collect per-check (apLocId, area, pos) and per-grace
                 // (litFlag, pos) during the coord dump; scopeToApLoc inverts apLocId->scope for AP ids.
@@ -833,7 +833,7 @@ namespace RandomizerCommon
                 if (apWantSweep)
                     foreach (var kv in apLocationsToScopes) scopeToApLoc[kv.Value] = kv.Key;
 
-                // Check-trim groundwork (SPEC-check-trim.md): dump every Site of Grace AND every AP
+                // Check-trim groundwork: dump every Site of Grace AND every AP
                 // item-location in GLOBAL coords (tile + x/y/z) so the apworld can score how 'out of
                 // the way' a check is by distance to the nearest grace. Diag-only; harmless if it fails.
                 try
@@ -912,7 +912,7 @@ namespace RandomizerCommon
                 } catch (Exception coordEx) { Console.WriteLine("location coords dump failed: " + coordEx); }
 
                 // Boss attribution -> sweep_flags { eventFlag : [apLocationId,...] } in apconfig.json
-                // (SPEC-boss-attribution.md). Gated on dungeon_sweep == bosses (option value 3).
+                //. Gated on dungeon_sweep == bosses (option value 3).
                 // grace_sweep: 0 off / 1 complement / 2 full. Harmless if it fails (sweep just absent).
                 try
                 {

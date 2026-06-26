@@ -81,7 +81,7 @@ namespace RandomizerCommon
         }
         private static bool Diag(string token) => SynthDiag.Contains(token) || SynthDiag.Contains("inert");
 
-        // BRIEF #12 (AP-check pickup glow): synthetic AP-check items are tagged with the
+        // AP-check pickup glow: synthetic AP-check items are tagged with the
         // legendary rarity tier so they show the gold pickup aura / world light pillar and a
         // legendary frame in shops & inventory, distinguishing real checks from the many
         // non-check world pickups under location_pool:lean. ER item-rarity enum is 0..3 where
@@ -590,7 +590,7 @@ namespace RandomizerCommon
                         {
                             item = syntheticUniqueItems[0];
                         }
-                        // BRIEF #12: does this placement carry an AP check? Used to glow its lot.
+                        // does this placement carry an AP check? Used to glow its lot.
                         bool isApCheckGlow = game.EldenRing && syntheticApLocations.ContainsKey(item);
                         // Record the event flag guarding this AP location (lots/world pickups:
                         // the scope's event id). Shop placements overwrite this below with the
@@ -2241,7 +2241,6 @@ namespace RandomizerCommon
                         // crashed ER on boot. The synthetic id range (>3,780,000) is set by
                         // AddSyntheticCopy; the runtime client detects synthetics by that id range,
                         // not by base item, so the base only needs to be a safe inert good.
-                        // See [[er-apworld-key-mismatch]].
                         FromGame.ER => 15000, // Sliver of Meat (inert crafting material)
                         var g => throw UnsupportedGame(g),
                     }
@@ -2359,7 +2358,7 @@ namespace RandomizerCommon
 
             param.Rows.Add(row);
 
-            // BRIEF #12: every synthetic carrying an archipelagoLocationId IS an AP check
+            // every synthetic carrying an archipelagoLocationId IS an AP check
             // (world treasure, enemy drop, shop entry, foreign-world item, NPC gift). Tag it
             // with the legendary rarity tier so it glows. `rarity` exists on all ER item params
             // (Goods/Weapon/Protector/Accessory/Gem); null-guard keeps non-ER games untouched.
@@ -2671,7 +2670,7 @@ namespace RandomizerCommon
             {
                 row["LotItemRarity"].Value = itemRarity[baseLot];
             }
-            // BRIEF #12: AP-check lots get the legendary pillar even when the vanilla lot
+            // AP-check lots get the legendary pillar even when the vanilla lot
             // carried an explicit (non -1) rarity that would otherwise override the item tier.
             if (apCheckGlow && !Diag("noglow"))
             {

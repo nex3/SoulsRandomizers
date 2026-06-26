@@ -863,7 +863,7 @@ namespace RandomizerCommon
                 Console.WriteLine("WARNING: SpEffectParam[5020] missing (param skipped at load); skipping resident speffects");
             }
 
-            // Notify v2 (SPEC-notify-banner.md): suppress the full "NEW ... Y:OK" item-acquisition
+            // Notify v2: suppress the full "NEW ... Y:OK" item-acquisition
             // DIALOG on pickup/grant, game-wide, while keeping the lightweight acquisition LOG (the
             // right-side ticker). Two independent per-item fields:
             //   showLogCondType    (acquisition LOG;    default 1 = on)         -> the ticker; LEAVE ON.

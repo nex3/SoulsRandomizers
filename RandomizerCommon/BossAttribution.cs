@@ -26,7 +26,7 @@ namespace RandomizerCommon
     ///
     /// NOTE: positions are approximate where a boss has no MSB part (skipped); region membership
     /// uses on-the-fly AP-region centroids computed from the check positions (same model the
-    /// poptracker dry-run validated). Build + verify on Windows; this never ran in the sandbox.
+    /// poptracker dry-run validated).
     /// </summary>
     public static class BossAttribution
     {

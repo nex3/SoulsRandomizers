@@ -6,7 +6,7 @@ namespace RandomizerCommon
 {
     // Pure helpers for reading Archipelago slot_data, extracted from ArchipelagoForm so the
     // (historically bug-prone) numeric/option parsing is unit-testable without a live AP session.
-    // See SPEC-test-coverage.md (P2) and RandomizerCommon.Tests/SlotDataParseTests.
+    // See RandomizerCommon.Tests/SlotDataParseTests.
     public static class SlotDataParse
     {
         // slot_data packs category-tagged FullIDs; the GEM category nibble (0x80000000) sets bit 31,
