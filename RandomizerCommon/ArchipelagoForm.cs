@@ -279,40 +279,9 @@ namespace RandomizerCommon
         /// Runs the randomizer and saves its results.
         /// </summary>
         /// <returns>True if randomization succeeded, false if it was canceled.</returns>
-        // Full-bake log (tee): mirror Console.Out/Error to a timestamped ap_bake_<stamp>.log so the
-        // ENTIRE bake is persisted (RegionFogGates, CompletionScaling diag, ap_* echoes, and the
-        // FAILED stack from submit_Click's catch). Installed once at bake start; deliberately NOT
-        // restored, so output that happens after RandomizeForArchipelago unwinds is still captured.
-        private sealed class TeeTextWriter : System.IO.TextWriter
-        {
-            private readonly System.IO.TextWriter _a, _b;
-            public TeeTextWriter(System.IO.TextWriter a, System.IO.TextWriter b) { _a = a; _b = b; }
-            public override System.Text.Encoding Encoding => _a.Encoding;
-            public override void Write(char c) { _a.Write(c); _b.Write(c); }
-            public override void Write(string s) { _a.Write(s); _b.Write(s); }
-            public override void Flush() { _a.Flush(); _b.Flush(); }
-        }
-        private static System.IO.TextWriter _bakeRealOut, _bakeRealErr;
-        private static System.IO.StreamWriter _bakeLogWriter;
-        private static string StartBakeLog()
-        {
-            try
-            {
-                if (_bakeRealOut == null) { _bakeRealOut = Console.Out; _bakeRealErr = Console.Error; }
-                try { _bakeLogWriter?.Flush(); _bakeLogWriter?.Dispose(); } catch { }
-                string path = Util.ApDiagPath("ap_bake").Replace(".txt", ".log");
-                _bakeLogWriter = new System.IO.StreamWriter(path, false) { AutoFlush = true };
-                _bakeLogWriter.WriteLine($"=== ER AP bake log {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
-                Console.SetOut(new TeeTextWriter(_bakeRealOut, _bakeLogWriter));
-                Console.SetError(new TeeTextWriter(_bakeRealErr, _bakeLogWriter));
-                return path;
-            }
-            catch (Exception e) { try { Console.WriteLine("StartBakeLog failed: " + e.Message); } catch { } return null; }
-        }
         private void RandomizeForArchipelago(ArchipelagoSession session, Dictionary<string, object> slotData)
         {
             SetStatusText("Downloading item data...");
-            string bakeLogPath = StartBakeLog(); Console.WriteLine($"Bake log -> {bakeLogPath}");
             var locations = session.Locations
                 .ScoutLocationsAsync(session.Locations.AllLocations.ToArray())
                 .Result
@@ -457,19 +426,9 @@ namespace RandomizerCommon
             var random = new Random(seed);
 
             // Randomize starting loadout *before* adding a bunch of synthetic weapons and armor to
-            // the pool that we don't want shoved into shops. CharacterWriter fully supports ER
-            // (class stats incl. Arcane, two-handing, ER params); with no handedness opts set it
-            // uses the GUI defaults (two-hand allowed, stat adjustments allowed).
-            // NB: ER's slot_data encodes toggles as 0/1 INTS, so they're excluded from the
-            // bool-only `options` dict above — read random_start straight from slotData.
-            // KNOWN ISSUE: ER CharacterWriter corrupts the regulation -> game
-            // crashes on boot. Root cause: this fork's ER CharacterWriter predates the DLC-era
-            // CharaInitParam def (public randomizer source is ~3 years stale), so its writes are
-            // misaligned against regulation 1.16. Fix = audit CharacterWriter's ER writes against
-            // the current Paramdex def, then restore:
-            //   type == FromGame.ER && (((JObject)slotData["options"])?["random_start"]?.Value<int>() ?? 0) != 0
-            bool erRandomStart = false;
-            if ((type == FromGame.DS3 && options["random_starting_loadout"]) || erRandomStart)
+            // the pool that we don't want shoved into shops. (ER starting-loadout rando is not
+            // wired up in this base-game build.)
+            if (type == FromGame.DS3 && options["random_starting_loadout"])
             {
                 var characters = new CharacterWriter(game, data);
                 characters.Write(random, opt);
@@ -621,34 +580,9 @@ namespace RandomizerCommon
                 }
             }
 
-            // ===== DIAGNOSTIC DUMP: quantify how much of the server's seed we failed to resolve,
-            // and sample the names so we can tell base-game vs DLC mismatch. =====
-            try
-            {
-                var diag = new System.Text.StringBuilder();
-                diag.AppendLine($"server scouted locations:            {locations.Count}");
-                diag.AppendLine($"resolved to scopes:                  {apLocationsToScopes.Count}");
-                diag.AppendLine($"dropped (location not in scrape):    {droppedLocationNames.Count}");
-                diag.AppendLine($"dropped (item id not in apIdsToItemIds): {droppedItemNames.Count}");
-                diag.AppendLine($"locations with placed items:         {items.Count}");
-                diag.AppendLine($"apIdsToItemIds entries:              {apIdsToItemIds.Count}");
-                diag.AppendLine($"ann.SlotsByAnnotationsKey:           {ann.SlotsByAnnotationsKey.Count}");
-                diag.AppendLine($"ann.Slots:                           {ann.Slots.Count}");
-                diag.AppendLine($"ann.Areas:                           {ann.Areas.Count}");
-                diag.AppendLine($"game.Maps (after DLC strip):         {game.Maps.Count}");
-                diag.AppendLine();
-                diag.AppendLine("== sample dropped location names (first 40) ==");
-                foreach (var n in droppedLocationNames.Take(40)) diag.AppendLine("  " + n);
-                diag.AppendLine();
-                diag.AppendLine("== sample dropped item names (first 40) ==");
-                foreach (var n in droppedItemNames.Take(40)) diag.AppendLine("  " + n);
-                diag.AppendLine();
-                diag.AppendLine($"== items with NO PARAM ROW (bad apworld er_code/category): {badParamRowItems.Count} ==");
-                foreach (var n in badParamRowItems.Take(100)) diag.AppendLine("  " + n);
-                File.WriteAllText(Util.ApDiagPath("ap_diag"), diag.ToString());
-                Console.WriteLine(diag.ToString());
-            }
-            catch (Exception diagEx) { Console.WriteLine("diag dump failed: " + diagEx); }
+            Console.WriteLine($"AP resolve: {items.Count} placed, {skippedUnresolvedItems} skipped " +
+                $"({droppedLocationNames.Count} location + {droppedItemNames.Count} item), " +
+                $"{badParamRowItems.Count} without a param row");
 
             SetStatusText("Randomizing locations...");
 
@@ -747,18 +681,6 @@ namespace RandomizerCommon
 
                 case FromGame.ER:
                     MiscSetup.EldenCommonPass(game, opt, messages);
-                    // Messmer's Kindling Shard = goods 2008021 (vanilla Messmer's Kindling,
-                    // a maxNum=1 key item). messmer_kindle grants up to messmer_kindle_max
-                    // copies as the dlc_only spine, but the vanilla cap of 1 rejects the 2nd
-                    // ("exceeds maximum storage"). Raise carry + box caps to hold the count.
-                    {
-                        var apKindling = game.Params["EquipParamGoods"][2008021];
-                        if (apKindling != null)
-                        {
-                            apKindling["maxNum"].Value = (short)99;
-                            apKindling["maxRepositoryNum"].Value = (short)99;
-                        }
-                    }
                     break;
             }
             MiscSetup.InjectUncompressed(game);
@@ -795,192 +717,6 @@ namespace RandomizerCommon
                 configData["location_flags"] = flagMap;
                 Console.WriteLine($"location_flags: {writer.ApLocationFlags.Count} AP locations mapped to event flags");
 
-                // Groundwork for grace warp rando: dump every
-                // grace's warp-unlock flag so the apworld's grace data table can be built
-                // from real ids. Diag-only; harmless if unused.
-                try
-                {
-                    var lines = new List<string> { "rowId\teventflagId\t(extra fields best-effort)" };
-                    foreach (var row in game.Params["BonfireWarpParam"].Rows)
-                    {
-                        string extra = "";
-                        foreach (var fieldName in new[] { "bonfireEntityId", "textId1", "textId", "areaNo", "gridXNo", "gridZNo" })
-                        {
-                            try { extra += $"\t{fieldName}={row[fieldName].Value}"; } catch { }
-                        }
-                        try
-                        {
-                            lines.Add($"{row.ID}\t{row["eventflagId"].Value}{extra}");
-                        } catch { }
-                    }
-                    File.WriteAllText(Util.ApDiagPath("ap_grace_flags"), string.Join("\n", lines));
-                    Console.WriteLine($"ap_grace_flags: dumped {lines.Count - 1} BonfireWarpParam rows");
-                } catch (Exception graceEx) { Console.WriteLine("grace flag dump failed: " + graceEx); }
-
-                // Boss attribution: ENTIRELY gated on dungeon_sweep == bosses
-                // (option value 3). When off, nothing below collects or computes -- no behaviour change
-                // and no extra work for other seeds. Collect per-check (apLocId, area, pos) and per-grace
-                // (litFlag, pos) during the coord dump; scopeToApLoc inverts apLocId->scope for AP ids.
-                int apDungeonSweep = (slotData["options"] as JObject)?["dungeon_sweep"]?.Value<int>() ?? 0;
-                bool apWantSweep = apDungeonSweep >= 3;
-                var apSweepChecks = new List<BossAttribution.CheckPt>();
-                var apSweepGraces = new List<BossAttribution.GracePt>();
-                // entity id -> world pos, parsed from each slot's DebugText. A boss's drop-check
-                // names its entity id, so this gives rando-stable boss positions (item lots don't
-                // move when enemies shuffle), unlike a live-MSB lookup by entity id.
-                var apEntityPos = new Dictionary<int, System.Numerics.Vector3>();
-                var scopeToApLoc = new Dictionary<LocationScope, long>();
-                if (apWantSweep)
-                    foreach (var kv in apLocationsToScopes) scopeToApLoc[kv.Value] = kv.Key;
-
-                // Check-trim groundwork: dump every Site of Grace AND every AP
-                // item-location in GLOBAL coords (tile + x/y/z) so the apworld can score how 'out of
-                // the way' a check is by distance to the nearest grace. Diag-only; harmless if it fails.
-                try
-                {
-                    var clines = new List<string> { "type\tkey\ttileX\ttileZ\tgx\tgy\tgz\tmapName" };
-                    int graceN = 0, itemN = 0;
-                    foreach (var row in game.Params["BonfireWarpParam"].Rows)
-                    {
-                        try
-                        {
-                            List<byte> mapParts = game.GetMapParts(row);
-                            var local = new System.Numerics.Vector3(
-                                (float)row["posX"].Value, (float)row["posY"].Value, (float)row["posZ"].Value);
-                            var (g, tx, tz) = coord.ToGlobalCoords(mapParts, local);
-                            clines.Add($"grace\t{row.ID}\t{tx}\t{tz}\t{g.X:0.##}\t{g.Y:0.##}\t{g.Z:0.##}\t{GameData.FormatMap(mapParts)}");
-                            graceN++;
-                            if (apWantSweep) try { apSweepGraces.Add(new BossAttribution.GracePt { Flag = Convert.ToInt32(row["eventflagId"].Value), Pos = g }); } catch { }
-                        } catch { }
-                    }
-                    foreach (var entry in ann.Slots)
-                    {
-                        var slotAnn = entry.Value;
-                        if (slotAnn == null || string.IsNullOrEmpty(slotAnn.Key)) continue;
-                        string em = null;
-                        System.Numerics.Vector3 ep = default;
-                        bool found = false;
-                        foreach (SlotKey sk in data.Location(entry.Key))
-                        {
-                            ItemLocation il = data.Location(sk);
-                            if (il == null) continue;
-                            foreach (LocationKey lk in il.Keys)
-                            {
-                                foreach (EntityId ent in lk.Entities)
-                                {
-                                    if (ent.Position is System.Numerics.Vector3 p && !string.IsNullOrEmpty(ent.MapName))
-                                    { ep = p; em = ent.MapName; found = true; break; }
-                                }
-                                if (found) break;
-                            }
-                            if (found) break;
-                        }
-                        if (!found) continue;
-                        try
-                        {
-                            var (g, tx, tz) = coord.ToGlobalCoords(em, ep);
-                            clines.Add($"item\t{slotAnn.Key}\t{tx}\t{tz}\t{g.X:0.##}\t{g.Y:0.##}\t{g.Z:0.##}\t{em}");
-                            itemN++;
-                            // Shop / NPC-exchange checks (Enia remembrances, Ymir/Moore/Thiollier shops)
-                            // resolve to the MERCHANT's world position -- not a spot you reach by
-                            // exploring near a boss. The position sweep otherwise mis-attributes them to
-                            // the nearest boss and dumps them on that kill (killing Margit cleared 9 DLC
-                            // merchant checks). They are BOUGHT, so exclude them from the boss sweep
-                            // (still real checks: location_flags polls them on purchase).
-                            if (apWantSweep && entry.Key.ShopIds.Count == 0
-                                && scopeToApLoc.TryGetValue(entry.Key, out long apSweepId))
-                                apSweepChecks.Add(new BossAttribution.CheckPt { ApLocId = apSweepId, Area = slotAnn.GetArea(), Pos = g });
-                            // record this slot's entity ids at its world position. A boss's drop-check
-                            // names the boss entity, giving a rando-stable boss position (item lots do
-                            // not move under enemy rando). Read EntityID off the EntityId objects -- NOT
-                            // slotAnn.DebugText: annotations.txt carries no "id N" (those live only in
-                            // itemslots.txt), so the old DebugText regex matched nothing and left every
-                            // boss unpositioned, silently emptying the field/capstone/grace sweep tiers.
-                            if (apWantSweep)
-                                foreach (SlotKey esk in data.Location(entry.Key))
-                                {
-                                    ItemLocation eil = data.Location(esk);
-                                    if (eil == null) continue;
-                                    foreach (LocationKey elk in eil.Keys)
-                                        foreach (EntityId eent in elk.Entities)
-                                            if (eent.EntityID > 0) apEntityPos[eent.EntityID] = g;
-                                }
-                        } catch { }
-                    }
-                    File.WriteAllText(Util.ApDiagPath("ap_location_coords"), string.Join("\n", clines));
-                    Console.WriteLine($"ap_location_coords: dumped {itemN} item locations, {graceN} graces");
-                } catch (Exception coordEx) { Console.WriteLine("location coords dump failed: " + coordEx); }
-
-                // Boss attribution -> sweep_flags { eventFlag : [apLocationId,...] } in apconfig.json
-                //. Gated on dungeon_sweep == bosses (option value 3).
-                // grace_sweep: 0 off / 1 complement / 2 full. Harmless if it fails (sweep just absent).
-                try
-                {
-                    if (apWantSweep)
-                    {
-                        int gsweep = (slotData["options"] as JObject)?["grace_sweep"]?.Value<int>() ?? 0;
-                        bool erando = ((slotData["options"] as JObject)?["enemy_rando"]?.Value<int>() ?? 0) != 0;
-                        var bopt = new BossAttribution.Options
-                        {
-                            GraceMode = gsweep == 2 ? "full" : gsweep == 1 ? "complement" : "off",
-                            EnemyRando = erando,
-                        };
-                        var sweep = BossAttribution.Compute(game, ann, coord, apSweepChecks, apSweepGraces, bopt,
-                            apEntityPos, out var sweepStats, out var sweepFlagNames);
-                        // Chokepoint re-attribution (extra_region_locks: chokepoint_locks): the apworld
-                        // carves a legacy dungeon's BEFORE-half onto its mid-boss chokepoint, but the
-                        // geometric tier-1 attribution lumps the whole legacy area onto its single
-                        // lowest-id boss (all Farum Azula -> Maliketh, all Haligtree -> Malenia). Re-home
-                        // the before-half ids from the end-boss lump onto the choke boss DefeatFlag so
-                        // killing the CHOKE boss (not the end boss) sweeps them. Grace flags (< 1e6) are
-                        // left intact so grace_sweep still covers them. Source: slot_data chokepointSweeps.
-                        if (slotData.TryGetValue("chokepointSweeps", out var chokeObj) && chokeObj is JObject chokeMap)
-                        {
-                            foreach (var ck in chokeMap)
-                            {
-                                if (!int.TryParse(ck.Key, out int chokeFlag)) continue;
-                                var ids = (ck.Value as JArray)?.Select(t => t.Value<long>()).ToHashSet();
-                                if (ids == null || ids.Count == 0) continue;
-                                // pull off every OTHER boss flag (>= 1e6); leave grace flags alone
-                                foreach (var kv in sweep)
-                                    if (kv.Key != chokeFlag && kv.Key >= 1000000)
-                                        kv.Value.RemoveAll(id => ids.Contains(id));
-                                if (!sweep.TryGetValue(chokeFlag, out var dst)) sweep[chokeFlag] = dst = new List<long>();
-                                foreach (var id in ids) if (!dst.Contains(id)) dst.Add(id);
-                            }
-                            // drop any boss flag whose list emptied out after the move
-                            foreach (var _ek in sweep.Where(kv => kv.Value.Count == 0).Select(kv => kv.Key).ToList())
-                                sweep.Remove(_ek);
-                        }
-                        var sweepJson = new JObject();
-                        long sweepPairs = 0; int sweepGraceFlags = 0;
-                        foreach (var kv in sweep)
-                        {
-                            sweepJson[kv.Key.ToString()] = new JArray(kv.Value);
-                            sweepPairs += kv.Value.Count;
-                            if (kv.Key < 1000000) sweepGraceFlags++;   // grace lit-flags are small; boss DefeatFlags are >=1e6
-                        }
-                        configData["sweep_flags"] = sweepJson;
-                        string sweepLine = $"sweep_flags: {sweep.Count} flags ({sweepGraceFlags} grace, "
-                            + $"{sweep.Count - sweepGraceFlags} boss) over {apSweepChecks.Count} checks, {sweepPairs} pairs; "
-                            + $"grace mode {bopt.GraceMode}, enemyRando {erando}; {sweepStats}";
-                        Console.WriteLine(sweepLine);
-                        try
-                        {
-                            // Succinct readable mapping: each sweep flag -> boss/grace name + check count.
-                            string sweepBreakdown = string.Join("\n", sweep
-                                .OrderByDescending(kv => kv.Value.Count)
-                                .Select(kv => "  " + (sweepFlagNames.TryGetValue(kv.Key, out var _nm) ? _nm : "?")
-                                    + " (flag " + kv.Key + "): " + kv.Value.Count + " checks"));
-                            File.WriteAllText(Util.ApDiagPath("ap_sweep_diag"),
-                                sweepLine + "\ngraces collected: " + apSweepGraces.Count
-                                + "\nentity positions (drop-check): " + apEntityPos.Count
-                                + "\n\nsweep mappings (boss/grace -> checks):\n" + sweepBreakdown + "\n");
-                        }
-                        catch { }
-                    }
-                }
-                catch (Exception sweepEx) { Console.WriteLine("boss attribution failed: " + sweepEx); }
             }
             WriteConfigFiles(slotData);
 
@@ -1056,13 +792,6 @@ namespace RandomizerCommon
                 configData.Remove("password");
             }
             File.WriteAllText(ConfigFileLocation, JsonConvert.SerializeObject(configData));
-            // Timestamped snapshot beside the ap_*_<stamp> diags (Util.ApDiagPath -> bake cwd),
-            // so every bake's apconfig is preserved + readable even when the in-place
-            // apconfig.json is locked/stale. Diagnostic only; ignore failures.
-            try {
-                File.WriteAllText(Util.ApDiagPath("apconfig").Replace(".txt", ".json"),
-                    JsonConvert.SerializeObject(configData, Formatting.Indented));
-            } catch { }
 
             if (me3ConfigData != null)
             {
@@ -1311,23 +1040,6 @@ namespace RandomizerCommon
 
                 throw new Exception($"Couldn't find a slot that corresponds to Archipelago location \"{apName}\".");
             }
-            try
-            {
-                var kd = new System.Text.StringBuilder();
-                kd.AppendLine($"apIdsToKeys (server) count: {apIdsToKeys.Count}");
-                kd.AppendLine($"ann.SlotsByAnnotationsKey (scrape) count: {ann.SlotsByAnnotationsKey.Count}");
-                kd.AppendLine();
-                kd.AppendLine("== first 15 SERVER keys (apIdsToKeys values) ==");
-                foreach (var v in apIdsToKeys.Values.Take(15)) kd.AppendLine("  " + v);
-                kd.AppendLine();
-                kd.AppendLine("== first 15 SCRAPE keys (SlotsByAnnotationsKey keys) ==");
-                foreach (var k in ann.SlotsByAnnotationsKey.Keys.Take(15)) kd.AppendLine("  " + k);
-                kd.AppendLine();
-                int overlap = apIdsToKeys.Values.Distinct().Count(v => ann.SlotsByAnnotationsKey.ContainsKey(v));
-                kd.AppendLine($"server keys that exist in scrape: {overlap}");
-                File.WriteAllText(Util.ApDiagPath("ap_keys"), kd.ToString());
-            }
-            catch (Exception kdEx) { Console.WriteLine("key dump failed: " + kdEx); }
             if (skippedUnmatchedKeys > 0)
             {
                 Console.WriteLine($"WARNING: skipped {skippedUnmatchedKeys} Archipelago locations whose " +
