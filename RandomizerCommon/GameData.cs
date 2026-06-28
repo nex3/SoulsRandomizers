@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -15,6 +15,7 @@ namespace RandomizerCommon
 {
     public class GameData
     {
+        public bool KeepDlcMaps = false;
         private static readonly List<string> itemParams = new List<string>()
         {
             "EquipParamWeapon", "EquipParamProtector", "EquipParamAccessory", "EquipParamGoods", "EquipParamGem", null, "EquipParamCustomWeapon",
@@ -707,7 +708,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
         public string AC6NpcName(int accountId)
         {
             // Skip AccountParam and assume the name for the time being
-            FMG fmg = ItemFMGs["NPC名"];
+            FMG fmg = ItemFMGs["NPC?"];
             string type = fmg[accountId];
             string name = fmg[accountId + 1];
             if (name == "<?null?>") name = null;
@@ -754,7 +755,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
             }
             if (entity.NameID > 0)
             {
-                string fmgName = AC6 ? AC6NpcName(entity.NameID) : ItemFMGs[EldenRing ? "NpcName" : "NPC名"][entity.NameID];
+                string fmgName = AC6 ? AC6NpcName(entity.NameID) : ItemFMGs[EldenRing ? "NpcName" : "NPC?"][entity.NameID];
                 if (!string.IsNullOrEmpty(fmgName))
                 {
                     details.Add($"[{fmgName}]");
@@ -1485,7 +1486,7 @@ O1FnLm8i4zOxVdPHQBKICkKcGS1o3C2dfwIEXw/f3w==
                 foreach (string lang in MiscSetup.Langs.Keys)
                 {
                     // TODO: Multilang if needed
-                    if (AC6 && lang != "engus") continue;
+                    if (lang != "engus") continue; // ER AP: engus-only (vanilla msg ships engus); was AC6-only
                     AllMenuFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\menu.msgbnd.dcx");
                     AllMenuFMGs[lang] = MaybeOverrideFromModDir(AllMenuFMGs[lang], $@"msg\{lang}\menu.msgbnd.dcx", read);
                     AllItemFMGs[lang] = read($@"{Dir}\Vanilla\msg\{lang}\item.msgbnd.dcx");

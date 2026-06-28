@@ -58,6 +58,43 @@ namespace RandomizerCommon
 
         private readonly Timer blinkTimer;
 
+        /// <summary>When true, automatically clicks Connect once the form is shown (dev loop).</summary>
+        public bool AutoConnect = false;
+        // Set via the "enemies" launch arg: leave the enemy randomizer ENABLED under autoconnect.
+        // (Default remains disabled — the original goods-MVP-safe dev loop.)
+        public bool AutoConnectEnemies = false;
+        // Slot name to autoconnect as (build.ps1 passes slot=<name> read from the Players
+        // yaml). Falls back to "Player1" if unset, for manual/legacy bakes.
+        public string AutoConnectSlot = null;
+        // URL to autoconnect to (build.ps1 passes url=<host:port>). Defaults to localhost:38281.
+        // Like the slot, this ALWAYS wins under autoconnect -- the dev loop / -LoopTest always
+        // serve locally, so a stale url pre-filled from the last apconfig must NOT survive.
+        public string AutoConnectUrl = null;
+        // Headless batch bake (build.ps1 -LoopTest): suppress the success dialog and
+        // auto-close on BOTH success and failure, setting the process exit code
+        // (0 ok / 1 fail) so a script can bake many seeds unattended. Implies AutoConnect.
+        public bool Headless = false;
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            if (AutoConnect)
+            {
+                // The url ALWAYS wins under autoconnect -- url.Text may be pre-filled from the last
+                // apconfig (a stale remote ref from a central sync), so an empty-check isn't enough.
+                // The dev loop and -LoopTest always serve locally; default to localhost:38281.
+                url.Text = string.IsNullOrEmpty(AutoConnectUrl) ? "localhost:38281" : AutoConnectUrl;
+                // The slot from build.ps1 (yaml name) ALWAYS wins -- name.Text may be pre-filled
+                // from the last apconfig (e.g. a stale "Player1"), so an empty-check isn't enough.
+                if (!string.IsNullOrEmpty(AutoConnectSlot)) name.Text = AutoConnectSlot;
+                else if (name.Text.Length == 0) name.Text = "Player1";
+                // Goods-only plumbing test default: disable enemy randomization unless the
+                // "enemies" launch arg opted in (DLC-enemy testing).
+                disableEnemyRandomizerCheckbox.Checked = !AutoConnectEnemies;
+                submit_Click(this, EventArgs.Empty);
+            }
+        }
+
         public ArchipelagoForm(FromGame type)
         {
             InitializeComponent();
@@ -67,6 +104,8 @@ namespace RandomizerCommon
                 {
                     FromGame.DS3 => "$this.DS3Icon",
                     FromGame.SDT => "$this.SDTIcon",
+                    // TODO: ship a dedicated ER icon resource; reuse DS3's for now (cosmetic only).
+                    FromGame.ER => "$this.DS3Icon",
                     var g => throw UnsupportedGame(g),
                 }
             );
@@ -172,13 +211,15 @@ namespace RandomizerCommon
                     {
                         FromGame.DS3 => "Dark Souls III",
                         FromGame.SDT => "Sekiro: Shadows Die Twice",
+                        // exact AP connection string, no space.
+                        FromGame.ER => "EldenRing",
                         var g => throw UnsupportedGame(g)
                     },
                     name.Text,
                     Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.NoItems,
                     password: password.Text.Length == 0 ? null : password.Text,
-                    version: new System.Version(0, 6, 1),
-                    requestSlotData: false
+                    version: new System.Version(0, 6, 6),
+                    requestSlotData: true
                 );
             }
             catch (Exception exception)
@@ -206,18 +247,29 @@ namespace RandomizerCommon
             try
             {
 #endif
-            await Task.Run(() => RandomizeForArchipelago(session));
+            // Slot data now arrives in the Connected packet (we ask for it at login) and is
+            // parsed before login returns. Read it from the login result rather than a live
+            // DataStorage read of the _read_slot_data key: that synchronous read blocks on a
+            // packet response and times out, as the AP client library explicitly warns.
+            var slotData = ((LoginSuccessful)result).SlotData;
+            await Task.Run(() => RandomizeForArchipelago(session, slotData));
 #if !DEBUG
 
             }
             catch (Exception ex)
             {
+                // Dump the full stack trace so we can find the actual throw site (the form only
+                // shows ex.Message otherwise).
+                Console.WriteLine("=== RandomizeForArchipelago FAILED ===");
+                Console.WriteLine(ex.ToString());
+                try { File.WriteAllText(Util.ApDiagPath("ap_error"), ex.ToString()); } catch { }
                 ShowFailure(ex.Message);
                 return;
             }
 #endif
 
-            MessageBox.Show("Archipelago config loaded successfully!");
+            if (Headless) { System.Environment.ExitCode = 0; }
+            else { MessageBox.Show("Archipelago config loaded successfully!"); }
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -227,7 +279,7 @@ namespace RandomizerCommon
         /// Runs the randomizer and saves its results.
         /// </summary>
         /// <returns>True if randomization succeeded, false if it was canceled.</returns>
-        private void RandomizeForArchipelago(ArchipelagoSession session)
+        private void RandomizeForArchipelago(ArchipelagoSession session, Dictionary<string, object> slotData)
         {
             SetStatusText("Downloading item data...");
             var locations = session.Locations
@@ -236,12 +288,37 @@ namespace RandomizerCommon
                 .Values
                 .OrderBy(location => location.LocationId)
                 .ToList();
-            var slotData = session.DataStorage.GetSlotData();
-            var apIdsToItemIds = ((JObject)slotData["apIdsToItemIds"]).ToObject<Dictionary<string, int>>()
-                .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
+            // Values are category-packed FullIDs (top nibble = category); the GEM nibble
+            // 0x80000000 overflows a signed-int32 read. Read as long, reinterpret the low 32 bits.
+            var apIdsToItemIds = SlotDataParse.ApIdsToItemIds((JObject)slotData["apIdsToItemIds"]);
             CheckVersionRange(slotData);
-            var options = ((JObject)slotData["options"]).ToObject<Dictionary<string, bool>>();
+            // Only the boolean options go into this dict. ER's slot_data also includes non-bool
+            // options (e.g. exclude_local_item_only is an array), which would break a strict
+            // Dictionary<string, bool> deserialization; those are read directly from slotData where
+            // the ER-specific logic needs them.
+            var options = SlotDataParse.BoolOptions((JObject)slotData["options"]);
             if (disableEnemyRandomizerCheckbox.Checked) options["randomize_enemies"] = false;
+            // The ER apworld has no randomize_enemies option in slot_data (DS3's does), so for ER
+            // the checkbox is the source of truth: unchecked = enemy randomizer ON. Without this,
+            // GetValueOrDefault(false) made the ER enemy pass unreachable.
+            // ER honors the apworld's enemy_rando slot_data key as the source of truth, so
+            // headless / true-multiworld seeds drive the enemy pass from the yaml rather than the
+            // GUI. enemy_rando ships as an int toggle (0/1), which BoolOptions() drops -- it keeps
+            // only JSON booleans -- so read it straight from the raw options object and coerce.
+            // The "Disable Enemy Randomizer" checkbox stays a hard manual override (handled above:
+            // checked => false). If the key is absent (older apworld) fall back to ON-when-unchecked
+            // to preserve prior behavior.
+            if (type == FromGame.ER && !disableEnemyRandomizerCheckbox.Checked)
+            {
+                JToken enemyRandoTok = ((JObject)slotData["options"])["enemy_rando"];
+                bool enemyRandoOn =
+                    enemyRandoTok == null
+                        ? true
+                        : enemyRandoTok.Type == JTokenType.Boolean
+                            ? enemyRandoTok.Value<bool>()
+                            : enemyRandoTok.Value<long>() != 0;
+                options["randomize_enemies"] = enemyRandoOn;
+            }
 
             var opt = ConvertRandomizerOptions(options);
             var itemCounts = ((JObject)slotData["itemCounts"]).ToObject<Dictionary<string, uint>>()
@@ -253,6 +330,7 @@ namespace RandomizerCommon
             {
                 FromGame.DS3 => "dist",
                 FromGame.SDT => "dists",
+                FromGame.ER => "diste",
                 var g => throw UnsupportedGame(g),
             };
 #if DEBUG
@@ -269,16 +347,33 @@ namespace RandomizerCommon
                 throw new Exception("Missing data directory");
             }
             var game = new GameData(distDir, type);
+            if (type == FromGame.ER)
+            {
+                // keep SOTE maps loaded when the
+                // seed includes DLC locations (enable_dlc) or the enemy randomizer will run (the
+                // v0.11.4-ported enemy config includes DLC enemies). With both off, the original
+                // base-game-only strip applies and behavior is unchanged.
+                // enable_dlc ships as an int toggle (0/1); BoolOptions() keeps only JSON bools, so it
+                // gets dropped and GetValueOrDefault returned false -> DLC maps stripped -> ~871 DLC
+                // locations never scraped -> DLC items stayed vanilla on an enemy-rando-OFF / dlc_only
+                // seed. Read it raw + coerce, same as randomize_enemies below.
+                bool enableDlcRaw = (((JObject)slotData["options"])?["enable_dlc"]?.Value<int>() ?? 0) != 0;
+                game.KeepDlcMaps = enableDlcRaw
+                    || options.GetValueOrDefault("randomize_enemies", false);
+            }
             game.Load();
 
             EventConfig eventConfig;
-            using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+            // ER stores its item-event config in itemevents.txt; DS3/Sekiro use events.txt.
+            string eventConfigFile = type == FromGame.ER ? "itemevents.txt" : "events.txt";
+            using (var reader = File.OpenText($@"{game.Dir}\Base\{eventConfigFile}"))
             {
                 eventConfig = new DeserializerBuilder().Build().Deserialize<EventConfig>(reader);
             }
 
             LocationData data;
             Events events;
+            EldenCoordinator coord = null;
             switch (type)
             {
                 case FromGame.DS3:
@@ -294,14 +389,34 @@ namespace RandomizerCommon
                     events = new Events($@"{game.Dir}\Base\sekiro-common.emedf.json");
                     break;
 
+                case FromGame.ER:
+                    coord = new EldenCoordinator(game, false);
+                    data = new EldenLocationDataScraper().FindItems(game, coord, opt);
+                    events = null; // ER's PermutationWriter takes a coord instead of an Events.
+                    break;
+
                 case var g: throw UnsupportedGame(g);
             }
 
+            var messages = type == FromGame.ER ? new Messages(distBasename) : new Messages(null);
             var ann = new AnnotationData(game, data);
             ann.Load(opt);
-            var writer = new PermutationWriter(game, data, ann, events, eventConfig);
-            var permutation = new Permutation(game, data, ann, new Messages(null));
-            var apLocationsToScopes = ArchipelagoLocations(session, ann, locations);
+            PermutationWriter writer;
+            if (type == FromGame.ER)
+            {
+                // Mirror Randomizer.cs's ER setup: extra annotation processing + the coord/messages
+                // PermutationWriter overload (ER uses a coord rather than an Events).
+                ann.ProcessRestrictions(opt, null);
+                ann.AddSpecialItems();
+                ann.AddMaterialItems(opt["mats"]);
+                writer = new PermutationWriter(game, data, ann, null, eventConfig, messages, coord);
+            }
+            else
+            {
+                writer = new PermutationWriter(game, data, ann, events, eventConfig);
+            }
+            var permutation = new Permutation(game, data, ann, messages);
+            var apLocationsToScopes = ArchipelagoLocations(ann, locations, slotData);
 
             // The Archipelago API doesn't guarantee that the seed is a number, so we hash it so
             // that we can use it as a seed for C#'s RNG. Add the current player's slot number so
@@ -311,8 +426,9 @@ namespace RandomizerCommon
             var random = new Random(seed);
 
             // Randomize starting loadout *before* adding a bunch of synthetic weapons and armor to
-            // the pool that we don't want shoved into shops.
-            if (type != FromGame.SDT && options["random_starting_loadout"])
+            // the pool that we don't want shoved into shops. (ER starting-loadout rando is not
+            // wired up in this base-game build.)
+            if (type == FromGame.DS3 && options["random_starting_loadout"])
             {
                 var characters = new CharacterWriter(game, data);
                 characters.Write(random, opt);
@@ -327,9 +443,22 @@ namespace RandomizerCommon
             // they're assigned elsewhere).
             var itemsToRemove = new Dictionary<SlotKey, List<SlotKey>>();
 
+            int skippedUnresolvedItems = 0;
+            var droppedLocationNames = new List<string>();
+            var droppedItemNames = new List<string>();
+            // GOOD items whose er_code has no EquipParamGoods row (bad apworld id / wrong
+            // category nibble). Logged + skipped (location keeps vanilla item) instead of NPEing.
+            var badParamRowItems = new List<string>();
             foreach (var info in locations)
             {
-                var targetScope = apLocationsToScopes[info.LocationId];
+                // Locations whose slot keys weren't in this (base-game-only) scrape were dropped
+                // from apLocationsToScopes; skip them here too instead of throwing.
+                if (!apLocationsToScopes.TryGetValue(info.LocationId, out var targetScope))
+                {
+                    skippedUnresolvedItems++;
+                    droppedLocationNames.Add(info.LocationName ?? $"<id {info.LocationId}>");
+                    continue;
+                }
                 var targetSlotKey = FindMatchingSlotKey(
                     session, game, data.Location(targetScope), info);
                 AddMulti(itemsToRemove, targetSlotKey, FindMatchingSlotKey(
@@ -349,6 +478,9 @@ namespace RandomizerCommon
                         iconId: type switch {
                             FromGame.DS3 => 6020,
                             FromGame.SDT => 579,
+                            // TODO: dedicated ER AP foreign-item icon. Cosmetic only — the runtime
+                            // client detects synthetic items by id range, not icon.
+                            FromGame.ER => 7039,
                             var g => throw UnsupportedGame(g),
                         },
                         // The highest in-game sortId across all supported games is 133,100, so for
@@ -371,7 +503,33 @@ namespace RandomizerCommon
                         iconId: 7039,
                         archipelagoLocationId: info.LocationId));
                 }
-                else if (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
+                else if (!apIdsToItemIds.TryGetValue(info.ItemId, out var localItemId))
+                {
+                    // The server's slot_data didn't map this local AP item id to a game item id.
+                    // (apworld slot_data completeness issue.) Skip placing it rather than throwing
+                    // KeyNotFoundException; the location keeps its vanilla item.
+                    skippedUnresolvedItems++;
+                    droppedItemNames.Add($"{info.ItemName} (id {info.ItemId})");
+                }
+                else if (
+                    (targetScope.ShopIds.Count == 0 && !(targetSlot.Tags?.Contains("crow") ?? false))
+                    // ER: only EquipParamGoods/EquipParamAccessory have the Vagrant* fields we use
+                    // to carry the AP location id (weapon/armor/gem params dropped them), and the
+                    // runtime client only decodes synthetic GOODS tokens anyway. So for ER any
+                    // non-GOOD local item must use the goods placeholder token even in shops —
+                    // buying the token grants the real item via replaceWithInArchipelago. Without
+                    // this, the first weapon placed in a shop NPE'd AddSyntheticCopy (Vagrant
+                    // field lookup) the moment the expanded scope made shops resolvable.
+                    || (type == FromGame.ER && new ItemKey(localItemId).Type != ItemType.GOOD)
+                    // own-world GOODS sold in SHOPS were the last case still using the
+                    // functional copy (AddSyntheticCopy) in the else-branch below: buying granted
+                    // the real item AND the purchase flag tripped flag-polling, echoing it a
+                    // second time (double-grant). Route shop GOODS through the placeholder token
+                    // like every other shop item -> single grant (buy = placeholder, echo = real
+                    // item; a lingering token clears once the client's removeFromInventory lands).
+                    // Crow GOODS (ShopIds.Count == 0) keep the functional copy: not flag-polled
+                    // the same way, out of scope for #6.
+                    || (type == FromGame.ER && targetScope.ShopIds.Count > 0))
                 {
                     // The Archipelago mod can't replace items that appear in shops or are dropped
                     // by the crow, so we put more realistic items there. Everywhere else, we
@@ -383,14 +541,35 @@ namespace RandomizerCommon
                     // represent bundles of multiple items.
                     AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
                         $"[Placeholder] {info.ItemName}",
-                        "If you can see this your Archipelago mod isn't working.",
+                        $"A voucher for your own {info.ItemName}. Acquiring it reports the check; "
+                            + "the real item is delivered by the Archipelago server moments later.",
                         archipelagoLocationId: info.LocationId,
-                        replaceWithInArchipelago: new ItemKey(apIdsToItemIds[info.ItemId]),
+                        replaceWithInArchipelago: new ItemKey(localItemId),
                         replaceWithQuantity: itemCounts.GetValueOrDefault(info.ItemId, 1U)));
                 }
                 else
                 {
-                    var original = new ItemKey(apIdsToItemIds[info.ItemId]);
+                    var original = new ItemKey(localItemId);
+                    // A packed id whose low bits don't exist in the category's param would NPE
+                    // deep in AddSyntheticCopy's row clone. These are the apworld's logic-only
+                    // "lock" keys (sentinel er_code 99999) or genuinely bad ids; route them
+                    // through the placeholder token instead so the CHECK still exists in-game.
+                    // The client skips granting the 99999 sentinel when it echoes back.
+                    // (ER-only: in ER this branch is GOODs-only so a direct row lookup is valid;
+                    // DS3 weapons need the upgrade-digit math.)
+                    if (type == FromGame.ER && game.Param(original.Type)[original.ID] == null)
+                    {
+                        badParamRowItems.Add(
+                            $"{info.ItemName} (ap {info.ItemId}) -> {original.Type}:{original.ID} (no param row; placed as placeholder token)");
+                        AddMulti(items, targetSlotKey, writer.AddSyntheticItem(
+                            $"[Placeholder] {info.ItemName}",
+                            $"A logic-only token ({info.ItemName}). Acquiring it reports the check; "
+                                + "there is no physical item to deliver.",
+                            archipelagoLocationId: info.LocationId,
+                            replaceWithInArchipelago: original,
+                            replaceWithQuantity: 1));
+                        continue;
+                    }
                     var (copy, _) = writer.AddSyntheticCopy(
                         original,
                         info.LocationId,
@@ -400,6 +579,10 @@ namespace RandomizerCommon
                     AddMulti(items, targetSlotKey, copy);
                 }
             }
+
+            Console.WriteLine($"AP resolve: {items.Count} placed, {skippedUnresolvedItems} skipped " +
+                $"({droppedLocationNames.Count} location + {droppedItemNames.Count} item), " +
+                $"{badParamRowItems.Count} without a param row");
 
             SetStatusText("Randomizing locations...");
 
@@ -415,30 +598,36 @@ namespace RandomizerCommon
 
             writer.Write(random, permutation, opt, alwaysReplacePathOfTheDragon: true);
 
-            if (type != FromGame.SDT)
+            if (type == FromGame.DS3)
             {
                 if (options["no_weapon_requirements"]) RemoveWeaponRequirements(game);
                 if (options["no_spell_requirements"]) RemoveSpellRequirements(game);
                 if (options["no_equip_load"]) RemoveEquipLoad(game);
             }
 
-            if (options["randomize_enemies"])
+            if (options.GetValueOrDefault("randomize_enemies", false))
             {
-                var presetYaml = (string)slotData["random_enemy_preset"];
-                Preset preset;
-                try
+                // ER's apworld doesn't send random_enemy_preset; DS3's always does.
+                Preset preset = null;
+                if (slotData.TryGetValue("random_enemy_preset", out object presetObj)
+                    && presetObj is string presetYaml
+                    && !string.IsNullOrWhiteSpace(presetYaml))
                 {
-                    preset = Preset.ParsePreset("archipelago", presetYaml);
-                }
-                catch (YamlException)
-                {
-                    DisplayYamlParseError(presetYaml);
-                    throw new Exception("Failed to parse enemy preset");
+                    try
+                    {
+                        preset = Preset.ParsePreset("archipelago", presetYaml);
+                    }
+                    catch (YamlException)
+                    {
+                        DisplayYamlParseError(presetYaml);
+                        throw new Exception("Failed to parse enemy preset");
+                    }
                 }
 
                 switch (type)
                 {
                     case FromGame.DS3:
+                        if (preset == null) throw new Exception("Missing random_enemy_preset in slot data");
                         preset.RemoveSource = preset.RemoveSource == null
                         ? "Yhorm the Giant"
                         : preset.RemoveSource + ";Yhorm the Giant";
@@ -451,7 +640,29 @@ namespace RandomizerCommon
                         break;
                 }
 
-                new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
+                if (type == FromGame.ER)
+                {
+                    // Mirror Randomizer.cs's ER enemy setup: the enemy pass uses Base/events.txt
+                    // (this form's `eventConfig` above is itemevents.txt, the ITEM-path config)
+                    // and its own lite-emedf Events instance. The previous code passed
+                    // events=null + the item eventConfig, which would NPE if this path ever ran.
+                    EventConfig enemyEventConfig;
+                    using (var reader = File.OpenText($@"{game.Dir}\Base\events.txt"))
+                    {
+                        enemyEventConfig = new DeserializerBuilder().Build().Deserialize<EventConfig>(reader);
+                    }
+                    var enemyEvents = new Events(
+                        null,
+                        darkScriptMode: true,
+                        paramAwareMode: true,
+                        valueSpecs: enemyEventConfig.ValueTypes);
+                    var erRando = new EnemyRandomizer(game, enemyEvents, enemyEventConfig);
+                    erRando.Run(opt, preset);
+                }
+                else
+                {
+                    new EnemyRandomizer(game, events, eventConfig).Run(opt, preset);
+                }
             }
 
             switch (type)
@@ -467,8 +678,13 @@ namespace RandomizerCommon
                     MiscSetup.SortParams(game, new[] { "EquipParamGoods", "EquipParamWeapon" });
                     MiscSetup.SekiroCommonPass(game, events, opt);
                     break;
+
+                case FromGame.ER:
+                    MiscSetup.EldenCommonPass(game, opt, messages);
+                    break;
             }
             MiscSetup.InjectUncompressed(game);
+            MiscSetup.InjectApItemIcon(game);
 
             SetStatusText("Writing game files...");
             switch (type)
@@ -481,10 +697,27 @@ namespace RandomizerCommon
                     game.SaveSekiro(Directory.GetCurrentDirectory());
                     break;
 
+                case FromGame.ER:
+                    game.WriteFMGs = true;
+                    game.SaveEldenRing(Directory.GetCurrentDirectory(), false,
+                        $"Produced by ER Archipelago randomizer. Options and seed: {opt}");
+                    break;
+
                 case var g: throw UnsupportedGame(g);
             }
 
             SetStatusText("Writing client save file...");
+            // Emit the AP-location -> in-game event flag map for the runtime client's flag
+            // polling, which detects checks that bypass the AddItemFunc detour (shop purchases,
+            // NPC gifts, pickups made while disconnected).
+            if (type == FromGame.ER)
+            {
+                var flagMap = new JObject();
+                foreach (var kv in writer.ApLocationFlags) flagMap[kv.Key.ToString()] = kv.Value;
+                configData["location_flags"] = flagMap;
+                Console.WriteLine($"location_flags: {writer.ApLocationFlags.Count} AP locations mapped to event flags");
+
+            }
             WriteConfigFiles(slotData);
 
             SetStatusText("Finished!", System.Drawing.Color.Green);
@@ -523,9 +756,21 @@ namespace RandomizerCommon
 
             var apLocation = session.Locations.GetLocationNameFromId(info.LocationId);
             var defaultItemName = ItemNameForLocation(apLocation);
-            var match = candidates.FirstOrDefault(candidate => game.BaseName(candidate.Item) == defaultItemName);
+            // AP location names carry a stack-quantity suffix the param item name lacks (e.g.
+            // "Rune Arc x3" vs BaseName "Rune Arc"), so a raw equality check fails for every
+            // stacked shop row and this method falls through to candidates.First() -- every row of
+            // the shop then binds to one slot/flag (the Moore & Enia collapse). Strip a trailing
+            // " xN" on both sides before comparing.
+            string normName(string s) => StackQtyRe.Replace(s ?? "", "").Trim();
+            var want = normName(defaultItemName);
+            var match = candidates.FirstOrDefault(candidate => normName(game.BaseName(candidate.Item)) == want);
             if (match != null) return match;
-            throw new Exception($"Multiple possible locations for {apLocation}: {string.Join(", ", candidates)}");
+            // Couldn't disambiguate by item name (e.g. multiple smithing-stone tiers at one
+            // breakable-statue scope). Fall back to the first candidate so the run proceeds; they
+            // share the same physical location anyway.
+            var candNames = string.Join(", ", candidates.Select(c => "'" + normName(game.BaseName(c.Item)) + "'"));
+            Console.WriteLine($"WARNING: ambiguous location {apLocation}: want '{want}' among [{candNames}] (n={candidates.Count}) -- using first");
+            return candidates.First();
         }
 
         /// <summary>
@@ -639,12 +884,53 @@ namespace RandomizerCommon
                         opt["scale"] = archiOptions["scale_enemies"];
                     }
                     break;
+
+                case FromGame.ER:
+                    // Mirror EldenForm's ER enemy-rando defaults ("enemy" gates the pass, "scale"
+                    // rescales moved enemies to the destination tier). Previously there was no ER
+                    // case at all, so the AP enemy pass ran with an all-default option set.
+                    if (archiOptions.GetValueOrDefault("randomize_enemies", false))
+                    {
+                        opt["enemy"] = true;
+                        opt["scale"] = archiOptions.GetValueOrDefault("scale_enemies", true);
+                        // Mirror the GUI's boss QoL defaults: rename boss text to the actual
+                        // arena occupant, rebalance multi-phase boss HP in single-phase arenas,
+                        // and let boss music follow the boss instead of the arena.
+                        opt["editnames"] = true;
+                        opt["phasehp"] = true;
+                        opt["bossbgm"] = true;
+                        // Standard enemy-rando companions: relocated+scaled Malenia keeps her
+                        // heal-on-hit and the Gargoyles keep their poison tick otherwise, which
+                        // are both degenerate outside their tuned arenas. Delete to restore.
+                        opt["nerfmalenia"] = true;
+                        opt["nerfgargoyles"] = true;
+                        // apworld enemy-rando sub-toggles (shipped as real bools in
+                        // slot_data so they survive the bool-only options filter).
+                        opt["swapboss"] = archiOptions.GetValueOrDefault("swap_multiboss", false);
+                        opt["swaprewards"] = archiOptions.GetValueOrDefault("boss_runes_match", false);
+                        opt["impolite"] = archiOptions.GetValueOrDefault("impolite_enemies", false);
+                    }
+                    // Flatten the regular-weapon upgrade curve: 1 smithing stone per level, like
+                    // somber weapons (the GUI's "Reduce upgrade cost for non-somber weapons").
+                    // Sensible default for AP runs where stones arrive at the pool's mercy.
+                    opt["sombermode"] = true;
+                    // Starting-loadout rando only; don't touch NPC outfits (mirrors the DS3 AP
+                    // path's reasoning re: shop/drop interplay).
+                    opt["nooutfits"] = true;
+                    // apworld option (shipped as a real bool in slot_data, so it survives the
+                    // bool-only options filter): zero all weapon/ammo/spell stat requirements.
+                    opt["weaponreqs"] = archiOptions.GetValueOrDefault("no_weapon_requirements", false);
+                    // apworld option: disable upgrading the Serpent-Hunter (base-randomizer
+                    // balance tweak); independent of the enemy pass.
+                    opt["nerfsh"] = archiOptions.GetValueOrDefault("disable_serpent_hunter_upgrade", false);
+                    break;
             }
 
             // These options aren't actually used, but they're necessary to run the offlien item
             // randomizer for infinite items.
             opt.Difficulty = 50;
 
+            opt["soft_consumable_shop"] = archiOptions.GetValueOrDefault("soft_consumable_shop", false);
             return opt;
         }
 
@@ -663,12 +949,9 @@ namespace RandomizerCommon
         /// Returns a map from Archipelago location IDs to the corresponding location scopes.
         /// </summary>
         private static Dictionary<long, LocationScope> ArchipelagoLocations(
-            ArchipelagoSession session, AnnotationData ann, List<ScoutedItemInfo> locations)
+            AnnotationData ann, List<ScoutedItemInfo> locations, Dictionary<string, object> slotData)
         {
-            var slotData = session.DataStorage.GetSlotData();
-            var apIdsToKeys = ((JObject)slotData["locationIdsToKeys"])
-                .ToObject<Dictionary<string, string>>()
-                .ToDictionary(entry => long.Parse(entry.Key), entry => entry.Value);
+            var apIdsToKeys = SlotDataParse.LocationIdsToKeys((JObject)slotData["locationIdsToKeys"]);
 
             // A map from item names to all the slots that correspond to those names.
             var itemNameToSlots = new Dictionary<string, List<AnnotationData.SlotAnnotation>>();
@@ -678,7 +961,10 @@ namespace RandomizerCommon
             var locationToSlots = new Dictionary<(string, string), Queue<AnnotationData.SlotAnnotation>>();
             foreach (var slot in ann.SlotsByAnnotationsKey.Values)
             {
-                var area = ann.Areas[slot.Area].Archipelago;
+                // Some slots have no real area (e.g. "unknown") or an area not present in the
+                // annotations; skip them rather than throwing KeyNotFoundException.
+                if (slot.Area == null || !ann.Areas.TryGetValue(slot.Area, out var areaAnn)) continue;
+                var area = areaAnn.Archipelago;
                 if (area == null) continue;
 
                 foreach (var text in slot.DebugText)
@@ -697,11 +983,24 @@ namespace RandomizerCommon
                 locationToSlots.ToDictionary(pair => pair.Key, pair => pair.Value.Count);
 
             var result = new Dictionary<long, LocationScope>();
+            int skippedUnmatchedKeys = 0;
             foreach (var location in locations)
             {
                 if (apIdsToKeys.TryGetValue(location.LocationId, out var key))
                 {
-                    result[location.LocationId] = ann.SlotsByAnnotationsKey[key].LocationScope;
+                    // Base-game-only AP: the server's seed (from a DLC-aware apworld) may reference
+                    // slot keys that don't exist in this pre-DLC scrape (DLC maps were dropped at
+                    // load). Skip those locations instead of throwing; they just won't be baked.
+                    // keyedSlot.LocationScope is null for config-only slots whose game location
+                    // isn't in this scrape (DLC-stripped or item lot absent). Treat as unmatched.
+                    if (ann.SlotsByAnnotationsKey.TryGetValue(key, out var keyedSlot) && keyedSlot.LocationScope != null)
+                    {
+                        result[location.LocationId] = keyedSlot.LocationScope;
+                    }
+                    else
+                    {
+                        skippedUnmatchedKeys++;
+                    }
                     continue;
                 }
 
@@ -740,6 +1039,11 @@ namespace RandomizerCommon
                 }
 
                 throw new Exception($"Couldn't find a slot that corresponds to Archipelago location \"{apName}\".");
+            }
+            if (skippedUnmatchedKeys > 0)
+            {
+                Console.WriteLine($"WARNING: skipped {skippedUnmatchedKeys} Archipelago locations whose " +
+                    "slot keys aren't in this (base-game-only) scrape. Those locations won't be baked.");
             }
             return result;
         }
@@ -796,6 +1100,10 @@ namespace RandomizerCommon
         }
 
         private static readonly Regex ApLocationRe = new(@"^[^:]+: (.*?)( - .*)?$");
+        // Trailing stack-quantity on an AP location item name (e.g. "Rune Arc x3"); BaseName
+        // has none, so it is stripped before name-matching shop rows in FindMatchingSlotKey
+        // (else every stacked row collapses onto one slot/event flag).
+        private static readonly Regex StackQtyRe = new(@"\s*x\d+$", RegexOptions.IgnoreCase);
 
         /// <summary>The maximum number of characters in a DS3 item's name.</summary>
         private const int ItemNameLimit = 32;
@@ -885,6 +1193,13 @@ namespace RandomizerCommon
             foreach (Control control in Controls)
             {
                 control.Enabled = true;
+            }
+            if (Headless)
+            {
+                // Unattended batch bake: record the failure in the exit code and close so
+                // the driver script moves on to the next seed instead of waiting on a window.
+                System.Environment.ExitCode = 1;
+                BeginInvoke((Action)(() => Close()));
             }
         }
 

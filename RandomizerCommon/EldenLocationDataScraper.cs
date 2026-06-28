@@ -966,6 +966,7 @@ namespace RandomizerCommon
             foreach (KeyValuePair<string, MSBE> entry in game.EldenMaps)
             {
                 string location = entry.Key;
+                if (!coord.IsKnownMap(location)) continue; // ER AP base-game: skip DLC maps the coordinator can't place
                 MSBE msb = entry.Value;
                 foreach (MSBE.Part part in msb.Parts.GetEntries())
                 {
@@ -1076,6 +1077,7 @@ namespace RandomizerCommon
             foreach (KeyValuePair<string, MSBE> entry in game.EldenMaps)
             {
                 string location = entry.Key;
+                if (!coord.IsKnownMap(location)) continue; // ER AP base-game: skip DLC maps the coordinator can't place
                 MSBE msb = entry.Value;
                 foreach (MSBE.Event.Treasure treasure in msb.Events.Treasures)
                 {

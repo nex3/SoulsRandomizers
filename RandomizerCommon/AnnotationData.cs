@@ -44,6 +44,7 @@ namespace RandomizerCommon
         public readonly Dictionary<string, List<string>> AreaEvents = new Dictionary<string, List<string>>();
         // All named items with logic associated with them.
         public readonly Dictionary<string, ItemKey> Items = new Dictionary<string, ItemKey>();
+        public readonly Dictionary<string, Expr> ConfigVarExprs = new Dictionary<string, Expr>();
         // Contents of item groups by names, used for various purposes
         // Required ones: keyitems, questitems, remove
         public readonly Dictionary<string, List<ItemKey>> ItemGroups = new Dictionary<string, List<ItemKey>>();
@@ -104,7 +105,7 @@ namespace RandomizerCommon
         public void Load(RandomizerOptions options)
         {
             Annotations ann;
-            IDeserializer deserializer = new DeserializerBuilder().Build();
+            IDeserializer deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
             string annPath = $@"{game.Dir}\Base\annotations.txt";
             using (var reader = File.OpenText(annPath))
             {
@@ -170,13 +171,13 @@ namespace RandomizerCommon
                                 }
                             }
                         }
-                        if (ret.Count == 0) throw new Exception($"Empty item range {key} {end}");
+                        if (ret.Count == 0) return ret; // base core: DLC item range absent from base params
                         return ret;
                     }
                 }
                 else
                 {
-                    return new List<ItemKey> { game.ItemForName(item.Name) };
+                    return game.RevItemNames.ContainsKey(item.Name) ? new List<ItemKey> { game.ItemForName(item.Name) } : new List<ItemKey>();
                 }
             }
             List<string> hints = new List<string>();
@@ -190,6 +191,7 @@ namespace RandomizerCommon
                         item.ConfigName = Regex.Replace(item.Name.ToLowerInvariant(), @"[^a-z]", "");
                     }
                     item.Keys = itemsForAnnotation(item);
+                    if (item.Keys.Count == 0) continue; // base core: DLC item not in base params
                     if (!configItems.NoConfigNames)
                     {
                         if (Items.ContainsKey(item.ConfigName)) throw new Exception($"Duplicate item under config name {item.ConfigName}");
@@ -219,7 +221,7 @@ namespace RandomizerCommon
                 group.Keys = new List<ItemKey>();
                 if (group.Names != null)
                 {
-                    group.Keys.AddRange(group.Names.Select(name => game.ItemForName(name)));
+                    group.Keys.AddRange(group.Names.Where(name => game.RevItemNames.ContainsKey(name)).Select(name => game.ItemForName(name)));
                 }
                 if (group.Items != null)
                 {
@@ -285,7 +287,7 @@ namespace RandomizerCommon
                 List<ItemKey> keys = new List<ItemKey>();
                 if (placement.Name != null)
                 {
-                    keys.Add(game.ItemForName(placement.Name));
+                    keys.AddRange(game.RevItemNames.ContainsKey(placement.Name) ? new[] { game.ItemForName(placement.Name) } : new ItemKey[0]);
                 }
                 else if (placement.Item != null)
                 {
@@ -296,6 +298,7 @@ namespace RandomizerCommon
                     keys.AddRange(ItemGroups[placement.Includes]);
                 }
                 else throw new Exception();
+                if (keys.Count == 0) continue; // base core: DLC placement-restriction item absent
                 placement.Key = keys[0];
                 if (keys.Count > 1)
                 {
@@ -395,7 +398,7 @@ namespace RandomizerCommon
                     HashSet<ItemKey> items = new HashSet<ItemKey>();
                     if (group.Names != null)
                     {
-                        items.UnionWith(group.Names.Select(name => game.ItemForName(name)));
+                        items.UnionWith(group.Names.Where(name => game.RevItemNames.ContainsKey(name)).Select(name => game.ItemForName(name)));
                     }
                     if (group.Items != null)
                     {
@@ -424,6 +427,26 @@ namespace RandomizerCommon
             }
             // Areas
             Parser<char, Expr> parser = ExprParser();
+            // ConfigVars: named macro expressions substituted into Area/Event Reqs (runes_*,
+            // imbued_base, dlcopen_event, treekindling). Ported from the full fork for er-ap-enable.
+            if (ann.ConfigVars != null)
+            {
+                foreach (KeyValuePair<string, string> cv in ann.ConfigVars)
+                {
+                    string val = (cv.Value ?? "").Trim();
+                    Expr expr;
+                    string[] tokens = val.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (val == "true") expr = Expr.TRUE;
+                    else if (val == "false") expr = Expr.FALSE;
+                    else if (!val.Contains("(") && !tokens.Any(t => t == "AND" || t == "OR"))
+                    {
+                        expr = new Expr(tokens.Select(Expr.Named).ToList(), true).Simplify();
+                    }
+                    else expr = parser.ParseOrThrow(val).Simplify();
+                    ConfigVarExprs[cv.Key] = expr;
+                }
+            }
+
             string start = null;
             void parseReq(AreaAnnotation area)
             {
@@ -485,6 +508,7 @@ namespace RandomizerCommon
             foreach (SlotAnnotation slot in ann.Slots)
             {
                 string key = slot.Key.Substring(slot.Key.IndexOf(',') + 1);
+                key = LeadingZerosRe.Replace(key.Replace(":0000000000:", ":-1:"), ":");
                 strSlots[key] = slot;
                 SlotsByAnnotationsKey[slot.Key] = slot;
             }
@@ -530,9 +554,12 @@ namespace RandomizerCommon
                     if (tag.Contains(':'))
                     {
                         string[] parts = tag.Split(':');
-                        if (parts.Length != 2 || !Items.TryGetValue(parts[1], out ItemKey tagItem)) throw new Exception($"Bad scoped item tag {tag} in {scope}");
-                        if (slot.TagItems == null) slot.TagItems = new Dictionary<string, List<ItemKey>>();
-                        AddMulti(slot.TagItems, parts[0], tagItem);
+                        if (parts.Length != 2) throw new Exception($"Bad scoped item tag {tag} in {scope}");
+                        if (Items.TryGetValue(parts[1], out ItemKey tagItem))
+                        {
+                            if (slot.TagItems == null) slot.TagItems = new Dictionary<string, List<ItemKey>>();
+                            AddMulti(slot.TagItems, parts[0], tagItem);
+                        }
                     }
                     AddMulti(AllTags, tag, scope);
                 }
@@ -555,7 +582,7 @@ namespace RandomizerCommon
                             // TODO: I'm not sure if event info is available everywhere so just transform it here
                             slot.AreaReqs.Add(eventArea);
                         }
-                        else throw new Exception($"QuestReq {questReq} is neither an item or area or area-eligible event");
+                        else continue; // base core: DLC questreq absent from base params
                     }
                 }
                 // Include area as part of key items counting
@@ -1091,6 +1118,7 @@ namespace RandomizerCommon
             public List<ItemPriorityAnnotation> ItemPriority { get; set; }
             public List<AreaAnnotation> Events { get; set; }
             public List<AreaAnnotation> Areas { get; set; }
+            public Dictionary<string, string> ConfigVars { get; set; }
             public List<SlotAnnotation> Slots { get; set; }
 
             public Annotations()

@@ -3426,9 +3426,9 @@ namespace RandomizerCommon
                         if (infos[source].HasTag("hidden"))
                         {
                             // Don't allow wooooooo enemies or true monk to walk around, as this interrupts their invisibility
-                            if (e is MSBS.Part.Enemy es)
+                            if (e is MSBS.Part.Enemy)
                             {
-                                es.PatrolIndex = -1;
+                                // es.PatrolIndex: removed in SoulsFormatsNEXT MSBS (Sekiro-only, unreached by ER)
                             }
                             else if (e is MSB3.Part.Enemy e3)
                             {

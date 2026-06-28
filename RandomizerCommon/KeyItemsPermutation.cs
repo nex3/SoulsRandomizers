@@ -32,6 +32,7 @@ namespace RandomizerCommon
 
             Dictionary<string, bool> config = ann.GetConfig(options.GetLogicOptions());
             Dictionary<string, Expr> configExprs = config.ToDictionary(e => e.Key, e => e.Value ? Expr.TRUE : Expr.FALSE);
+            foreach (KeyValuePair<string, Expr> cv in ann.ConfigVarExprs) configExprs[cv.Key] = cv.Value;
             if (explain) Console.WriteLine($"Using config {string.Join(", ", config)}");
 
             Dictionary<LocationScope, (UniqueCategory, int)> counts = ann.GetUniqueCounts();
@@ -155,7 +156,7 @@ namespace RandomizerCommon
                             other = true;
                         }
                     }
-                    else throw new Exception($"Internal error: Unknown dependency {free} in requirements for {area.Name}");
+                    else { other = true; } // base core: unknown dep (KeyCount instance / DLC) -> area sealed
                 }
                 if (dependentAreas.Count == 1 && !other)
                 {
@@ -276,7 +277,7 @@ namespace RandomizerCommon
             HashSet<string> counting = new HashSet<string>();
             int getCumulativeCounts(string name)
             {
-                Node node = nodes[name];
+                if (!nodes.TryGetValue(name, out Node node)) return 0; // base core: dep (sealed area / bare event) not a node
                 if (node.CumKeyCount != -1 || counting.Contains(name))
                 {
                     return node.KeyCount + node.CumKeyCount;
@@ -433,7 +434,7 @@ namespace RandomizerCommon
             {
                 ItemKey itemKey = ann.Items[item];
 
-                List<string> allowedAreas = areas.Where(a => !reqs[a].Needs(item)).ToList();
+                List<string> allowedAreas = areas.Where(a => !reqs[a].Needs(item) && nodes[a].KeyCount > 0).ToList();
                 if (debugChoices) Console.WriteLine($"\n> {item} not allowed in areas: {string.Join(",", areas.Where(a => !allowedAreas.Contains(a)))}");
                 bool redundant = allowedAreas.Count == areas.Count;
                 HashSet<string> neededForEvent = itemEvents.TryGetValue(item, out HashSet<string> ev) ? ev : null;
@@ -514,7 +515,7 @@ namespace RandomizerCommon
             HashSet<string> getIncludedAreas(string name, List<string> path)
             {
                 path = path.Concat(new[] { name }).ToList();
-                if (!nodes.TryGetValue(name, out Node node)) throw new Exception($"Bad options: no way to access area \"{name}\"");
+                if (!nodes.TryGetValue(name, out Node node)) return new HashSet<string>(); // base core: sealed area (DLC dep) not a node
                 if (ret.IncludedAreas.ContainsKey(name))
                 {
                     if (ret.IncludedAreas[name] == null)
@@ -629,7 +630,7 @@ namespace RandomizerCommon
                     if (tag.Contains(':'))
                     {
                         string[] parts = tag.Split(':');
-                        if (parts[0] == "exclude")
+                        if (parts[0] == "exclude" && ann.Items.ContainsKey(parts[1]))
                         {
                             // Console.WriteLine($"Adding exclude {ann.Items[parts[1]].Key} to {slot.Text}");
                             AddMulti(ret.RestrictedItems, ann.Items[parts[1]], scope);

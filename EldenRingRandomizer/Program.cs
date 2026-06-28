@@ -83,7 +83,18 @@ namespace EldenRingRandomizer
 #endif
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new EldenForm(args.Contains("dumpmessages"), args.Contains("loadempty")));
+                AttachConsole(-1);
+                var apForm = new ArchipelagoForm(FromGame.ER);
+                if (args.Contains("autoconnect")) apForm.AutoConnect = true;
+                if (args.Contains("enemies")) apForm.AutoConnectEnemies = true;
+                // Unattended batch bake (build.ps1 -LoopTest): no dialogs, auto-close,
+                // process exit code reflects success/failure. Implies autoconnect.
+                if (args.Contains("headless")) { apForm.AutoConnect = true; apForm.Headless = true; }
+                var slotArg = args.FirstOrDefault(a => a.StartsWith("slot="));
+                if (slotArg != null) apForm.AutoConnectSlot = slotArg.Substring("slot=".Length);
+                var urlArg = args.FirstOrDefault(a => a.StartsWith("url="));
+                if (urlArg != null) apForm.AutoConnectUrl = urlArg.Substring("url=".Length);
+                Application.Run(apForm);
             }
         }
     }

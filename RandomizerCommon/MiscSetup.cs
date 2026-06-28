@@ -552,6 +552,118 @@ namespace RandomizerCommon
             }
         }
 
+        /// <summary>
+        /// ER only. Rebrands the Telescope's menu icon with the Archipelago flower so every
+        /// synthetic AP item shows it (they all borrow the Telescope's iconId in
+        /// PermutationWriter.AddSyntheticItem). The icon is a per-icon TPF named
+        /// MENU_Knowledge_(iconId).tpf inside the BND4 bundle menu/hi/00_solo.tpfbnd.dcx, which
+        /// InjectUncompressed can't touch (it only handles bare .tpf.dcx), so this is a
+        /// dedicated BND-aware step.
+        ///
+        /// The flower DDS is read from diste\Archipelago\ap_telescope_icon.dds and MUST be in
+        /// the SAME pixel format as the vanilla telescope texture (we keep the TPF Format byte
+        /// and only swap pixel bytes; a format mismatch renders as garbage). To make matching
+        /// easy, when that file is missing this dumps the vanilla telescope DDS to
+        /// diste\Archipelago\_telescope_icon_dump.dds and no-ops, so you can read its format
+        /// (texconv -info) and encode the flower to match.
+        /// </summary>
+        public static void InjectApItemIcon(GameData game)
+        {
+            if (!game.EldenRing) return;
+
+            // The ER pipeline assumes a UXM-unpacked game, so the vanilla bundle is a loose file
+            // in the game root. Reading it back after a prior deploy is harmless: the swap is
+            // idempotent (same texture replaced with the same flower DDS).
+            string vanillaBnd = $@"{game.InstallPath}\menu\hi\00_solo.tpfbnd.dcx";
+            if (!File.Exists(vanillaBnd))
+            {
+                Console.WriteLine($"AP icon: {vanillaBnd} not found (is the game UXM-unpacked?); skipping icon swap");
+                return;
+            }
+
+            int iconId = Convert.ToInt32(game.Param(ItemType.GOOD)[2040]["iconId"].Value);
+            const string prefix = "MENU_Knowledge_";
+
+            BND4 bnd = BND4.Read(vanillaBnd);
+            BinderFile entry = null;
+            foreach (BinderFile bf in bnd.Files)
+            {
+                string baseName = Path.GetFileNameWithoutExtension(bf.Name);
+                if (baseName == null || !baseName.StartsWith(prefix)) continue;
+                if (int.TryParse(baseName.Substring(prefix.Length), out int entryId) && entryId == iconId)
+                {
+                    entry = bf;
+                    break;
+                }
+            }
+            if (entry == null)
+            {
+                Console.WriteLine($"AP icon: {prefix}{iconId} (telescope iconId) not found in 00_solo; skipping");
+                return;
+            }
+
+            TPF tpf = TPF.Read(entry.Bytes);
+            if (tpf.Textures.Count == 0)
+            {
+                Console.WriteLine("AP icon: telescope TPF has no textures; skipping");
+                return;
+            }
+
+            string apDir = $@"{game.Dir}\Archipelago";
+            string flowerPath = $@"{apDir}\ap_telescope_icon.dds";
+            if (!File.Exists(flowerPath))
+            {
+                Directory.CreateDirectory(apDir);
+                string dump = $@"{apDir}\_telescope_icon_dump.dds";
+                File.WriteAllBytes(dump, tpf.Textures[0].Bytes);
+                Console.WriteLine($"AP icon: {flowerPath} not found. Wrote the vanilla telescope icon to {dump}.");
+                Console.WriteLine($"AP icon: 'texconv -info {Path.GetFileName(dump)}', encode the flower to the SAME format/size, save as ap_telescope_icon.dds in {apDir}, then re-bake. Skipping for now.");
+                return;
+            }
+
+            // Swap in the flower DDS. SoulsFormats re-derives Type/Mipmaps from the new DDS on
+            // write (PC) but does NOT change the Format byte. If the flower DDS is a different
+            // pixel format than the vanilla telescope (e.g. uncompressed B8G8R8A8 vs vanilla BC7)
+            // the format byte must be updated to match or the game renders garbage. Detect an
+            // uncompressed DDS and set the matching ER format byte; a format-matched (BC7) flower
+            // keeps the vanilla byte.
+            byte[] flowerBytes = File.ReadAllBytes(flowerPath);
+            byte? uncompressedFormat = TryGetUncompressedErFormat(flowerBytes);
+            if (uncompressedFormat.HasValue)
+                tpf.Textures[0].Format = uncompressedFormat.Value;
+            tpf.Textures[0].Bytes = flowerBytes;
+            entry.Bytes = tpf.Write();
+
+            string outPath = $@"menu\hi\00_solo.tpfbnd.dcx";
+            Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+            bnd.Write(outPath);
+            Console.WriteLine($"AP icon: swapped telescope icon ({prefix}{iconId}) for the Archipelago flower -> {outPath}");
+        }
+
+        /// <summary>
+        /// If <paramref name="ddsBytes"/> is an UNCOMPRESSED DDS, returns the matching ER TPF
+        /// format byte so the icon swap can update the texture's Format to match. Returns null
+        /// for compressed/DX10 DDS (those keep the vanilla telescope's format byte, assumed to
+        /// already match a format-matched flower).
+        /// </summary>
+        private static byte? TryGetUncompressedErFormat(byte[] ddsBytes)
+        {
+            try
+            {
+                DDS dds = new DDS(ddsBytes);
+                string fourCC = (dds.ddspf.dwFourCC ?? "").Replace("\0", "").Trim();
+                if (fourCC.Length > 0) return null;
+                switch (dds.ddspf.dwRGBBitCount)
+                {
+                    case 32: return 9;  // B8G8R8A8
+                    case 16: return 6;  // B5G5R5A1_UNORM
+                    case 8: return 16;  // A8
+                    default: return null;
+                }
+            }
+            catch { return null; }
+        }
+
         /// <param name="bdtBaseName">
         /// The basename of the <c>.bdt</c> file that contains the given paths, without the
         /// extension.
@@ -597,7 +709,7 @@ namespace RandomizerCommon
 
             using Stream stream =
                 game.BhdKeys.TryGetValue(Path.GetFileNameWithoutExtension(path), out var key)
-                ? CryptographyUtility.DecryptRsa(path, key)
+                ? SoulsIds.BhdExtractor.DecryptRsa(path, key)
                 : File.OpenRead(path);
             return BHD5.Read(stream, bhdGame);
         }
@@ -736,11 +848,41 @@ namespace RandomizerCommon
 
         public static void EldenCommonPass(GameData game, RandomizerOptions opt, Messages messages, PermutationWriter.Result result = null)
         {
-            // Resident speffects
-            PARAM.Row baseSp = game.Params["SpEffectParam"][5020];
-            for (int i = 0; i < 20; i++)
+            // Resident speffects. SpEffectParam may have been skipped during load (paramdef skew on
+            // 2.6.2.0 vs Paramdex), in which case [5020] is null — skip this block then.
+            PARAM.Row baseSp = game.Params["SpEffectParam"]?[5020];
+            if (baseSp != null)
             {
-                GameEditor.CopyRow(baseSp, game.AddRow("SpEffectParam", 6950 + i));
+                for (int i = 0; i < 20; i++)
+                {
+                    GameEditor.CopyRow(baseSp, game.AddRow("SpEffectParam", 6950 + i));
+                }
+            }
+            else
+            {
+                Console.WriteLine("WARNING: SpEffectParam[5020] missing (param skipped at load); skipping resident speffects");
+            }
+
+            // Notify v2: suppress the full "NEW ... Y:OK" item-acquisition
+            // DIALOG on pickup/grant, game-wide, while keeping the lightweight acquisition LOG (the
+            // right-side ticker). Two independent per-item fields:
+            //   showLogCondType    (acquisition LOG;    default 1 = on)         -> the ticker; LEAVE ON.
+            //   showDialogCondType (acquisition DIALOG; default 2 = "new only") -> the blocking modal.
+            // Crafting materials (Rowa Fruit etc.) already ship with the dialog off -- exactly the UX
+            // we want for AP grants (frequent; should not throw a blocking modal). Set it to 0 (None)
+            // on every grantable item type -> all pickups become ticker-only. Editing only this 2-bit
+            // field leaves showLogCondType untouched. Param edit only: gen-testable, reversible, no
+            // client/runtime change. (Game-wide by nature -- the modal is keyed on the item param, not
+            // the acquisition source; per-source would need the abandoned runtime hook.)
+            foreach (string dlgParamName in new[] { "EquipParamGoods", "EquipParamWeapon",
+                                                    "EquipParamProtector", "EquipParamAccessory", "EquipParamGem" })
+            {
+                if (!game.Params.ContainsKey(dlgParamName)) continue;
+                PARAM dlgParam = game.Params[dlgParamName];
+                if (dlgParam.AppliedParamdef == null || dlgParam.Rows.Count == 0) continue;
+                if (!dlgParam.Rows[0].Cells.Any(c => c.Def.InternalName == "showDialogCondType")) continue;
+                foreach (PARAM.Row dlgRow in dlgParam.Rows)
+                    dlgRow["showDialogCondType"].Value = (byte)0;
             }
 
             HashSet<(int, int)> deleteCommands = new HashSet<(int, int)>

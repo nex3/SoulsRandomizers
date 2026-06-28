@@ -9,11 +9,18 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
+    <Configurations>Debug;Release;Debug (Archipelago);Release (Archipelago)</Configurations>
+    <NoWarn>$(NoWarn);CS0168</NoWarn> <!-- catch (Exception ex): ex used only under #if DEBUG -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug (Archipelago)' Or '$(Configuration)' == 'Release (Archipelago)' ">
+    <DefineConstants>$(DefineConstants);ARCHIPELAGO</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\SoulsIds\SoulsIds\SoulsIds.csproj" />
     <ProjectReference Include="..\RandomizerCommon\RandomizerCommon.csproj" />
+    <ProjectReference Include="..\..\yet-another-tab-control\GrayIris.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
