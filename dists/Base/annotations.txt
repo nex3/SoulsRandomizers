@@ -2025,7 +2025,7 @@ Slots:
 - Key: '02,0:50006246::'
   DebugText:
   - 'Mushin Esoteric Text - 62304[Emma (c7400_0000 #1100722,1105600) ashinaoutskirts, Emma (c7400_0000 #1110700) ashinacastle, Emma (c7400_0002 #1110712) ashinacastle, Emma (c7400_0004 #1110716) ashinacastle, Emma (c7400_0005 #1110718) ashinacastle], 62406[Isshin (c5410_0000 #1110705) ashinacastle, Tengu of Ashina (c5430_0003 #1110713) ashinacastle]'
-  Text: Given by Isshin or Emma after learning Shadowrush, Living Force, Ashina Cross, and High Monk.
+  Text: Given by Isshin or Emma after learning Shadowrush, Living Force, Ashina Cross, or High Monk.
   Area: ashinacastle_kuro1
   Tags: norandom
   #QuestReqs: shadowrush livingforce ashinacross highmonk
