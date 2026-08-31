@@ -318,6 +318,15 @@ namespace RandomizerCommon
                 characters.Write(random, opt);
             }
 
+            //Randomize skills for Sekiro
+            // TODO: Add SkillSplitter once we support injecting the Skills
+            SkillSplitter.Assignment split = null;
+            if (type == FromGame.SDT && options["randomize_skills_and_prosthetics"])
+            {
+                SkillWriter skills = new SkillWriter(game, data, ann);
+                skills.RandomizeTrees(new Random(seed + 2), permutation, split);
+            }
+
             // A map from locations in the game where items can appear to the list of items that
             // should appear in those locations.
             var items = new Dictionary<SlotKey, List<SlotKey>>();
@@ -627,10 +636,13 @@ namespace RandomizerCommon
                     break;
 
                 case FromGame.SDT:
+                    opt["headlesswalk"] = archiOptions["remove_headless_slow_walk"];
+
                     if (archiOptions["randomize_enemies"])
                     {
                         opt["bosses"] = true;
                         opt["minibosses"] = true;
+                        opt["headlessmove"] = archiOptions["randomize_headless"];
                         opt["enemies"] = true;
                         opt["edittext"] = true;
                         opt["phases"] = archiOptions["similar_boss_phases"];
@@ -749,7 +761,7 @@ namespace RandomizerCommon
         /// </summary>
         private static (string, string) ParseArchipelagoLocation(string locationName)
         {
-            var rx = new Regex(@"^([A-Z0-9]+): (.*?)(?: - .*)?$", RegexOptions.Compiled);
+            var rx = new Regex(@"^([A-Z0-9/]+): (.*?)(?: - .*)?$", RegexOptions.Compiled);
             var match = rx.Match(locationName);
             if (!match.Success)
             {
